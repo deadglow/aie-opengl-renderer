@@ -1,9 +1,9 @@
 #include "ShaderLoader.h"
+#include "FileReader.h"
 #include <filesystem>
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include "FileReader.h"
 
 namespace fs = std::filesystem;
 

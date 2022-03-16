@@ -3,6 +3,8 @@
 #include <vector>
 #include <filesystem>
 
+namespace fs = std::filesystem;
+
 class FileReader
 {
 public:

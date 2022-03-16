@@ -3,8 +3,6 @@
 #include <sstream>
 #include <iostream>
 
-namespace fs = std::filesystem;
-
 std::string FileReader::LoadFileAsString(std::string filename)
 {
     std::stringstream workingFile;

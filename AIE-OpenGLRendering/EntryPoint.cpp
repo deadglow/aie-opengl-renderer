@@ -1,10 +1,15 @@
+#pragma once
 #define GLFW_INCLUDE_NONE
 #include "glfw3.h"
 #include "glad.h"
 #include "glm.hpp"
 #include <iostream>
+#include "ShaderLoader.h"
+
+#define DEFAULT_SHADER "default"
 
 GLFWwindow* window;
+ShaderLoader* shaders;
 GLuint triangleID;
 
 void Startup()
@@ -20,7 +25,6 @@ void Draw()
 
 int main()
 {
-
 	// init GLFW, and check if it has successfully inited
 	if (!glfwInit())
 		return -1;
@@ -41,6 +45,10 @@ int main()
 		return -1;
 
 	// startup stuff here
+	shaders = new ShaderLoader("", "shader.list");
+	shaders->LoadShaders();
+	shaders->UseShader(DEFAULT_SHADER);
+	
 	Startup();
 
 	glGenBuffers(1, &triangleID);
@@ -55,7 +63,7 @@ int main()
 	glEnableVertexAttribArray(0);
 
 	// main game loop
-	while (!glfwWindowShouldClose(window))
+	while (shaders->GetShaderStateOkay() && !glfwWindowShouldClose(window))
 	{
 		// clear the screen and start drawing
 		glClear(GL_COLOR_BUFFER_BIT);
