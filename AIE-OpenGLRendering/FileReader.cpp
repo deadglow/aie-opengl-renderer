@@ -25,6 +25,7 @@ std::string FileReader::LoadFileAsString(std::string filename)
         std::cout << "Error loading file: " << filename << std::endl;
         return "";
     }
+    file.close();
 }
 
 int FileReader::GetAllFilesWithExtension(std::string dir, std::string extension, std::vector<fs::path>* paths)

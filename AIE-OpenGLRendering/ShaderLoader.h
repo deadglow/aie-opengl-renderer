@@ -2,7 +2,7 @@
 #include "glfw3.h"
 #include "glad.h"
 #include "glm.hpp"
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class ShaderLoader
@@ -10,9 +10,9 @@ class ShaderLoader
 private:
 	std::string dir;
 	std::string shaderListFilename;
-	std::map<std::string, GLuint> vertexShaders;
-	std::map<std::string, GLuint> fragmentShaders;
-	std::map<std::string, GLuint> shaderPrograms;
+	std::unordered_map<std::string, GLuint> vertexShaders;
+	std::unordered_map<std::string, GLuint> fragmentShaders;
+	std::unordered_map<std::string, GLuint> shaderPrograms;
 
 	bool shaderStateOkay = false;
 	std::string currentShaderName = "";
