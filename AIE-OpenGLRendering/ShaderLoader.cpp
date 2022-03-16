@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 ShaderLoader::ShaderLoader()
 {
-	dir = "";
+	dir = fs::current_path().string();
 	shaderListFilename = "shaders.list";
 }
 
@@ -26,9 +26,10 @@ ShaderLoader::~ShaderLoader()
 
 bool ShaderLoader::LoadShaders()
 {
-	shaderStateOkay = true;
 	// clear all
 	ClearShaders();
+
+	shaderStateOkay = true;
 
 	std::vector<fs::path> vertexShaderFiles;
 	std::vector<fs::path> fragmentShaderFiles;
@@ -40,18 +41,19 @@ bool ShaderLoader::LoadShaders()
 		for (fs::directory_entry const& entry : fs::recursive_directory_iterator(dir))
 		{
 			if (!fs::is_regular_file(entry)) continue;
+
 			fs::path path = entry.path();
-			if (path.filename() == shaderListFilename)
+			if (path.filename().string() == shaderListFilename)
 			{
 				shaderListFile = path;
 				continue;
 			}
-			if (path.extension() == "vsd")
+			if (path.filename().extension().string() == ".vsd")
 			{
 				vertexShaderFiles.push_back(path);
 				continue;
 			}
-			if (path.extension() == "fsd")
+			if (path.filename().extension().string() == ".fsd")
 			{
 				fragmentShaderFiles.push_back(path);
 				continue;
@@ -59,10 +61,13 @@ bool ShaderLoader::LoadShaders()
 		}
 	}
 
+	std::cout << vertexShaderFiles.size() << " vertex shaders, " << fragmentShaderFiles.size() << " fragment shaders." << std::endl;
+
 	// generate vertex shader collection
 	for (int i = 0; i < vertexShaderFiles.size(); ++i)
 	{
-		const char* contents = FileReader::LoadFileAsString(vertexShaderFiles[i].string()).c_str();
+		const std::string contentsStr = FileReader::LoadFileAsString(vertexShaderFiles[i].string());
+		const char* contents = contentsStr.c_str();
 		// create shader handle
 		GLuint shader = glCreateShader(GL_VERTEX_SHADER);
 		// populate source with code
@@ -77,23 +82,24 @@ bool ShaderLoader::LoadShaders()
 		if (success == GL_FALSE)
 		{
 			// something failed with the vertex shader compilation
-			std::cout << "Vertex shader " << vertexShaderFiles[i].filename() << " failed:" << std::endl;
+			std::cout << "Vertex shader " << vertexShaderFiles[i].filename().string() << " failed:" << std::endl;
 			glGetShaderInfoLog(shader, 512, nullptr, errorLog);
 			std::cout << errorLog << std::endl;
 			shaderStateOkay = false;
 		}
 		else
 		{
-			std::cout << "Vertex shader " << vertexShaderFiles[i].filename() << " compiled." << std::endl;
+			std::cout << "Vertex shader " << vertexShaderFiles[i].filename().string() << " compiled." << std::endl;
 		}
 		
-		vertexShaders.emplace(vertexShaderFiles[i].filename(), shader);
+		vertexShaders.emplace(vertexShaderFiles[i].filename().string(), shader);
 	}
 
 	// generate fragment shader collection
 	for (int i = 0; i < fragmentShaderFiles.size(); ++i)
 	{
-		const char* contents = FileReader::LoadFileAsString(fragmentShaderFiles[i].string()).c_str();
+		const std::string contentsStr = FileReader::LoadFileAsString(fragmentShaderFiles[i].string());
+		const char* contents = contentsStr.c_str();
 		// create shader handle
 		GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
 		// populate source with code
@@ -108,17 +114,17 @@ bool ShaderLoader::LoadShaders()
 		if (success == GL_FALSE)
 		{
 			// something failed with the vertex shader compilation
-			std::cout << "Fragment shader " << vertexShaderFiles[i].filename() << " failed:" << std::endl;
+			std::cout << "Fragment shader " << vertexShaderFiles[i].filename().string() << " failed:" << std::endl;
 			glGetShaderInfoLog(shader, 512, nullptr, errorLog);
 			std::cout << errorLog << std::endl;
 			shaderStateOkay = false;
 		}
 		else
 		{
-			std::cout << "Fragment shader " << vertexShaderFiles[i].filename() << " compiled." << std::endl;
+			std::cout << "Fragment shader " << vertexShaderFiles[i].filename().string() << " compiled." << std::endl;
 		}
 
-		fragmentShaders.emplace(fragmentShaderFiles[i].filename(), shader);
+		fragmentShaders.emplace(fragmentShaderFiles[i].filename().string(), shader);
 	}
 
 	struct ShaderProgramStrings
@@ -174,7 +180,7 @@ bool ShaderLoader::LoadShaders()
 	}
 	else
 	{
-		std::cout << "Error loading shader list" << std::endl;
+		std::cout << "Error loading shader list. Path: " << shaderListFile.string() << std::endl;
 		shaderStateOkay = false;
 	}
 	file.close();
@@ -184,7 +190,7 @@ bool ShaderLoader::LoadShaders()
 		for (int i = 0; i < programStrings.size(); ++i)
 		{
 			GLuint program = glCreateProgram();
-			glAttachShader(program, vertexShaders[programStrings[i].fragment]);
+			glAttachShader(program, fragmentShaders[programStrings[i].fragment]);
 			glAttachShader(program, vertexShaders[programStrings[i].vertex]);
 			glLinkProgram(program);
 
@@ -243,6 +249,25 @@ void ShaderLoader::UseShader(std::string shader)
 	{
 		UseShader(shaderPrograms[shader]);
 		currentShaderName = shader;
+	}
+}
+
+void ShaderLoader::PrintShaderCollections()
+{
+	std::cout << "\n-----------------------\nVertex shaders:" << std::endl;
+	for (auto const [key, value] : vertexShaders)
+	{
+		std::cout << key << ", " << value << std::endl;
+	}
+	std::cout << "\n-----------------------\nFragment shaders:" << std::endl;
+	for (auto const [key, value] : fragmentShaders)
+	{
+		std::cout << key << ", " << value << std::endl;
+	}
+	std::cout << "\n-----------------------\nShader programs:" << std::endl;
+	for (auto const [key, value] : shaderPrograms)
+	{
+		std::cout << key << ", " << value << std::endl;
 	}
 }
 

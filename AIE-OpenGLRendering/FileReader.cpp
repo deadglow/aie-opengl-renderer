@@ -16,6 +16,7 @@ std::string FileReader::LoadFileAsString(std::string filename)
             std::getline(file, thisLine);
             workingFile << thisLine << std::endl;
         }
+        file.close();
         return workingFile.str();
     }
     else
@@ -23,7 +24,6 @@ std::string FileReader::LoadFileAsString(std::string filename)
         std::cout << "Error loading file: " << filename << std::endl;
         return "";
     }
-    file.close();
 }
 
 int FileReader::GetAllFilesWithExtension(std::string dir, std::string extension, std::vector<fs::path>* paths)
@@ -41,7 +41,7 @@ int FileReader::GetAllFilesWithExtension(std::string dir, std::string extension,
                 continue;
             }
         }
-        return paths->size();
+        return (int)paths->size();
     }
     else
     {

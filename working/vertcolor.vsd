@@ -1,0 +1,14 @@
+#version 450
+
+//Attributes that we expect from the vertex buffer
+layout (location = 0) in vec2 Position;
+layout (location = 1) in vec4 VertColor;
+
+out vec4 VertColour;
+
+
+void main()
+{
+	gl_Position = vec4(Position, 1.0, 1.0);
+	VertColour = VertColor.xyzw;
+}

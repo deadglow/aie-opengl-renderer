@@ -28,6 +28,7 @@ public:
 
 	bool LoadShaders();
 	void UseShader(std::string shader);
+	void PrintShaderCollections();
 
 	bool GetShaderStateOkay() { return shaderStateOkay; }
 
