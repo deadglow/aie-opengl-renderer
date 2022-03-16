@@ -18,6 +18,8 @@ private:
 	GLuint currentShader = -1;
 
 	void UseShader(GLuint shader);
+	bool LoadInShaders();
+	void PruneVertexAndFragmentShaders();
 	void ClearShaders();
 
 public:
@@ -26,7 +28,7 @@ public:
 
 	~ShaderLoader();
 
-	bool LoadShaders();
+	bool InitialiseShaders();
 	void UseShader(std::string shader);
 	void PrintShaderCollections();
 

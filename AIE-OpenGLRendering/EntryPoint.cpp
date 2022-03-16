@@ -76,9 +76,14 @@ int main()
 
 	// startup stuff here
 	shaders = new ShaderLoader();
-	if (shaders->LoadShaders())
-		shaders->PrintShaderCollections();
 	
+	if (!shaders->InitialiseShaders())
+	{
+		delete shaders;
+		glfwTerminate();
+		return -1;
+	}
+
 	Startup();
 
 	// main game loop

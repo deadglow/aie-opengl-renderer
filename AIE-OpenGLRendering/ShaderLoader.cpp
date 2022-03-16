@@ -24,11 +24,8 @@ ShaderLoader::~ShaderLoader()
 	ClearShaders();
 }
 
-bool ShaderLoader::LoadShaders()
+bool ShaderLoader::LoadInShaders()
 {
-	// clear all
-	ClearShaders();
-
 	shaderStateOkay = true;
 
 	std::vector<fs::path> vertexShaderFiles;
@@ -217,18 +214,8 @@ bool ShaderLoader::LoadShaders()
 	return shaderStateOkay;
 }
 
-void ShaderLoader::UseShader(GLuint shader)
+void ShaderLoader::PruneVertexAndFragmentShaders()
 {
-	currentShader = shader;
-	glUseProgram(currentShader);
-}
-
-void ShaderLoader::ClearShaders()
-{
-	for (const auto& [key, value] : shaderPrograms)
-	{
-		glDeleteProgram(value);
-	}
 	for (const auto& [key, value] : vertexShaders)
 	{
 		glDeleteShader(value);
@@ -237,10 +224,43 @@ void ShaderLoader::ClearShaders()
 	{
 		glDeleteShader(value);
 	}
-
-	shaderPrograms.clear();
 	vertexShaders.clear();
 	fragmentShaders.clear();
+
+	std::cout << "Vertex and Fragment shaders pruned." << std::endl;
+}
+
+
+void ShaderLoader::ClearShaders()
+{
+	for (const auto& [key, value] : shaderPrograms)
+	{
+		glDeleteProgram(value);
+	}
+
+	shaderPrograms.clear();
+
+	PruneVertexAndFragmentShaders();
+	std::cout << "All shaders cleared." << std::endl;
+}
+
+bool ShaderLoader::InitialiseShaders()
+{
+	ClearShaders();
+	if (LoadInShaders())
+	{
+		PrintShaderCollections();
+		PruneVertexAndFragmentShaders();
+		return true;
+	}
+	else
+		return false;
+}
+
+void ShaderLoader::UseShader(GLuint shader)
+{
+	currentShader = shader;
+	glUseProgram(currentShader);
 }
 
 void ShaderLoader::UseShader(std::string shader)
@@ -269,6 +289,8 @@ void ShaderLoader::PrintShaderCollections()
 	{
 		std::cout << key << ", " << value << std::endl;
 	}
+
+	std::cout << "\n\n";
 }
 
 GLuint ShaderLoader::GetUniformLocation(std::string variable)
