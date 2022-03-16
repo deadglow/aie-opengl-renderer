@@ -1,0 +1,12 @@
+#pragma once
+#include <string>
+#include <vector>
+#include <filesystem>
+
+class FileReader
+{
+public:
+	static std::string LoadFileAsString(std::string filename);
+	static int GetAllFilesWithExtension(std::string dir, std::string extension, std::vector<fs::path>* paths);
+};
+

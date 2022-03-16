@@ -1,0 +1,40 @@
+#pragma once
+#include "glfw3.h"
+#include "glad.h"
+#include "glm.hpp"
+#include <map>
+#include <string>
+
+class ShaderLoader
+{
+private:
+	std::string dir;
+	std::string shaderListFilename;
+	std::map<std::string, GLuint> vertexShaders;
+	std::map<std::string, GLuint> fragmentShaders;
+	std::map<std::string, GLuint> shaderPrograms;
+
+	bool shaderStateOkay = false;
+	std::string currentShaderName = "";
+	GLuint currentShader = -1;
+
+	void UseShader(GLuint shader);
+	void ClearShaders();
+
+public:
+	ShaderLoader();
+	ShaderLoader(std::string dir_init, std::string shaderListFilename_init);
+
+	~ShaderLoader();
+
+	bool LoadShaders();
+	void UseShader(std::string shader);
+
+	bool GetShaderStateOkay() { return shaderStateOkay; }
+
+	GLuint GetUniformLocation(std::string variable);
+
+	void SetUniform(std::string variable, float value);
+	void SetUniform(std::string variable, glm::mat4 value);
+};
+
