@@ -150,12 +150,14 @@
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="glad.h" />
     <ClInclude Include="khrplatform.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderLoader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

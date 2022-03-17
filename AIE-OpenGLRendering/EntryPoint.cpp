@@ -10,7 +10,17 @@
 
 GLFWwindow* window;
 ShaderLoader* shaders;
-GLuint triangleID;
+
+void OnInput(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_PRESS)
+	{
+		if (key == GLFW_KEY_R)
+		{
+			shaders->InitialiseShaders();
+		}
+	}
+}
 
 void Startup()
 {
@@ -19,38 +29,59 @@ void Startup()
 
 void Draw()
 {
-	GLuint colorsID;
-	glGenBuffers(1, &triangleID);
+	GLuint vao[2];
+	GLuint vbo;
+	GLuint ebo;
+	glGenVertexArrays(1, &vao[0]);
+	glGenBuffers(1, &vbo);
+	glGenBuffers(1, &ebo);
 
 	struct Vertex
 	{
-		float x, y;
-		unsigned char r, g, b, a;
+		float pos[3];
+		unsigned char color[4];
 	};
 
-	Vertex vertices[6];
-	vertices[0] = { 0, 0,
+	Vertex vertices[4];
+	vertices[0] = { -1.0f, -1.0f, 1,
 					255, 0, 0, 255 };
-	vertices[1] = { 1, 1,
+	vertices[1] = { -1.0f, 1.0f, 1,
 					0, 255, 0, 255 };
-	vertices[2] = { 1, 0,
+	vertices[2] = { 1.0f, 1.0f, 1,
 					0, 0, 255, 255 };
-	vertices[3] = { 0, 0,
-					255, 0, 0, 255 };
-	vertices[4] = { 1, 1,
-					0, 255, 0, 255 };
-	vertices[5] = { 0, 1,
-					0, 0, 255, 255 };
-	
-	glBindBuffer(GL_ARRAY_BUFFER, triangleID);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+	vertices[3] = { 1.0f, -1.0f, 1,
+					127, 127, 0, 255 };
 
+	unsigned int indices[6] =
+	{
+		0, 1, 2,
+		0, 2, 3
+	};
+
+
+	
+	// bind the vao
+	glBindVertexArray(vao[0]);
+	// bind the triangle buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+	// bind the index buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+	
+	// set vertex attributes
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(sizeof(float) * 2));
+	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(sizeof(Vertex::pos)));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+
+	/*if (shaders->GetCurrentShader() != nullptr)
+		shaders->GetCurrentShader()->SetUniform("_Offset", glm::vec4(glm::sin((float)glfwGetTime()) * 0.2f, 0.0f, 0.0f, 0.0f));*/
 	shaders->UseShader("vertcolor");
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	shaders->GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
+
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 int main()
@@ -83,6 +114,8 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
+
+	glfwSetKeyCallback(window, OnInput);
 
 	Startup();
 

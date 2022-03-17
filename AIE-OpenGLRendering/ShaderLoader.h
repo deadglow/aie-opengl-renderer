@@ -3,6 +3,7 @@
 #include "glm.hpp"
 #include <unordered_map>
 #include <string>
+#include "Shader.h"
 
 class ShaderLoader
 {
@@ -11,13 +12,12 @@ private:
 	std::string shaderListFilename;
 	std::unordered_map<std::string, GLuint> vertexShaders;
 	std::unordered_map<std::string, GLuint> fragmentShaders;
-	std::unordered_map<std::string, GLuint> shaderPrograms;
+	std::unordered_map<std::string, Shader*> shaderPrograms;
 
 	bool shaderStateOkay = false;
-	std::string currentShaderName = "";
-	GLuint currentShader = -1;
+	Shader* currentShader = nullptr;
 
-	void UseShader(GLuint shader);
+	void UseShader(Shader* shader);
 	bool LoadInShaders();
 	void PruneVertexAndFragmentShaders();
 	void ClearShaders();
@@ -28,15 +28,12 @@ public:
 
 	~ShaderLoader();
 
-	bool InitialiseShaders();
+	const bool InitialiseShaders();
+	const Shader* GetCurrentShader() const;
 	void UseShader(std::string shader);
-	void PrintShaderCollections();
+	void PrintShaderCollections() const;
 
-	bool GetShaderStateOkay() { return shaderStateOkay; }
+	const bool GetShaderStateOkay() const { return shaderStateOkay; }
 
-	GLuint GetUniformLocation(std::string variable);
-
-	void SetUniform(std::string variable, float value);
-	void SetUniform(std::string variable, glm::mat4 value);
 };
 

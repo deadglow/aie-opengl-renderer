@@ -206,9 +206,9 @@ bool ShaderLoader::LoadInShaders()
 				std::cout << "Successfully linked shader program " << programStrings[i].name << std::endl;
 			}
 
-			shaderPrograms.emplace(programStrings[i].name, program);
+			Shader* newShader = new Shader(program, programStrings[i].name);
+			shaderPrograms.emplace(newShader->GetName(), newShader);
 		}
-
 	}
 
 	return shaderStateOkay;
@@ -235,7 +235,7 @@ void ShaderLoader::ClearShaders()
 {
 	for (const auto& [key, value] : shaderPrograms)
 	{
-		glDeleteProgram(value);
+		delete value;
 	}
 
 	shaderPrograms.clear();
@@ -244,7 +244,7 @@ void ShaderLoader::ClearShaders()
 	std::cout << "All shaders cleared." << std::endl;
 }
 
-bool ShaderLoader::InitialiseShaders()
+const bool ShaderLoader::InitialiseShaders()
 {
 	ClearShaders();
 	if (LoadInShaders())
@@ -257,10 +257,15 @@ bool ShaderLoader::InitialiseShaders()
 		return false;
 }
 
-void ShaderLoader::UseShader(GLuint shader)
+const Shader* ShaderLoader::GetCurrentShader() const
+{
+	return currentShader;
+}
+
+void ShaderLoader::UseShader(Shader* shader)
 {
 	currentShader = shader;
-	glUseProgram(currentShader);
+	currentShader->Use();
 }
 
 void ShaderLoader::UseShader(std::string shader)
@@ -268,11 +273,10 @@ void ShaderLoader::UseShader(std::string shader)
 	if (shaderPrograms.count(shader))
 	{
 		UseShader(shaderPrograms[shader]);
-		currentShaderName = shader;
 	}
 }
 
-void ShaderLoader::PrintShaderCollections()
+void ShaderLoader::PrintShaderCollections() const
 {
 	std::cout << "\n-----------------------\nVertex shaders:" << std::endl;
 	for (auto const [key, value] : vertexShaders)
@@ -287,21 +291,8 @@ void ShaderLoader::PrintShaderCollections()
 	std::cout << "\n-----------------------\nShader programs:" << std::endl;
 	for (auto const [key, value] : shaderPrograms)
 	{
-		std::cout << key << ", " << value << std::endl;
+		std::cout << key << ", " << value->GetID() << std::endl;
 	}
 
 	std::cout << "\n\n";
-}
-
-GLuint ShaderLoader::GetUniformLocation(std::string variable)
-{
-	return GLuint();
-}
-
-void ShaderLoader::SetUniform(std::string variable, float value)
-{
-}
-
-void ShaderLoader::SetUniform(std::string variable, glm::mat4 value)
-{
 }
