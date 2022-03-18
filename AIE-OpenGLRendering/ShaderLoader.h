@@ -1,6 +1,4 @@
 #pragma once
-#include "glad.h"
-#include "glm.hpp"
 #include <unordered_map>
 #include <string>
 #include "Shader.h"
@@ -10,8 +8,8 @@ class ShaderLoader
 private:
 	std::string dir;
 	std::string shaderListFilename;
-	std::unordered_map<std::string, GLuint> vertexShaders;
-	std::unordered_map<std::string, GLuint> fragmentShaders;
+	std::unordered_map<std::string, unsigned int> vertexShaders;
+	std::unordered_map<std::string, unsigned int> fragmentShaders;
 	std::unordered_map<std::string, Shader*> shaderPrograms;
 
 	bool shaderStateOkay = false;

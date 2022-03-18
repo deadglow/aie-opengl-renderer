@@ -1,4 +1,6 @@
 #include "Shader.h"
+#include "glad.h"
+#include "glfw3.h"
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {

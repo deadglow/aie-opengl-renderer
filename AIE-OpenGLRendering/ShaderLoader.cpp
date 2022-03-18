@@ -1,5 +1,7 @@
 #include "ShaderLoader.h"
 #include "FileReader.h"
+#include "glad.h"
+#include "glfw3.h"
 #include <filesystem>
 #include <vector>
 #include <iostream>
@@ -23,6 +25,13 @@ ShaderLoader::~ShaderLoader()
 {
 	ClearShaders();
 }
+
+struct ShaderProgramStrings
+{
+	std::string name = "";
+	std::string vertex = "";
+	std::string fragment = "";
+};
 
 bool ShaderLoader::LoadInShaders()
 {
@@ -123,13 +132,6 @@ bool ShaderLoader::LoadInShaders()
 
 		fragmentShaders.emplace(fragmentShaderFiles[i].filename().string(), shader);
 	}
-
-	struct ShaderProgramStrings
-	{
-		std::string name = "";
-		std::string vertex = "";
-		std::string fragment = "";
-	};
 
 	std::vector<ShaderProgramStrings> programStrings;
 
