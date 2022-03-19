@@ -14,8 +14,8 @@ public:
 
 	void Use();
 
-	const unsigned int GetID();
-	const std::string GetName();
+	const unsigned int GetID() const;
+	const std::string GetName() const;
 
 	const int GetUniformLocation(const std::string variable) const;
 

@@ -1,10 +1,11 @@
 #version 450
 
+in vec4 Color;
 out vec4 FragColour;
 
 //uniform goes here
 
 void main()
 {
-	FragColour = vec4(1.0, 0.0, 0.5, 1.0);
+	FragColour = Color;
 }

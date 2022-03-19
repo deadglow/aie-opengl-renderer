@@ -18,12 +18,12 @@ void Shader::Use()
 	glUseProgram(ID);
 }
 
-const unsigned int Shader::GetID()
+const unsigned int Shader::GetID() const
 {
 	return ID;
 }
 
-const std::string Shader::GetName()
+const std::string Shader::GetName() const
 {
 	return name;
 }

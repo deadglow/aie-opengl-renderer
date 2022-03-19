@@ -27,8 +27,8 @@ public:
 	~ShaderLoader();
 
 	const bool InitialiseShaders();
-	const Shader* GetCurrentShader() const;
-	void UseShader(std::string shader);
+	Shader* GetCurrentShader() const;
+	void UseShader(const std::string shader);
 	void PrintShaderCollections() const;
 
 	const bool GetShaderStateOkay() const { return shaderStateOkay; }

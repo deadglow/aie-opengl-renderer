@@ -11,7 +11,7 @@ namespace fs = std::filesystem;
 
 ShaderLoader::ShaderLoader()
 {
-	dir = fs::current_path().string();
+	dir = fs::current_path().string() + "/shaders";
 	shaderListFilename = "shaders.list";
 }
 
@@ -54,12 +54,12 @@ bool ShaderLoader::LoadInShaders()
 				shaderListFile = path;
 				continue;
 			}
-			if (path.filename().extension().string() == ".vsd")
+			if (path.filename().extension().string() == ".vert")
 			{
 				vertexShaderFiles.push_back(path);
 				continue;
 			}
-			if (path.filename().extension().string() == ".fsd")
+			if (path.filename().extension().string() == ".frag")
 			{
 				fragmentShaderFiles.push_back(path);
 				continue;
@@ -205,11 +205,11 @@ bool ShaderLoader::LoadInShaders()
 			}
 			else
 			{
+				Shader* newShader = new Shader(program, programStrings[i].name);
+				shaderPrograms.emplace(newShader->GetName(), newShader);
 				std::cout << "Successfully linked shader program " << programStrings[i].name << std::endl;
 			}
 
-			Shader* newShader = new Shader(program, programStrings[i].name);
-			shaderPrograms.emplace(newShader->GetName(), newShader);
 		}
 	}
 
@@ -259,7 +259,7 @@ const bool ShaderLoader::InitialiseShaders()
 		return false;
 }
 
-const Shader* ShaderLoader::GetCurrentShader() const
+Shader* ShaderLoader::GetCurrentShader() const
 {
 	return currentShader;
 }
@@ -270,7 +270,7 @@ void ShaderLoader::UseShader(Shader* shader)
 	currentShader->Use();
 }
 
-void ShaderLoader::UseShader(std::string shader)
+void ShaderLoader::UseShader(const std::string shader)
 {
 	if (shaderPrograms.count(shader))
 	{

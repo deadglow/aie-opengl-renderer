@@ -1,9 +1,12 @@
 #pragma once
 #include "Renderer.h"
 #include "Input.h"
+#include <iostream>
 
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	int initStatus = Renderer::Initialise();
 	if (initStatus != 0)
 	{
@@ -11,6 +14,10 @@ int main()
 		return initStatus;
 	}
 	Input::Initialise(Renderer::GetWindow());
+
+	Renderer::Start();
+
+	Renderer::GetTextureLoader()->LoadTexture("boletus.jpg");
 
 	// main game loop
 	while (Renderer::GetShaderLoader()->GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
