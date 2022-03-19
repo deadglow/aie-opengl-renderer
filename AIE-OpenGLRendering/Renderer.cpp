@@ -1,6 +1,8 @@
 #include "Renderer.h"
 #include <iostream>
 
+#define TEXTUREMAN "container.jpg"
+
 GLFWwindow* Renderer::window = nullptr;
 ShaderLoader* Renderer::shaderLoader = nullptr;
 TextureLoader* Renderer::textureLoader = nullptr;
@@ -39,7 +41,7 @@ int Renderer::Initialise()
 	// textures setup
 	textureLoader = new TextureLoader();
 	textureLoader->Initialise();
-	textureLoader->PrintAllTextureFiles();
+	// textureLoader->PrintAllTextureFiles();
 
 	return 0;
 }
@@ -68,6 +70,8 @@ GLFWwindow* Renderer::GetWindow()
 
 void Renderer::Start()
 {
+	textureLoader->LoadTexture(TEXTUREMAN);
+	std::cout << textureLoader->GetTexture(TEXTUREMAN)->GetID() << std::endl;
 }
 
 void Renderer::Render()
@@ -95,21 +99,37 @@ void Renderer::OnDraw()
 	{
 		float pos[3];
 		unsigned char color[4];
+		float texCoords[2];
 	};
 
-	Vertex vertices[3];
-	vertices[0] = { 0.0f, 0.5f, 1,
-					255, 0, 0, 255 };
-	vertices[1] = { -0.5f, -0.5f, 1,
-					0, 255, 0, 255 };
-	vertices[2] = { 0.5f, -0.5f, 1,
-					0, 0, 255, 255 };
-	//vertices[3] = { 1.0f, -1.0f, 1,
-	//				127, 127, 0, 255 };
+	Vertex vertices[4];
+	float val = -0.5f + glm::sin(glfwGetTime()) * 0.1f;
+	vertices[0] =
+	{	val, -0.5f, 1,
+		255, 255, 255, 255,
+		0.0f, 0.0f
+	};
+	vertices[1] =
+	{	-0.5f, 0.5f, 1,
+		255, 255, 255, 255,
+		0.0f, 1.0f
+	};
+	vertices[2] = 
+	{	0.5f, 0.5f, 1,
+		255, 255, 255, 255,
+		1.0f, 1.0f
+	};
 
-	unsigned int indices[3] =
+	vertices[3] =
+	{	0.5f, -0.5f, 1,
+		255, 255, 255, 255,
+		1.0f, 0.0f
+	};
+
+	unsigned int indices[6] =
 	{
 		0, 1, 2,
+		2, 3, 0
 	};
 
 	// bind the vao
@@ -122,16 +142,16 @@ void Renderer::OnDraw()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
 
 	// set vertex attributes
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)(sizeof(Vertex::pos)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(Vertex::pos) + sizeof(Vertex::color)));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 
-	/*if (shaders->GetCurrentShader() != nullptr)
-		shaders->GetCurrentShader()->SetUniform("_Offset", glm::vec4(glm::sin((float)glfwGetTime()) * 0.2f, 0.0f, 0.0f, 0.0f));*/
-	shaderLoader->UseShader("default");
+	shaderLoader->UseShader(DEFAULT_SHADER);
 	shaderLoader->GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
-
+	shaderLoader->GetCurrentShader()->SetUniform("_Texture", (Texture*)textureLoader->GetTexture(TEXTUREMAN));
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

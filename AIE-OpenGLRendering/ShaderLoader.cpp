@@ -67,7 +67,7 @@ bool ShaderLoader::LoadInShaders()
 		}
 	}
 
-	std::cout << vertexShaderFiles.size() << " vertex shaders, " << fragmentShaderFiles.size() << " fragment shaders." << std::endl;
+	std::cout << "Found " << vertexShaderFiles.size() << " vertex shaders, " << fragmentShaderFiles.size() << " fragment shaders." << std::endl;
 
 	// generate vertex shader collection
 	for (int i = 0; i < vertexShaderFiles.size(); ++i)
@@ -216,7 +216,7 @@ bool ShaderLoader::LoadInShaders()
 	return shaderStateOkay;
 }
 
-void ShaderLoader::PruneVertexAndFragmentShaders()
+void ShaderLoader::DeleteVertexAndFragmentShaders()
 {
 	for (const auto& [key, value] : vertexShaders)
 	{
@@ -229,7 +229,7 @@ void ShaderLoader::PruneVertexAndFragmentShaders()
 	vertexShaders.clear();
 	fragmentShaders.clear();
 
-	std::cout << "Vertex and Fragment shaders pruned." << std::endl;
+	std::cout << "Vertex and Fragment shaders deleted.\n" << std::endl;
 }
 
 
@@ -242,8 +242,8 @@ void ShaderLoader::ClearShaders()
 
 	shaderPrograms.clear();
 
-	PruneVertexAndFragmentShaders();
-	std::cout << "All shaders cleared." << std::endl;
+	DeleteVertexAndFragmentShaders();
+	std::cout << "All shaders cleared.\n" << std::endl;
 }
 
 const bool ShaderLoader::InitialiseShaders()
@@ -252,7 +252,7 @@ const bool ShaderLoader::InitialiseShaders()
 	if (LoadInShaders())
 	{
 		PrintShaderCollections();
-		PruneVertexAndFragmentShaders();
+		DeleteVertexAndFragmentShaders();
 		return true;
 	}
 	else
@@ -280,7 +280,7 @@ void ShaderLoader::UseShader(const std::string shader)
 
 void ShaderLoader::PrintShaderCollections() const
 {
-	std::cout << "\n-----------------------\nVertex shaders:" << std::endl;
+	std::cout << "\n____Start Shader list____\n-----------------------\nVertex shaders:" << std::endl;
 	for (auto const [key, value] : vertexShaders)
 	{
 		std::cout << key << ", " << value << std::endl;
@@ -296,5 +296,5 @@ void ShaderLoader::PrintShaderCollections() const
 		std::cout << key << ", " << value->GetID() << std::endl;
 	}
 
-	std::cout << "\n\n";
+	std::cout << "\n----End Shader List----\n\n";
 }

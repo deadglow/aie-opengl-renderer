@@ -4,7 +4,7 @@
 #include "ShaderLoader.h"
 #include "TextureLoader.h"
 
-#define DEFAULT_SHADER "default"
+#define DEFAULT_SHADER "unlit"
 
 class Renderer
 {

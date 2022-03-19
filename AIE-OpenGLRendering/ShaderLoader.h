@@ -17,7 +17,7 @@ private:
 
 	void UseShader(Shader* shader);
 	bool LoadInShaders();
-	void PruneVertexAndFragmentShaders();
+	void DeleteVertexAndFragmentShaders();
 	void ClearShaders();
 
 public:

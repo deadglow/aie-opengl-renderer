@@ -17,8 +17,6 @@ int main()
 
 	Renderer::Start();
 
-	Renderer::GetTextureLoader()->LoadTexture("boletus.jpg");
-
 	// main game loop
 	while (Renderer::GetShaderLoader()->GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
 	{

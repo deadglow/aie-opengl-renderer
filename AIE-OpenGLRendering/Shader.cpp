@@ -1,6 +1,7 @@
 #include "Shader.h"
 #include "glad.h"
 #include "glfw3.h"
+#include "Texture.h"
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {
@@ -38,6 +39,11 @@ void Shader::SetUniform(const std::string variable, float value) const
 	glUniform1f(GetUniformLocation(variable), value);
 }
 
+void Shader::SetUniform(const std::string variable, unsigned int value) const
+{
+	glUniform1ui(GetUniformLocation(variable), value);
+}
+
 void Shader::SetUniform(const std::string variable, int value) const
 {
 	glUniform1i(GetUniformLocation(variable), value);
@@ -61,4 +67,9 @@ void Shader::SetUniform(const std::string variable, const glm::vec4 value) const
 void Shader::SetUniform(const std::string variable, glm::mat4 value) const
 {
 	glUniformMatrix4fv(GetUniformLocation(variable), 1, false, &value[0][0]);
+}
+
+void Shader::SetUniform(const std::string variable, Texture* tex) const
+{
+	SetUniform(variable, tex->GetID());
 }

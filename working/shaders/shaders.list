@@ -1,2 +1,2 @@
-default,default.vert,default.frag
+unlit,unlit.vert,unlit.frag
 vertcolor,vertcolor.vert,vertcolor.frag

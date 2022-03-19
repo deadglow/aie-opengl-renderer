@@ -21,7 +21,7 @@ TextureLoader::~TextureLoader()
 {
 	for (auto const [key, value] : textureLookup)
 	{
-		glDeleteTextures(1, &value);
+		delete value;
 	}
 	textureLookup.clear();
 	std::cout << "Textures unloaded." << std::endl;
@@ -61,12 +61,12 @@ const std::string TextureLoader::GetTexturePath(const std::string name) const
 	return textureFiles.at(name);
 }
 
-const unsigned int TextureLoader::GetTextureID(const std::string name) const
+const Texture* TextureLoader::GetTexture(const std::string name) const
 {
 	return textureLookup.at(name);
 }
 
-const unsigned int TextureLoader::LoadTexture(std::string filename)
+const Texture* TextureLoader::LoadTexture(std::string filename)
 {
 	if (textureFiles.count(filename))
 	{
@@ -77,18 +77,7 @@ const unsigned int TextureLoader::LoadTexture(std::string filename)
 
 		if (data)
 		{
-			unsigned int texture;
-			glGenTextures(1, &texture);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			// set texture parameters
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			// assign texture data
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-			glGenerateMipmap(GL_TEXTURE_2D);
+			Texture* texture = new Texture(data, width, height, nrChannels, filename);
 
 			// we're now done with the data
 			stbi_image_free(data);
@@ -103,19 +92,18 @@ const unsigned int TextureLoader::LoadTexture(std::string filename)
 		{
 			stbi_image_free(data);
 			std::cout << "Failed to load image from disk." << std::endl;
-			return -1;
+			return nullptr;
 		}
 	}
 	else
-		return -1;
+		return nullptr;
 }
 
 void TextureLoader::UnloadTexture(const std::string filename)
 {
 	if (textureLookup.count(filename))
 	{
-		unsigned int id = textureLookup[filename];
-		glDeleteTextures(1, &id);
+		delete textureLookup[filename];
 
 		textureLookup.erase(filename);
 		std::cout << "Unloaded texture " << filename << std::endl;
