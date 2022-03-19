@@ -1,37 +1,37 @@
 #pragma once
 #include <unordered_map>
 #include <string>
-#include "Shader.h"
+#include "ShaderConfiguration.h"
 
 class ShaderLoader
 {
 private:
-	std::string dir;
-	std::string shaderListFilename;
-	std::unordered_map<std::string, unsigned int> vertexShaders;
-	std::unordered_map<std::string, unsigned int> fragmentShaders;
-	std::unordered_map<std::string, Shader*> shaderPrograms;
+	static std::string dir;
+	static std::string shaderListFilename;
+	static std::unordered_map<std::string, unsigned int> vertexShaders;
+	static std::unordered_map<std::string, unsigned int> fragmentShaders;
+	static std::unordered_map<std::string, Shader*> shaderPrograms;
 
-	bool shaderStateOkay = false;
-	Shader* currentShader = nullptr;
+	static bool shaderStateOkay;
+	static Shader* currentShader;
 
-	void UseShader(Shader* shader);
-	bool LoadInShaders();
-	void DeleteVertexAndFragmentShaders();
-	void ClearShaders();
+	static bool LoadInShaders();
+	static void DeleteVertexAndFragmentShaders();
+	static void ClearShaders();
 
+	ShaderLoader() = delete;
 public:
-	ShaderLoader();
-	ShaderLoader(std::string dir_init, std::string shaderListFilename_init);
 
-	~ShaderLoader();
 
-	const bool InitialiseShaders();
-	Shader* GetCurrentShader() const;
-	void UseShader(const std::string shader);
-	void PrintShaderCollections() const;
+	static const bool InitialiseShaders();
+	static void Shutdown();
+	static Shader* GetCurrentShader();
+	static Shader* GetShader(const std::string filename);
+	static void UseShader(Shader* shader);
+	static void UseShader(const std::string shader);
+	static void PrintShaderCollections();
 
-	const bool GetShaderStateOkay() const { return shaderStateOkay; }
+	static const bool GetShaderStateOkay() { return shaderStateOkay; }
 
 };
 

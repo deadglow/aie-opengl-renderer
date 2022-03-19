@@ -26,7 +26,7 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (key == GLFW_KEY_R)
 		{
-			Renderer::GetShaderLoader()->InitialiseShaders();
+			ShaderLoader::InitialiseShaders();
 		}
 	}
 }

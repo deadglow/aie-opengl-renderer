@@ -2,6 +2,7 @@
 #include "glad.h"
 #include "glfw3.h"
 #include "Texture.h"
+#include "ShaderLoader.h"
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {
@@ -16,7 +17,7 @@ Shader::~Shader()
 
 void Shader::Use()
 {
-	glUseProgram(ID);
+	ShaderLoader::UseShader(this);
 }
 
 const unsigned int Shader::GetID() const

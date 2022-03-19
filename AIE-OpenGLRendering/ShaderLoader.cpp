@@ -9,19 +9,17 @@
 
 namespace fs = std::filesystem;
 
-ShaderLoader::ShaderLoader()
-{
-	dir = fs::current_path().string() + "/shaders";
-	shaderListFilename = "shaders.list";
-}
+std::string ShaderLoader::dir = fs::current_path().string() + "/shaders";
+std::string ShaderLoader::shaderListFilename = "shaders.list";
+std::unordered_map<std::string, unsigned int> ShaderLoader::vertexShaders;
+std::unordered_map<std::string, unsigned int> ShaderLoader::fragmentShaders;
+std::unordered_map<std::string, Shader*> ShaderLoader::shaderPrograms;
 
-ShaderLoader::ShaderLoader(std::string dir_init, std::string shaderListFilename_init)
-{
-	dir = dir_init;
-	shaderListFilename = shaderListFilename_init;
-}
+bool ShaderLoader::shaderStateOkay = false;
+Shader* ShaderLoader::currentShader = nullptr;
 
-ShaderLoader::~ShaderLoader()
+
+void ShaderLoader::Shutdown()
 {
 	ClearShaders();
 }
@@ -259,15 +257,20 @@ const bool ShaderLoader::InitialiseShaders()
 		return false;
 }
 
-Shader* ShaderLoader::GetCurrentShader() const
+Shader* ShaderLoader::GetCurrentShader()
 {
 	return currentShader;
+}
+
+Shader* ShaderLoader::GetShader(const std::string filename)
+{
+	return shaderPrograms.at(filename);
 }
 
 void ShaderLoader::UseShader(Shader* shader)
 {
 	currentShader = shader;
-	currentShader->Use();
+	glUseProgram(shader->GetID());
 }
 
 void ShaderLoader::UseShader(const std::string shader)
@@ -278,7 +281,7 @@ void ShaderLoader::UseShader(const std::string shader)
 	}
 }
 
-void ShaderLoader::PrintShaderCollections() const
+void ShaderLoader::PrintShaderCollections()
 {
 	std::cout << "\n____Start Shader list____\n-----------------------\nVertex shaders:" << std::endl;
 	for (auto const [key, value] : vertexShaders)

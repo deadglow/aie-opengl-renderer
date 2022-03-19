@@ -1,11 +1,14 @@
 #include "Renderer.h"
 #include <iostream>
+#include "ShaderConfiguration.h"
 
-#define TEXTUREMAN "container.jpg"
+#define TEXTUREMAN "boletus.png"
+//#define TEXTUREMAN "container.jpg"
 
 GLFWwindow* Renderer::window = nullptr;
-ShaderLoader* Renderer::shaderLoader = nullptr;
-TextureLoader* Renderer::textureLoader = nullptr;
+
+std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
+
 
 int Renderer::Initialise()
 {
@@ -29,38 +32,37 @@ int Renderer::Initialise()
 		return -1;
 
 	// shader setup
-	shaderLoader = new ShaderLoader();
 
-	if (!shaderLoader->InitialiseShaders())
+	if (!ShaderLoader::InitialiseShaders())
 	{
-		delete shaderLoader;
+		ShaderLoader::Shutdown();
 		glfwTerminate();
 		return -1;
 	}
 
 	// textures setup
-	textureLoader = new TextureLoader();
-	textureLoader->Initialise();
+	TextureLoader::Initialise();
 	// textureLoader->PrintAllTextureFiles();
+
+	// mesh setup
+	MeshLoader::Initialise();
 
 	return 0;
 }
 
 void Renderer::Shutdown()
 {
-	delete textureLoader;
-	delete shaderLoader;
+	MeshLoader::Shutdown();
+	TextureLoader::Shutdown();
+	ShaderLoader::Shutdown();
+	for (const auto [key, value] : shaderConfigs)
+	{
+		delete value;
+	}
+
+	shaderConfigs.clear();
+
 	glfwTerminate();
-}
-
-ShaderLoader* Renderer::GetShaderLoader()
-{
-	return shaderLoader;
-}
-
-TextureLoader* Renderer::GetTextureLoader()
-{
-	return textureLoader;
 }
 
 GLFWwindow* Renderer::GetWindow()
@@ -70,8 +72,9 @@ GLFWwindow* Renderer::GetWindow()
 
 void Renderer::Start()
 {
-	textureLoader->LoadTexture(TEXTUREMAN);
-	std::cout << textureLoader->GetTexture(TEXTUREMAN)->GetID() << std::endl;
+	TextureLoader::LoadTexture(TEXTUREMAN);
+	ShaderConfiguration* config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
+	shaderConfigs.emplace("unlit", config);
 }
 
 void Renderer::Render()
@@ -105,25 +108,25 @@ void Renderer::OnDraw()
 	Vertex vertices[4];
 	float val = -0.5f + glm::sin(glfwGetTime()) * 0.1f;
 	vertices[0] =
-	{	val, -0.5f, 1,
+	{	-0.5f, -0.5f, 1,
 		255, 255, 255, 255,
-		0.0f, 0.0f
+		0.0f, 1.0f
 	};
 	vertices[1] =
 	{	-0.5f, 0.5f, 1,
 		255, 255, 255, 255,
-		0.0f, 1.0f
+		0.0f, 0.0f
 	};
 	vertices[2] = 
 	{	0.5f, 0.5f, 1,
 		255, 255, 255, 255,
-		1.0f, 1.0f
+		1.0f, 0.0f
 	};
 
 	vertices[3] =
 	{	0.5f, -0.5f, 1,
 		255, 255, 255, 255,
-		1.0f, 0.0f
+		1.0f, 1.0f
 	};
 
 	unsigned int indices[6] =
@@ -149,9 +152,9 @@ void Renderer::OnDraw()
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
-	shaderLoader->UseShader(DEFAULT_SHADER);
-	shaderLoader->GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
-	shaderLoader->GetCurrentShader()->SetUniform("_Texture", (Texture*)textureLoader->GetTexture(TEXTUREMAN));
+	shaderConfigs.at("unlit")->UseShader();
+	ShaderLoader::GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
+
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 }

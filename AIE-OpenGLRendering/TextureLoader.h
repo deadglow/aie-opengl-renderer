@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <map>
+#include <unordered_map>
 #include "glad.h"
 #include "glfw3.h"
 #include "Texture.h"
@@ -8,21 +8,20 @@
 class TextureLoader
 {
 private:
-	std::string dir;
-	std::map<std::string, std::string> textureFiles;
-	std::map<std::string, Texture*> textureLookup;
+	static std::string dir;
+	static std::unordered_map<std::string, std::string> textureFiles;
+	static std::unordered_map<std::string, Texture*> textureLookup;
 
+	TextureLoader() = delete;
 public:
-	TextureLoader();
-	TextureLoader(std::string dir_init);
-	~TextureLoader();
 
-	void Initialise();
-	void PrintAllTextureFiles() const;
+	static void Initialise();
+	static void Shutdown();
+	static void PrintAllTextureFiles();
 
-	const std::string GetTexturePath(const std::string name) const;
-	const Texture* GetTexture(const std::string name) const;
-	const Texture* LoadTexture(std::string filename);
-	void UnloadTexture(const std::string filename);
+	static const std::string GetTexturePath(const std::string filename);
+	static const Texture* GetTexture(const std::string filename);
+	static const Texture* LoadTexture(const std::string filename);
+	static void UnloadTexture(const std::string filename);
 };
 

@@ -7,25 +7,9 @@
 
 namespace fs = std::filesystem;
 
-TextureLoader::TextureLoader()
-{
-	dir = fs::current_path().string() + "/textures";
-}
-
-TextureLoader::TextureLoader(std::string dir_init)
-{
-	dir = dir_init;
-}
-
-TextureLoader::~TextureLoader()
-{
-	for (auto const [key, value] : textureLookup)
-	{
-		delete value;
-	}
-	textureLookup.clear();
-	std::cout << "Textures unloaded." << std::endl;
-}
+std::string TextureLoader::dir = fs::current_path().string() + "/textures";;
+std::unordered_map<std::string, std::string> TextureLoader::textureFiles;
+std::unordered_map<std::string, Texture*> TextureLoader::textureLookup;
 
 void TextureLoader::Initialise()
 {
@@ -47,7 +31,17 @@ void TextureLoader::Initialise()
 	}
 }
 
-void TextureLoader::PrintAllTextureFiles() const
+void TextureLoader::Shutdown()
+{
+	for (auto const [key, value] : textureLookup)
+	{
+		delete value;
+	}
+	textureLookup.clear();
+	std::cout << "Textures unloaded." << std::endl;
+}
+
+void TextureLoader::PrintAllTextureFiles()
 {
 	std::cout << "Texture files: " << std::endl;
 	for (auto const [key, value] : textureFiles)
@@ -56,17 +50,17 @@ void TextureLoader::PrintAllTextureFiles() const
 	}
 }
 
-const std::string TextureLoader::GetTexturePath(const std::string name) const
+const std::string TextureLoader::GetTexturePath(const std::string filename)
 {
-	return textureFiles.at(name);
+	return textureFiles.at(filename);
 }
 
-const Texture* TextureLoader::GetTexture(const std::string name) const
+const Texture* TextureLoader::GetTexture(const std::string filename)
 {
-	return textureLookup.at(name);
+	return textureLookup.at(filename);
 }
 
-const Texture* TextureLoader::LoadTexture(std::string filename)
+const Texture* TextureLoader::LoadTexture(const std::string filename)
 {
 	if (textureFiles.count(filename))
 	{

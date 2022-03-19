@@ -18,7 +18,7 @@ int main()
 	Renderer::Start();
 
 	// main game loop
-	while (Renderer::GetShaderLoader()->GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
+	while (ShaderLoader::GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
 	{
 		Input::UpdateInput();
 		Renderer::Render();
