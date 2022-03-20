@@ -55,12 +55,12 @@ const std::string TextureLoader::GetTexturePath(const std::string filename)
 	return textureFiles.at(filename);
 }
 
-const Texture* TextureLoader::GetTexture(const std::string filename)
+Texture* TextureLoader::GetTexture(const std::string filename)
 {
 	return textureLookup.at(filename);
 }
 
-const Texture* TextureLoader::LoadTexture(const std::string filename)
+Texture* TextureLoader::LoadTexture(const std::string filename)
 {
 	if (textureFiles.count(filename))
 	{

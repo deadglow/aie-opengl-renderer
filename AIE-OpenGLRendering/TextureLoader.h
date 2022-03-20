@@ -20,8 +20,8 @@ public:
 	static void PrintAllTextureFiles();
 
 	static const std::string GetTexturePath(const std::string filename);
-	static const Texture* GetTexture(const std::string filename);
-	static const Texture* LoadTexture(const std::string filename);
+	static Texture* GetTexture(const std::string filename);
+	static Texture* LoadTexture(const std::string filename);
 	static void UnloadTexture(const std::string filename);
 };
 

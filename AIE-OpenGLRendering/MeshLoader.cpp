@@ -1,16 +1,18 @@
 #include "MeshLoader.h"
+#include "FileReader.h"
+#include "MeshLoadFunctions.h"
 #include <filesystem>
 #include <iostream>
+#include <vector>
 
 namespace fs = std::filesystem;
 
 std::string MeshLoader::dir = fs::current_path().string() + "/meshes";
 std::unordered_map<std::string, Mesh*> MeshLoader::meshList;
 
-// DO THIS DO THIS DO THIS
 Mesh* MeshLoader::CreateMesh(const std::string filepath)
 {
-	return nullptr;
+	return MeshLoadFunctions::CreateMeshFromFile(filepath);
 }
 
 void MeshLoader::Initialise()

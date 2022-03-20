@@ -7,14 +7,15 @@ layout (location = 2) in vec2 _TexCoord;
 layout (location = 3) in vec4 _VertexColor;
 
 uniform float _Time;
+uniform mat4 _MVP;
 
-out vec4 Color;
-out vec2 TexCoord;
 out vec3 Normal;
+out vec2 TexCoord;
+out vec4 Color;
 
 void main()
 {
-	gl_Position = vec4(_Position, 1);
+	gl_Position = _MVP * vec4(_Position, 1);
 	Normal = _Normal;
 	TexCoord = _TexCoord;
 	Color = _VertexColor;

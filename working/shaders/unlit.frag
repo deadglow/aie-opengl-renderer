@@ -1,9 +1,9 @@
 #version 450
 
-out vec4 FragColour;
 in vec3 Normal;
 in vec2 TexCoord;
 in vec4 Color;
+out vec4 FragColour;
 
 //uniform goes here
 uniform float _Time;

@@ -1,5 +1,6 @@
 #pragma once
 #include "Vertex.h"
+#include "Triangle.h"
 #include "ShaderConfiguration.h"
 #include <vector>
 #include <string>
@@ -8,17 +9,19 @@ class Mesh
 {
 private:
 	std::string filename;
+	float unitScale = 0.01f;
 	bool loaded = false;
 	unsigned int VAO, VBO, EBO;
+
 public:
 	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<Triangle> triangles;
 
-	Mesh(std::string filename_init, std::vector<Vertex> vertices_init, std::vector<unsigned int> indices_init);
+	Mesh(std::string filename_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init, float unitScale_init = 0.01f);
 	~Mesh();
 
 	const bool GetLoaded() const { return loaded; }
 	void LoadMesh();
 	void UnloadMesh();
-	void Draw(ShaderConfiguration* shaderConfig) const;
+	void Draw() const;
 };

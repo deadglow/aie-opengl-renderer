@@ -9,20 +9,21 @@ class ShaderConfiguration
 {
 private:
 	Shader* shader = nullptr;
-	std::vector<ShaderPropertyBase> properties;
+	std::string shaderName;
+	std::vector<ShaderPropertyBase*> properties;
 
 public:
 	ShaderConfiguration(Shader* shader_init);
+	~ShaderConfiguration();
 
 	template<class T>
-	void AddProperty(const std::string name, T value)
+	void AddProperty(const std::string name, const T value)
 	{
-		ShaderProperty<T> prop;
-		prop.name = name;
-		prop.value = value;
+		ShaderProperty<T>* prop = new ShaderProperty<T>(name, value);
 		properties.push_back(prop);
 	}
 
 	void UseShader();
+	void ApplyConfiguration();
 };
 

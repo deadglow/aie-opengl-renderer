@@ -3,6 +3,7 @@
 #include "glfw3.h"
 #include "Texture.h"
 #include "ShaderLoader.h"
+#include "gtc/type_ptr.hpp"
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {
@@ -67,7 +68,7 @@ void Shader::SetUniform(const std::string variable, const glm::vec4 value) const
 
 void Shader::SetUniform(const std::string variable, glm::mat4 value) const
 {
-	glUniformMatrix4fv(GetUniformLocation(variable), 1, false, &value[0][0]);
+	glUniformMatrix4fv(GetUniformLocation(variable), 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void Shader::SetUniform(const std::string variable, Texture* tex) const
