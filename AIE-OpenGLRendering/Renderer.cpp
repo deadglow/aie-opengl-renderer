@@ -8,17 +8,16 @@
 #include "gtx/norm.hpp"
 
 #define TEXTUREMAN "boletus.png"
-#define FOV 70.0f
-#define NEAR_PLANE 0.1f
-#define FAR_PLANE 200.0f
 
 //#define TEXTUREMAN "container.jpg"
 
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect;
+Camera Renderer::camera;
 
-std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
-Mesh* box;
+std::vector<Model*> Renderer::modelList;
+std::vector<ModelTransform*> Renderer::modelTransforms;
+std::unordered_map<std::string, ShaderConfiguration*> Renderer::shaderConfigs;
 
 
 int Renderer::Initialise()
@@ -79,9 +78,14 @@ void Renderer::Shutdown()
 	{
 		delete value;
 	}
-	shaderConfigs.clear();
-
-	delete box;
+	for (ModelTransform* mt : modelTransforms)
+	{
+		delete mt;
+	}
+	for (Model* model : modelList)
+	{
+		delete model;
+	}
 
 	glfwTerminate();
 }
@@ -93,6 +97,10 @@ GLFWwindow* Renderer::GetWindow()
 
 void Renderer::Start()
 {
+	// move da camera
+	glm::translate(camera.transform, glm::vec3(0, 0, -3));
+
+	// load da texture
 	TextureLoader::LoadTexture(TEXTUREMAN);
 	ShaderConfiguration* config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
 	config->AddProperty<Texture*>("_Texture", TextureLoader::GetTexture(TEXTUREMAN));
@@ -133,9 +141,22 @@ void Renderer::Start()
 	};
 	memcpy_s(&triangles[0], sizeof(triArray), triArray, sizeof(triArray));
 
-	box = new Mesh("Plane", vertices, triangles);
+	Mesh* box = new Mesh("Box", vertices, triangles);
 
-	box->LoadMesh();
+	// create model
+	Model* model = new Model("box");
+	model->AddMesh(box);
+	model->AddShaderConfig(shaderConfigs["unlit"]);
+	modelList.push_back(model);
+
+	// create model transform
+	ModelTransform* modelT = new ModelTransform(model);
+	modelTransforms.push_back(modelT);
+}
+
+float Renderer::GetAspect()
+{
+	return aspect;
 }
 
 void Renderer::Render()
@@ -152,21 +173,5 @@ void Renderer::Render()
 
 void Renderer::OnDraw()
 {
-	shaderConfigs.at("unlit")->UseShader();
-
-	// generate matrices
-	glm::mat4 m2w = glm::mat4(1.0f);
-	m2w = glm::rotate(m2w, glm::radians((float)glfwGetTime() * 40.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-	glm::mat4 w2v = glm::mat4(1.0f);
-	w2v = glm::translate(w2v, glm::vec3(0.0f, 0.0f, -3.0f));
-
-	glm::mat4 projection = glm::perspective(glm::radians(FOV), aspect, NEAR_PLANE, FAR_PLANE);
-	
-	glm::mat4 mvp = projection * w2v * m2w;
-
-	ApplyBaseShaderProperties();
-	ShaderLoader::GetCurrentShader()->SetUniform("_MVP", mvp);
-
-	box->Draw();
+	camera.Draw();
 }

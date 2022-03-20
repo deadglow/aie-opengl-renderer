@@ -8,12 +8,24 @@
 class Model
 {
 private:
+	std::string filename;
+	std::vector<unsigned int> meshShaderLookup;
+	bool loaded = false;
+
+public:
 	std::vector<Mesh*> meshes;
-	std::string dir;
+	std::vector<ShaderConfiguration*> shaderConfigs;
+	
+	Model(const std::string filename_init);
+	~Model();
 
-	void LoadModel(std::string path);
-	void ProcessNode(aiNode* node, const aiScene* scene);
-	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
-
+	void AddMesh(Mesh* mesh);
+	void AddShaderConfig(ShaderConfiguration* shaderConfig);
+	void Load();
+	void Unload();
+	void Draw(glm::mat4 mvp);
+	void SetShaderOfMesh(const int meshIndex, const int shaderIndex);
+	std::string GetFilename() const;
+	const bool IsLoaded() const;
 };
 

@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="glad.c" />
@@ -155,6 +156,7 @@
     <ClCompile Include="MeshLoader.cpp" />
     <ClCompile Include="MeshLoadFunctions.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="ModelTransform.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderConfiguration.cpp" />
@@ -167,6 +169,7 @@
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="glad.h" />
     <ClInclude Include="Input.h" />
@@ -175,6 +178,7 @@
     <ClInclude Include="MeshLoader.h" />
     <ClInclude Include="MeshLoadFunctions.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelTransform.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderConfiguration.h" />
