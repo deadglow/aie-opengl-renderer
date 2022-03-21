@@ -8,12 +8,12 @@ glm::dvec2 Input::mousePos;
 glm::dvec2 Input::lastMousePos;
 glm::dvec2 Input::mouseDelta;
 glm::vec3 Input::moveinput;
+bool Input::mouseLocked = false;
 
 void Input::Initialise(GLFWwindow* window_init)
 {
 	window = window_init;
 	glfwSetKeyCallback(window, OnKey);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Input::UpdateInput()
@@ -49,6 +49,14 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (key == GLFW_KEY_R)
 		{
 			ShaderLoader::InitialiseShaders();
+		}
+		if (key == GLFW_KEY_M)
+		{
+			mouseLocked = !mouseLocked;
+			if (mouseLocked)
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			else
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 
 		switch (key)

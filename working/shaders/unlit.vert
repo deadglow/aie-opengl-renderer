@@ -4,11 +4,12 @@
 layout (location = 0) in vec3 _Position;
 layout (location = 1) in vec3 _Normal;
 layout (location = 2) in vec2 _TexCoord;
-layout (location = 3) in vec4 _VertexColor;
 
 uniform float _Time;
-uniform mat4 _MVP;
+uniform mat4 _VP;
 uniform mat4 _iVP;
+uniform mat4 _M2W;
+uniform mat4 _NormalMatrix;
 uniform vec3 _CamPos;
 uniform vec3 _CamDir;
 uniform float _NearZ;
@@ -16,14 +17,14 @@ uniform float _FarZ;
 
 out vec3 Normal;
 out vec2 TexCoord;
-out vec4 Color;
 out vec4 NDCPos;
+out vec3 FragPos;
 
 void main()
 {
-	NDCPos = _MVP * vec4(_Position, 1);
+	FragPos = vec3(_M2W * vec4(_Position, 1));
+	NDCPos = _VP * vec4(FragPos, 1.0);
 	gl_Position = NDCPos;
-	Normal = _Normal;
+	Normal = mat3(_NormalMatrix) * _Normal;
 	TexCoord = _TexCoord;
-	Color = _VertexColor;
 }

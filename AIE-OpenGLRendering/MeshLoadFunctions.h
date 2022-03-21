@@ -6,7 +6,6 @@ class MeshLoadFunctions
 {
 public:
 
-
 	static Mesh* CreateMeshFromFile(const std::string filename);
 };
 

@@ -58,10 +58,6 @@ void Mesh::LoadMesh()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
 	glEnableVertexAttribArray(2);
 
-	// interpret vertex colors
-	glVertexAttribPointer(3, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-	glEnableVertexAttribArray(3);
-
 	glBindVertexArray(0);
 
 	loaded = true;

@@ -1,11 +1,10 @@
 #include "Renderer.h"
 #include <iostream>
 #include "ShaderConfiguration.h"
-#include "Vertex.h"
+#include "MeshPrimitives.h"
 #include "glm.hpp"
 #include "ext/matrix_transform.hpp"
 #include "ext/matrix_clip_space.hpp"
-#include "gtx/norm.hpp"
 
 #define TEXTUREMAN "boletus.png"
 
@@ -47,11 +46,13 @@ int Renderer::Initialise()
 	// enable depth buffer
 	glEnable(GL_DEPTH_TEST);
 
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+
+	glClearColor(0.0f, 0.02f, 0.07f, 1.0f);
 
 	// enable msaa
-	glfwWindowHint(GLFW_SAMPLES, 8);
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_MULTISAMPLE);
 
 	// shader setup
@@ -62,9 +63,6 @@ int Renderer::Initialise()
 		return -1;
 	}
 
-	// mesh setup
-	MeshLoader::Initialise();
-
 	// textures setup
 	TextureLoader::Initialise();
 
@@ -74,12 +72,13 @@ int Renderer::Initialise()
 void Renderer::ApplyBaseShaderProperties()
 {
 	ShaderLoader::GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
+	glm::vec3 lightDir = glm::normalize(glm::vec3(1, -1, 1));
+	ShaderLoader::GetCurrentShader()->SetUniform("_DirLight", lightDir);
 }
 
 void Renderer::Shutdown()
 {
 	TextureLoader::Shutdown();
-	MeshLoader::Shutdown();
 	ShaderLoader::Shutdown();
 	
 	for (const auto [key, value] : shaderConfigs)
@@ -113,45 +112,9 @@ void Renderer::Start()
 	ShaderConfiguration* config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
 	config->AddProperty<Texture*>("_Texture", TextureLoader::GetTexture(TEXTUREMAN));
 	shaderConfigs.emplace(DEFAULT_SHADER, config);
-
-	// create mesh
-	glm::vec3 normal = { 0, 0, 1 };
-	unsigned char color[4] = {255, 255, 255, 255};
-
-	std::vector<Vertex> vertices;
-	vertices.resize(8);
-	vertices[0] = Vertex({ -0.5f, -0.5f, 0.5f }, normal, { 0.0f, 1.0f }, color);
-	vertices[1] = Vertex({ -0.5f, 0.5f, 0.5f }, normal, { 0.0f, 0.0f }, color);
-	vertices[2] = Vertex({ 0.5f, 0.5f, 0.5f }, normal, { 1.0f, 0.0f }, color);
-	vertices[3] = Vertex({ 0.5f, -0.5f, 0.5f }, normal, { 1.0f, 1.0f }, color);
-	vertices[4] = Vertex({ -0.5f, -0.5f, -0.5f }, normal, { 1.0f, 1.0f }, color);
-	vertices[5] = Vertex({ -0.5f, 0.5f, -0.5f }, normal, { 1.0f, 0.0f }, color);
-	vertices[6] = Vertex({ 0.5f, 0.5f, -0.5f }, normal, { 0.0f, 0.0f }, color);
-	vertices[7] = Vertex({ 0.5f, -0.5f, -0.5f }, normal, { 0.0f, 1.0f }, color);
-
-
-	std::vector<Triangle> triangles;
-	triangles.resize(12);
-	Triangle triArray[12]
-	{
-		{ 0u, 1u, 2u },
-		{ 2u, 3u, 0u },
-		{ 1u, 5u, 6u },
-		{ 6u, 2u, 1u },
-		{ 4u, 5u, 6u },
-		{ 6u, 7u, 4u },
-		{ 0u, 4u, 7u },
-		{ 7u, 3u, 0u },
-		{ 3u, 2u, 6u },
-		{ 6u, 7u, 3u },
-		{ 4u, 5u, 1u },
-		{ 1u, 0u, 4u }
-	};
-	memcpy_s(&triangles[0], sizeof(triArray), triArray, sizeof(triArray));
-
-	Mesh* box = new Mesh("Box", vertices, triangles);
-
+	
 	// create model
+	Mesh* box = MeshPrimitives::CreateCube(1.0f);
 	Model* model = new Model("box");
 	model->AddMesh(box);
 	model->AddShaderConfig(shaderConfigs["unlit"]);
@@ -165,7 +128,7 @@ void Renderer::Start()
 	{
 		ModelTransform* modelT = new ModelTransform(model);
 		modelTransforms.push_back(modelT);
-		modelT->transform = glm::translate(modelT->transform, glm::vec3(2.0f * i, 0, 0));
+		modelT->transform = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f * i, 0, 0));
 	}
 }
 
