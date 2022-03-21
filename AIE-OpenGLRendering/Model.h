@@ -2,8 +2,6 @@
 #include "Mesh.h"
 #include <string>
 #include <vector>
-#include "assimp/Importer.hpp"
-#include "assimp/scene.h"
 
 class Model
 {

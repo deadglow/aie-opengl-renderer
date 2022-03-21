@@ -12,8 +12,10 @@
 //#define TEXTUREMAN "container.jpg"
 
 GLFWwindow* Renderer::window = nullptr;
-float Renderer::aspect;
+float Renderer::aspect = 1.0f;
 Camera Renderer::camera;
+double Renderer::lastTime = 0.0;
+double Renderer::deltaTime = 1.0;
 
 std::vector<Model*> Renderer::modelList;
 std::vector<ModelTransform*> Renderer::modelTransforms;
@@ -45,8 +47,14 @@ int Renderer::Initialise()
 	// enable depth buffer
 	glEnable(GL_DEPTH_TEST);
 
-	// shader setup
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
 
+	// enable msaa
+	glfwWindowHint(GLFW_SAMPLES, 8);
+	glEnable(GL_MULTISAMPLE);
+
+	// shader setup
 	if (!ShaderLoader::InitialiseShaders())
 	{
 		ShaderLoader::Shutdown();
@@ -98,7 +106,7 @@ GLFWwindow* Renderer::GetWindow()
 void Renderer::Start()
 {
 	// move da camera
-	glm::translate(camera.transform, glm::vec3(0, 0, -3));
+	camera.transform = glm::translate(camera.transform, glm::vec3(0, 0, 5));
 
 	// load da texture
 	TextureLoader::LoadTexture(TEXTUREMAN);
@@ -147,11 +155,23 @@ void Renderer::Start()
 	Model* model = new Model("box");
 	model->AddMesh(box);
 	model->AddShaderConfig(shaderConfigs["unlit"]);
+	model->SetShaderOfMesh(0, 0);
 	modelList.push_back(model);
 
+	model->Load();
+
 	// create model transform
-	ModelTransform* modelT = new ModelTransform(model);
-	modelTransforms.push_back(modelT);
+	for (int i = 0; i < 85; ++i)
+	{
+		ModelTransform* modelT = new ModelTransform(model);
+		modelTransforms.push_back(modelT);
+		modelT->transform = glm::translate(modelT->transform, glm::vec3(2.0f * i, 0, 0));
+	}
+}
+
+double Renderer::GetDeltaTime()
+{
+	return deltaTime;
 }
 
 float Renderer::GetAspect()
@@ -164,14 +184,23 @@ void Renderer::Render()
 	// clear the screen and start drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// calculate delta time
+	deltaTime = glfwGetTime() - lastTime;
+	lastTime = glfwGetTime();
+
 	// drawing here
 	OnDraw();
 
 	// swapping buffers
 	glfwSwapBuffers(window);
+
 }
 
 void Renderer::OnDraw()
 {
+	for (int i = 0; i < modelTransforms.size(); ++i)
+	{
+		modelTransforms[i]->transform = glm::rotate(modelTransforms[i]->transform, glm::radians(10.0f * i) * (float)deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
+	}
 	camera.Draw();
 }

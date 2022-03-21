@@ -5,11 +5,15 @@
 
 GLFWwindow* Input::window = nullptr;
 glm::dvec2 Input::mousePos;
+glm::dvec2 Input::lastMousePos;
+glm::dvec2 Input::mouseDelta;
+glm::vec2 Input::moveinput;
 
 void Input::Initialise(GLFWwindow* window_init)
 {
 	window = window_init;
 	glfwSetKeyCallback(window, OnKey);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Input::UpdateInput()
@@ -18,6 +22,24 @@ void Input::UpdateInput()
 	glfwPollEvents();
 
 	glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
+	
+	mouseDelta = mousePos - lastMousePos;
+	lastMousePos = mousePos;
+}
+
+glm::dvec2 Input::GetMousePos()
+{
+	return mousePos;
+}
+
+glm::dvec2 Input::GetMouseDelta()
+{
+	return mouseDelta;
+}
+
+glm::vec2 Input::GetMoveInput()
+{
+	return moveinput;
 }
 
 void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -27,6 +49,42 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (key == GLFW_KEY_R)
 		{
 			ShaderLoader::InitialiseShaders();
+		}
+
+		switch (key)
+		{
+		case GLFW_KEY_W:
+			moveinput.y += 1;
+			break;
+		case GLFW_KEY_S:
+			moveinput.y -= 1;
+			break;
+
+		case GLFW_KEY_D:
+			moveinput.x += 1;
+			break;
+		case GLFW_KEY_A:
+			moveinput.x -= 1;
+			break;
+		}
+	}
+	if (action == GLFW_RELEASE)
+	{
+		switch (key)
+		{
+		case GLFW_KEY_W:
+			moveinput.y -= 1;
+			break;
+		case GLFW_KEY_S:
+			moveinput.y += 1;
+			break;
+
+		case GLFW_KEY_D:
+			moveinput.x -= 1;
+			break;
+		case GLFW_KEY_A:
+			moveinput.x += 1;
+			break;
 		}
 	}
 }

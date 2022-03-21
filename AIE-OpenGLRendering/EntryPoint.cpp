@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "Input.h"
+#include "Game.h"
 #include <iostream>
 
 int main()
@@ -17,11 +18,14 @@ int main()
 
 	Renderer::Start();
 
+	Game game;
+
 	// main game loop
 	while (ShaderLoader::GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
 	{
 		Input::UpdateInput();
 		Renderer::Render();
+		game.Update();
 	}
 
 	// window has closed, clean up GLFW and exit

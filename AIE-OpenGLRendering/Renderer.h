@@ -8,8 +8,8 @@
 #include "Camera.h"
 
 #define DEFAULT_SHADER "unlit"
-#define RES_X 1280
-#define RES_Y 720
+#define RES_X 1920
+#define RES_Y 1080
 #define WINDOW_NAME "Creamy Triangle Maker"
 
 class Renderer
@@ -17,12 +17,14 @@ class Renderer
 private:
 	static GLFWwindow* window;
 	static float aspect;
-	static Camera camera;
+	static double lastTime;
+	static double deltaTime;
 
 	Renderer() = delete;
 	~Renderer() = default;
 	static void OnDraw();
 public:
+	static Camera camera;
 	static std::vector<Model*> modelList;
 	static std::vector<ModelTransform*> modelTransforms;
 	static std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
@@ -34,6 +36,7 @@ public:
 	static void Start();
 	static void Render();
 
+	static double GetDeltaTime();
 	static float GetAspect();
 	static void ApplyBaseShaderProperties();
 };

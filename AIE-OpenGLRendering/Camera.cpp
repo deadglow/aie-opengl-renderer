@@ -24,9 +24,9 @@ void Camera::UpdateVPMatrix()
 	{
 		float halfSize = orthoSize / 2;
 		float height = Renderer::GetAspect() * halfSize;
-		projection = glm::ortho(-halfSize, halfSize, -height, height, nearPlane, farPlane);
+		projection = glm::ortho(-halfSize, halfSize, -halfSize, halfSize, nearPlane, farPlane);
 	}
-	projection = glm::mat4(1.0f);
+
 	vpMatrix = projection * glm::inverse(transform);
 }
 
