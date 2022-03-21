@@ -1,5 +1,6 @@
 #pragma once
 #include "Model.h"
+#include "CameraShaderData.h"
 
 class ModelTransform
 {
@@ -11,6 +12,6 @@ public:
 	ModelTransform(Model* model_init);
 	~ModelTransform();
 
-	void Draw(glm::mat4 vpMatrix);
+	void Draw(CameraShaderData csd);
 };
 

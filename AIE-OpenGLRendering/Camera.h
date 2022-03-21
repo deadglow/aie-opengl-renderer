@@ -24,4 +24,3 @@ public:
 	glm::mat4 GetVPMatrix() const;
 	void Draw();
 };
-

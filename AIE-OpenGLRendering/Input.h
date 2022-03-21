@@ -9,7 +9,7 @@ private:
 	static glm::dvec2 mousePos;
 	static glm::dvec2 lastMousePos;
 	static glm::dvec2 mouseDelta;
-	static glm::vec2 moveinput;
+	static glm::vec3 moveinput;
 	static void OnKey (GLFWwindow* window, int key, int scancode, int action, int mods);
 	Input() = default;
 	~Input() = default;
@@ -19,5 +19,5 @@ public:
 
 	static glm::dvec2 GetMousePos();
 	static glm::dvec2 GetMouseDelta();
-	static glm::vec2 GetMoveInput();
+	static glm::vec3 GetMoveInput();
 };

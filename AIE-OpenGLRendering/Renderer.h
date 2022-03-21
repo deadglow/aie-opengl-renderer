@@ -8,8 +8,8 @@
 #include "Camera.h"
 
 #define DEFAULT_SHADER "unlit"
-#define RES_X 1920
-#define RES_Y 1080
+#define RES_X 1280
+#define RES_Y 720
 #define WINDOW_NAME "Creamy Triangle Maker"
 
 class Renderer

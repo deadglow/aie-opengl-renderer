@@ -7,7 +7,7 @@ GLFWwindow* Input::window = nullptr;
 glm::dvec2 Input::mousePos;
 glm::dvec2 Input::lastMousePos;
 glm::dvec2 Input::mouseDelta;
-glm::vec2 Input::moveinput;
+glm::vec3 Input::moveinput;
 
 void Input::Initialise(GLFWwindow* window_init)
 {
@@ -37,7 +37,7 @@ glm::dvec2 Input::GetMouseDelta()
 	return mouseDelta;
 }
 
-glm::vec2 Input::GetMoveInput()
+glm::vec3 Input::GetMoveInput()
 {
 	return moveinput;
 }
@@ -54,10 +54,10 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		switch (key)
 		{
 		case GLFW_KEY_W:
-			moveinput.y += 1;
+			moveinput.z += 1;
 			break;
 		case GLFW_KEY_S:
-			moveinput.y -= 1;
+			moveinput.z -= 1;
 			break;
 
 		case GLFW_KEY_D:
@@ -65,6 +65,12 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_A:
 			moveinput.x -= 1;
+			break;
+		case GLFW_KEY_E:
+			moveinput.y += 1;
+			break;
+		case GLFW_KEY_Q:
+			moveinput.y -= 1;
 			break;
 		}
 	}
@@ -73,10 +79,10 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		switch (key)
 		{
 		case GLFW_KEY_W:
-			moveinput.y -= 1;
+			moveinput.z -= 1;
 			break;
 		case GLFW_KEY_S:
-			moveinput.y += 1;
+			moveinput.z += 1;
 			break;
 
 		case GLFW_KEY_D:
@@ -84,6 +90,12 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			break;
 		case GLFW_KEY_A:
 			moveinput.x += 1;
+			break;
+		case GLFW_KEY_E:
+			moveinput.y -= 1;
+			break;
+		case GLFW_KEY_Q:
+			moveinput.y += 1;
 			break;
 		}
 	}

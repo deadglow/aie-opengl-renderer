@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh.h"
+#include "CameraShaderData.h"
 #include <string>
 #include <vector>
 
@@ -21,7 +22,7 @@ public:
 	void AddShaderConfig(ShaderConfiguration* shaderConfig);
 	void Load();
 	void Unload();
-	void Draw(glm::mat4 mvp);
+	void Draw(CameraShaderData csd, glm::mat4 transform);
 	void SetShaderOfMesh(const int meshIndex, const int shaderIndex);
 	std::string GetFilename() const;
 	const bool IsLoaded() const;

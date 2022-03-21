@@ -9,10 +9,10 @@ ModelTransform::~ModelTransform()
 {
 }
 
-void ModelTransform::Draw(glm::mat4 vpMatrix)
+void ModelTransform::Draw(CameraShaderData csd)
 {
 	if (model)
 	{
-		model->Draw(vpMatrix * transform);
+		model->Draw(csd, transform);
 	}
 }
