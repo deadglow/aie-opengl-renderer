@@ -36,17 +36,5 @@ void main()
 	float depth = dot(delta, delta) * _FogDensity;
 	float t = clamp(depth, 0, 1);
 
-	// light
-	vec3 norm = normalize(Normal);
-	vec4 diffuse = max(dot(norm, -_DirLight), 0.0) * _LightCol;
-
-	// specular highlight
-	vec3 viewDir = normalize(_CamPos - FragPos);
-	vec3 reflectDir = reflect(_DirLight, norm);
-	float exponent = mix(2, 256, _Roughness);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), exponent);
-	vec4 specular = _SpecularStrength * spec * _LightCol;
-
-	vec4 light = _Ambient + diffuse + specular;
-	FragColour = mix(texture(_Texture, TexCoord) * _AlbedoColor * light, _FogColor, t);
+	FragColour = mix(texture(_Texture, TexCoord) * _AlbedoColor, _FogColor, t);
 }

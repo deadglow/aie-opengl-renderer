@@ -117,7 +117,7 @@ void Renderer::Start()
 	Mesh* box = MeshPrimitives::CreateCube(1.0f);
 	Model* model = new Model("box");
 	model->AddMesh(box);
-	model->AddShaderConfig(shaderConfigs["unlit"]);
+	model->AddShaderConfig(shaderConfigs[DEFAULT_SHADER]);
 	model->SetShaderOfMesh(0, 0);
 	modelList.push_back(model);
 

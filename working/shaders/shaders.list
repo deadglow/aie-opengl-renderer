@@ -1,2 +1,2 @@
 unlit,unlit.vert,unlit.frag
-vertcolor,vertcolor.vert,vertcolor.frag
+lit,lit.vert,lit.frag
