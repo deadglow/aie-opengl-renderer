@@ -9,7 +9,7 @@ DirectionalLight::DirectionalLight(glm::vec3 direction_init, glm::vec3 color_ini
 
 DirectionalLight::DirectionalLight()
 {
-    direction = glm::normalize(glm::vec3( 1, 1, 1 ));
+    direction = glm::normalize(glm::vec3( 1, -1, -1 ));
     color = { 1.0f, 1.0f, 1.0f};
     intensity = 1.0f;
 }

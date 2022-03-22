@@ -8,8 +8,6 @@
 
 #define TEXTUREMAN "boletus.png"
 
-//#define TEXTUREMAN "container.jpg"
-
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect = 1.0f;
 double Renderer::lastTime = 0.0;
@@ -17,6 +15,7 @@ double Renderer::deltaTime = 1.0;
 
 GLuint Renderer::uboCamera = -1;
 GLuint Renderer::uboLighting = -1;
+GLuint Renderer::uboLights = -1;
 GLuint Renderer::uboFog = -1;
 
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
@@ -99,6 +98,14 @@ void Renderer::InitUBOs()
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
 
+	// lights buffer
+	glGenBuffers(1, &uboLights);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3 * MAX_LIGHTS, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLights);
+
 	// fog buffer
 	glGenBuffers(1, &uboFog);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
@@ -106,7 +113,6 @@ void Renderer::InitUBOs()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
-
 }
 
 void Renderer::SetCameraUBO(CameraShaderData csd)
@@ -127,6 +133,42 @@ void Renderer::SetLightingUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4) * 3, dirLightData);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetLightsUBO()
+{
+	// generate light array
+	PointLight lightArray[MAX_LIGHTS];
+
+	int size = glm::min((int)lights.size(), MAX_LIGHTS);
+
+	for (int i = 0; i < size; ++i)
+	{
+		lightArray[i] = lights[i];
+	}
+
+	int diff = MAX_LIGHTS - size;
+
+	// fill default lights
+	PointLight defaultLight = PointLight();
+	defaultLight.intensity = 0;
+	for (int i = 0; i < diff; ++i)
+	{
+		lightArray[size + i] = defaultLight;
+	}
+
+	// generate data array
+	constexpr int offset = sizeof(glm::vec4) * 3;
+	glm::vec4 floats[offset * MAX_LIGHTS];
+
+	for (int i = 0; i < MAX_LIGHTS; ++i)
+	{
+		glm::vec4 
+	}
+
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4) * 3 * MAX_LIGHTS)
+
 }
 
 void Renderer::SetFogUBO()
@@ -203,6 +245,7 @@ double Renderer::GetDeltaTime()
 {
 	return deltaTime;
 }
+
 
 float Renderer::GetAspect()
 {

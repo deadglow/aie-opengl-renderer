@@ -6,22 +6,29 @@
 #include "ModelTransform.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
+#include "PointLight.h"
 
 #define DEFAULT_SHADER "lit"
 #define RES_X 1280
 #define RES_Y 720
 #define WINDOW_NAME "Creamy Triangle Maker"
+#define MAX_LIGHTS 5
 
 class Renderer
 {
 private:
 	static GLFWwindow* window;
-	static GLuint uboCamera;
-	static GLuint uboLighting;
-	static GLuint uboFog;
 	static float aspect;
 	static double lastTime;
 	static double deltaTime;
+	
+	// ubo
+	static GLuint uboCamera;
+	static GLuint uboLighting;
+	static GLuint uboLights;
+	static GLuint uboFog;
+	
+	// fog
 	static glm::vec4 fogColor;
 	static float fogDensity;
 
@@ -31,13 +38,19 @@ private:
 	static void InitUBOs();
 	static void SetLightingUBO();
 	static void SetFogUBO();
+	static void SetLightsUBO();
 public:
 	static Camera camera;
+	
+	// lighting
 	static glm::vec4 ambientLight;
 	static DirectionalLight dirLight;
+	
+	// lists
 	static std::vector<Model*> modelList;
 	static std::vector<ModelTransform*> modelTransforms;
 	static std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
+	static std::vector<PointLight> lights;
 
 
 	static int Initialise();

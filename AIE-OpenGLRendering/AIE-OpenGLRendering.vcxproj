@@ -160,6 +160,7 @@
     <ClCompile Include="MeshPrimitives.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelTransform.cpp" />
+    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderConfiguration.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="MeshPrimitives.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelTransform.h" />
+    <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderConfiguration.h" />
