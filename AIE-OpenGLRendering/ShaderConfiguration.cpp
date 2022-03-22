@@ -24,7 +24,6 @@ void ShaderConfiguration::UseShader()
 	// we get it by name so hot reloading works (shader object would go poof on a reload)
 	ShaderLoader::GetShader(shaderName)->Use();
 	ApplyConfiguration();
-	Renderer::ApplyBaseShaderProperties();
 }
 
 void ShaderConfiguration::ApplyConfiguration()

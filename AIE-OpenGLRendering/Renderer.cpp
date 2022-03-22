@@ -12,9 +12,19 @@
 
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect = 1.0f;
-Camera Renderer::camera;
 double Renderer::lastTime = 0.0;
 double Renderer::deltaTime = 1.0;
+
+GLuint Renderer::uboCamera = -1;
+GLuint Renderer::uboLighting = -1;
+GLuint Renderer::uboFog = -1;
+
+glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
+float Renderer::fogDensity = 0.000f;
+
+Camera Renderer::camera;
+glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
+DirectionalLight Renderer::dirLight = DirectionalLight();
 
 std::vector<Model*> Renderer::modelList;
 std::vector<ModelTransform*> Renderer::modelTransforms;
@@ -55,6 +65,8 @@ int Renderer::Initialise()
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_MULTISAMPLE);
 
+	InitUBOs();
+
 	// shader setup
 	if (!ShaderLoader::InitialiseShaders())
 	{
@@ -69,11 +81,66 @@ int Renderer::Initialise()
 	return 0;
 }
 
+void Renderer::InitUBOs()
+{
+	// camera buffer
+	glGenBuffers(1, &uboCamera);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraShaderData), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboCamera);
+
+	// lighting buffer
+	glGenBuffers(1, &uboLighting);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
+
+	// fog buffer
+	glGenBuffers(1, &uboFog);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
+	glBufferData(GL_UNIFORM_BUFFER, 20, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
+
+}
+
+void Renderer::SetCameraUBO(CameraShaderData csd)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CameraShaderData), &csd);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetLightingUBO()
+{
+	// create dir light data
+	glm::vec4 dirLightData[3];
+	dirLightData[0] = glm::vec4(dirLight.direction, 1.0f);
+	dirLightData[1] = dirLight.GetFinalColor();
+	dirLightData[2] = ambientLight;
+
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4) * 3, dirLightData);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetFogUBO()
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &fogColor);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(float), &fogDensity);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
 void Renderer::ApplyBaseShaderProperties()
 {
-	ShaderLoader::GetCurrentShader()->SetUniform("_Time", (float)glfwGetTime());
-	glm::vec3 lightDir = glm::normalize(glm::vec3(1, -1, 1));
-	ShaderLoader::GetCurrentShader()->SetUniform("_DirLight", lightDir);
+	Shader* shader = ShaderLoader::GetCurrentShader();
+	shader->SetUniform("_Time", (float)glfwGetTime());
 }
 
 void Renderer::Shutdown()
@@ -114,12 +181,12 @@ void Renderer::Start()
 	shaderConfigs.emplace(DEFAULT_SHADER, config);
 	
 	// create model
-	Mesh* box = MeshPrimitives::CreateCube(1.0f);
+	Mesh* box = MeshPrimitives::CreateCube(1.0f, 1.0f, 1.0f);
 	Model* model = new Model("box");
 	model->AddMesh(box);
 	model->AddShaderConfig(shaderConfigs[DEFAULT_SHADER]);
 	model->SetShaderOfMesh(0, 0);
-	modelList.push_back(model);
+	modelList.push_back(model);	
 
 	model->Load();
 
@@ -161,9 +228,14 @@ void Renderer::Render()
 
 void Renderer::OnDraw()
 {
+	// set UBOS
+	SetLightingUBO();
+	SetFogUBO();
+
 	for (int i = 0; i < modelTransforms.size(); ++i)
 	{
 		modelTransforms[i]->transform = glm::rotate(modelTransforms[i]->transform, glm::radians(10.0f * i) * (float)deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 	camera.Draw();
 }
+

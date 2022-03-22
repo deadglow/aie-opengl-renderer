@@ -3,7 +3,6 @@
 #include "ext/matrix_transform.hpp"
 #include "ext/matrix_clip_space.hpp"
 #include "Renderer.h"
-#include "CameraShaderData.h"
 
 Camera::Camera()
 {
@@ -15,44 +14,40 @@ Camera::~Camera()
 
 void Camera::UpdateVPMatrix()
 {
-	glm::mat4 projection;
-
 	if (perspective)
 	{
-		projection = glm::perspective(fieldOfView, Renderer::GetAspect(), nearPlane, farPlane);
+		shaderData.pMatrix = glm::perspective(fieldOfView, Renderer::GetAspect(), nearPlane, farPlane);
 	}
 	else
 	{
 		float halfSize = orthoSize / 2;
 		float height = Renderer::GetAspect() * halfSize;
-		projection = glm::ortho(-halfSize, halfSize, -halfSize, halfSize, nearPlane, farPlane);
+		shaderData.pMatrix = glm::ortho(-halfSize, halfSize, -halfSize, halfSize, nearPlane, farPlane);
 	}
 
-	vpMatrix = projection * glm::inverse(transform);
+	shaderData.ipMatrix = glm::inverse(shaderData.pMatrix);
+
+	shaderData.vMatrix = glm::inverse(transform);
+	shaderData.ivMatrix = transform;
 }
 
-glm::mat4 Camera::GetVPMatrix() const
+const CameraShaderData Camera::GetShaderData() const
 {
-	return vpMatrix;
+	return shaderData;
 }
 
 void Camera::Draw()
 {
 	UpdateVPMatrix();
 
-	CameraShaderData csd;
-	csd.position = transform[3];
-	csd.direction = glm::normalize(transform[2]);
-	csd.vpMatrix = vpMatrix;
-	csd.ivpMatrix = glm::inverse(vpMatrix);
-	csd.nearz = nearPlane;
-	csd.farz = farPlane;
+	// create uniform buffer
+	Renderer::SetCameraUBO(shaderData);
 
 	for (int i = 0; i < Renderer::modelTransforms.size(); ++i)
 	{
 		ModelTransform* model = Renderer::modelTransforms[i];
 
-		model->Draw(csd);
+		model->Draw(shaderData);
 	}
 	
 }

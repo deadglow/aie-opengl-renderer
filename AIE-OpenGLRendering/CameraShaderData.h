@@ -3,10 +3,8 @@
 
 struct CameraShaderData
 {
-	glm::mat4 vpMatrix;
-	glm::mat4 ivpMatrix;
-	glm::vec3 position;
-	glm::vec3 direction;
-	float nearz;
-	float farz;
+	glm::mat4 pMatrix;
+	glm::mat4 ipMatrix;
+	glm::mat4 vMatrix;
+	glm::mat4 ivMatrix;
 };

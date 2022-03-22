@@ -44,18 +44,18 @@ const int Texture::GetHeight() const
     return height;
 }
 
-void Texture::SetWrapMode(GLint s, GLint t)
+void Texture::SetWrapMode(GLenum s, GLenum t)
 {
     wrapMode[0] = s;
     wrapMode[1] = t;
 }
 
-void Texture::SetMinFilter(GLint filter)
+void Texture::SetMinFilter(GLenum filter)
 {
     minFilter = filter;
 }
 
-void Texture::SetMagFilter(GLint filter)
+void Texture::SetMagFilter(GLenum filter)
 {
     magFilter = filter;
 }

@@ -118,14 +118,14 @@ bool ShaderLoader::LoadInShaders()
 		if (success == GL_FALSE)
 		{
 			// something failed with the vertex shader compilation
-			std::cout << "Fragment shader " << vertexShaderFiles[i].filename().string() << " failed:" << std::endl;
+			std::cout << "Fragment shader " << fragmentShaderFiles[i].filename().string() << " failed:" << std::endl;
 			glGetShaderInfoLog(shader, 512, nullptr, errorLog);
 			std::cout << errorLog << std::endl;
 			shaderStateOkay = false;
 		}
 		else
 		{
-			std::cout << "Fragment shader " << vertexShaderFiles[i].filename().string() << " compiled." << std::endl;
+			std::cout << "Fragment shader " << fragmentShaderFiles[i].filename().string() << " compiled." << std::endl;
 		}
 
 		fragmentShaders.emplace(fragmentShaderFiles[i].filename().string(), shader);

@@ -1,5 +1,6 @@
 #pragma once
 #include "glm.hpp"
+#include "CameraShaderData.h"
 
 #define DEFAULT_FOV 70.0f
 #define DEFAULT_NEARPLANE 0.1f
@@ -13,7 +14,7 @@ private:
 	float fieldOfView = glm::radians(DEFAULT_FOV);
 	float orthoSize = 10.0f;
 
-	glm::mat4 vpMatrix = glm::mat4(1.0f);
+	CameraShaderData shaderData;
 public:
 	bool perspective = true;
 	glm::mat4 transform = glm::mat4(1.0f);
@@ -21,6 +22,6 @@ public:
 	~Camera();
 
 	void UpdateVPMatrix();
-	glm::mat4 GetVPMatrix() const;
+	const CameraShaderData GetShaderData() const;
 	void Draw();
 };

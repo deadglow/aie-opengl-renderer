@@ -26,6 +26,6 @@ void Game::Update()
 	Renderer::camera.transform = rotationMatrix;
 
 	glm::vec3 moveinput = Input::GetMoveInput();
-	Renderer::camera.transform = Renderer::camera.transform * glm::translate(glm::mat4(1.0f), (glm::vec3(0, 0, 1) * -moveinput.z + glm::vec3(1, 0, 0) * moveinput.x + glm::vec3(0, 1, 0) * moveinput.y) * moveSpeed * (float)Renderer::GetDeltaTime());
+	Renderer::camera.transform = Renderer::camera.transform * glm::translate(glm::mat4(1.0f), (glm::vec3(0, 0, -1) * moveinput.z + glm::vec3(1, 0, 0) * moveinput.x + glm::vec3(0, 1, 0) * moveinput.y) * moveSpeed * (float)Renderer::GetDeltaTime());
 
 }

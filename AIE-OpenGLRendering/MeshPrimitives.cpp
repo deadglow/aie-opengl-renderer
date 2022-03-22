@@ -1,6 +1,6 @@
 #include "MeshPrimitives.h"
 
-Mesh* MeshPrimitives::CreateCube(float width)
+Mesh* MeshPrimitives::CreateCube(float width, float height, float depth)
 {
 	// front, right, back, left, up, down
 	glm::vec3 normals[6]
@@ -25,53 +25,55 @@ Mesh* MeshPrimitives::CreateCube(float width)
 	Vertex vertices[36]
 	{
 		// front -
-		{{-1, -1, 1}, normals[0], texCoords[0]},
-		{{1, -1, 1}, normals[0], texCoords[1]},
-		{{-1, 1, 1}, normals[0], texCoords[2]},
-		{{1, -1, 1}, normals[0], texCoords[1]},
-		{{1, 1, 1}, normals[0], texCoords[3]},
-		{{-1, 1, 1}, normals[0], texCoords[2]},
+		{{-1, -1, -1}, normals[0], texCoords[0]},
+		{{1, -1, -1}, normals[0], texCoords[1]},
+		{{-1, 1, -1}, normals[0], texCoords[2]},
+		{{1, -1, -1}, normals[0], texCoords[1]},
+		{{1, 1, -1}, normals[0], texCoords[3]},
+		{{-1, 1, -1}, normals[0], texCoords[2]},
 		// right -
-		{{1, -1, 1}, normals[1], texCoords[0]},
-		{{1, -1, -1}, normals[1], texCoords[1]},
-		{{1, 1, 1}, normals[1], texCoords[2]},
-		{{1, -1, -1}, normals[1], texCoords[1]},
-		{{1, 1, -1}, normals[1], texCoords[3]},
-		{{1, 1, 1}, normals[1], texCoords[2]},
+		{{1, -1, -1}, normals[1], texCoords[0]},
+		{{1, -1, 1}, normals[1], texCoords[1]},
+		{{1, 1, -1}, normals[1], texCoords[2]},
+		{{1, -1, 1}, normals[1], texCoords[1]},
+		{{1, 1, 1}, normals[1], texCoords[3]},
+		{{1, 1, -1}, normals[1], texCoords[2]},
 		// back -
-		{{1, -1, -1}, normals[2], texCoords[0]},
-		{{-1, -1, -1}, normals[2], texCoords[1]},
-		{{1, 1, -1}, normals[2], texCoords[2]},
-		{{-1, -1, -1}, normals[2], texCoords[1]},
-		{{-1, 1, -1}, normals[2], texCoords[3]},
-		{{1, 1, -1}, normals[2], texCoords[2]},
+		{{1, -1, 1}, normals[2], texCoords[0]},
+		{{-1, -1, 1}, normals[2], texCoords[1]},
+		{{1, 1, 1}, normals[2], texCoords[2]},
+		{{-1, -1, 1}, normals[2], texCoords[1]},
+		{{-1, 1, 1}, normals[2], texCoords[3]},
+		{{1, 1, 1}, normals[2], texCoords[2]},
 		// left -
-		{{-1, -1, -1}, normals[3], texCoords[0]},
-		{{-1, -1, 1}, normals[3], texCoords[1]},
-		{{-1, 1, -1}, normals[3], texCoords[2]},
-		{{-1, -1, 1}, normals[3], texCoords[1]},
-		{{-1, 1, 1}, normals[3], texCoords[3]},
-		{{-1, 1, -1}, normals[3], texCoords[2]},
+		{{-1, -1, 1}, normals[3], texCoords[0]},
+		{{-1, -1, -1}, normals[3], texCoords[1]},
+		{{-1, 1, 1}, normals[3], texCoords[2]},
+		{{-1, -1, -1}, normals[3], texCoords[1]},
+		{{-1, 1, -1}, normals[3], texCoords[3]},
+		{{-1, 1, 1}, normals[3], texCoords[2]},
 		// up -
-		{{-1, 1, 1}, normals[4], texCoords[0]},
-		{{1, 1, 1}, normals[4], texCoords[1]},
-		{{-1, 1, -1}, normals[4], texCoords[2]},
-		{{1, 1, 1}, normals[4], texCoords[1]},
-		{{1, 1, -1}, normals[4], texCoords[3]},
-		{{-1, 1, -1}, normals[4], texCoords[2]},
+		{{-1, 1, -1}, normals[4], texCoords[0]},
+		{{1, 1, -1}, normals[4], texCoords[1]},
+		{{-1, 1, 1}, normals[4], texCoords[2]},
+		{{1, 1, -1}, normals[4], texCoords[1]},
+		{{1, 1, 1}, normals[4], texCoords[3]},
+		{{-1, 1, 1}, normals[4], texCoords[2]},
 		// down -
-		{{-1, -1, -1}, normals[5], texCoords[0]},
-		{{1, -1, -1}, normals[5], texCoords[1]},
-		{{-1, -1, 1}, normals[5], texCoords[2]},
-		{{1, -1, -1}, normals[5], texCoords[1]},
-		{{1, -1, 1}, normals[5], texCoords[3]},
-		{{-1, -1, 1}, normals[5], texCoords[2]},
+		{{-1, -1, 1}, normals[5], texCoords[0]},
+		{{1, -1, 1}, normals[5], texCoords[1]},
+		{{-1, -1, -1}, normals[5], texCoords[2]},
+		{{1, -1, 1}, normals[5], texCoords[1]},
+		{{1, -1, -1}, normals[5], texCoords[3]},
+		{{-1, -1, -1}, normals[5], texCoords[2]},
 	};
 	
 	// scale the positions
 	for (int i = 0; i < 36; ++i)
 	{
-		vertices[i].pos *= width * 0.5f;
+		vertices[i].pos.x *= width * 0.5f;
+		vertices[i].pos.y *= height * 0.5f;
+		vertices[i].pos.z *= -depth * 0.5f;
 	}
 
 	// initialise vectors

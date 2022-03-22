@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -163,7 +164,6 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderConfiguration.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
-    <ClCompile Include="ShaderProperty.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
@@ -173,6 +173,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraShaderData.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="glad.h" />

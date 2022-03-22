@@ -25,6 +25,12 @@
     <Filter Include="Source Files\Primitive">
       <UniqueIdentifier>{6aa95850-ac1c-4a6f-a91b-4d1268555c7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Lighting">
+      <UniqueIdentifier>{601f3229-2d18-4122-9915-337974c46b98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Lighting">
+      <UniqueIdentifier>{e2764c77-6310-4cd5-9c36-50812cd5ab54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp">
@@ -63,9 +69,6 @@
     <ClCompile Include="ShaderConfiguration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderProperty.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MeshLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -92,6 +95,9 @@
     </ClCompile>
     <ClCompile Include="MeshPrimitives.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Source Files\Lighting</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +169,9 @@
     </ClInclude>
     <ClInclude Include="CameraShaderData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Header Files\Lighting</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
