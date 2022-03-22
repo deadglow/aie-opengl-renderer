@@ -23,7 +23,8 @@ void Input::UpdateInput()
 
 	glfwGetCursorPos(window, &mousePos.x, &mousePos.y);
 	
-	mouseDelta = mousePos - lastMousePos;
+	if (mouseLocked)
+		mouseDelta = mousePos - lastMousePos;
 	lastMousePos = mousePos;
 }
 

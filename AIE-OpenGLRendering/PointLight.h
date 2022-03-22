@@ -10,6 +10,7 @@ public:
 	float constant = 1.0f;
 	float linear = 1.0f;
 	float quadratic = 1.0f;
+	float radius = 0.1f;
 
 	PointLight();
 	~PointLight();

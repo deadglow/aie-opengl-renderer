@@ -28,6 +28,7 @@ DirectionalLight Renderer::dirLight = DirectionalLight();
 std::vector<Model*> Renderer::modelList;
 std::vector<ModelTransform*> Renderer::modelTransforms;
 std::unordered_map<std::string, ShaderConfiguration*> Renderer::shaderConfigs;
+std::vector<PointLight> Renderer::lights;
 
 
 int Renderer::Initialise()
@@ -137,6 +138,8 @@ void Renderer::SetLightingUBO()
 
 void Renderer::SetLightsUBO()
 {
+	constexpr int pointLightSize = sizeof(glm::vec4) * 3;
+
 	// generate light array
 	PointLight lightArray[MAX_LIGHTS];
 
@@ -152,23 +155,36 @@ void Renderer::SetLightsUBO()
 	// fill default lights
 	PointLight defaultLight = PointLight();
 	defaultLight.intensity = 0;
-	for (int i = 0; i < diff; ++i)
+	for (int i = size; i < MAX_LIGHTS; ++i)
 	{
-		lightArray[size + i] = defaultLight;
+		lightArray[i] = defaultLight;
 	}
 
 	// generate data array
-	constexpr int offset = sizeof(glm::vec4) * 3;
-	glm::vec4 floats[offset * MAX_LIGHTS];
+	glm::vec4 floats[pointLightSize * MAX_LIGHTS];
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
 	{
-		glm::vec4 
+		glm::vec4 position;
+		glm::vec4 color;
+		glm::vec4 properties;
+		position = glm::vec4(lightArray[i].position, 1.0f);
+		color = glm::vec4(lightArray[i].GetFinalColor());
+		properties.x = lightArray[i].constant;
+		properties.y = lightArray[i].linear;
+		properties.z = lightArray[i].quadratic;
+		properties.w = lightArray[i].radius;
+
+		int shift = i * 3;
+		floats[shift + 0] = position;
+		floats[shift + 1] = color;
+		floats[shift + 2] = properties;
 	}
 
+	// put the data in
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4) * 3 * MAX_LIGHTS)
-
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, pointLightSize * MAX_LIGHTS, floats);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Renderer::SetFogUBO()
@@ -239,6 +255,18 @@ void Renderer::Start()
 		modelTransforms.push_back(modelT);
 		modelT->transform = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f * i, 0, 0));
 	}
+
+	// create lights
+	PointLight light = PointLight();
+	light.position = { 5.0f, 0.0f, 2.0f };
+	light.color = { 1.0f, 0.0f, 0.0f };
+	light.intensity = 2.5f;
+
+	lights.push_back(light);
+	lights.push_back(light);
+	lights[1].color = { 0.0f, 0.0f, 1.0f };
+	lights[1].intensity = 4.0f;
+	lights[0].radius = 1.0f;
 }
 
 double Renderer::GetDeltaTime()
@@ -273,6 +301,7 @@ void Renderer::OnDraw()
 {
 	// set UBOS
 	SetLightingUBO();
+	SetLightsUBO();
 	SetFogUBO();
 
 	for (int i = 0; i < modelTransforms.size(); ++i)

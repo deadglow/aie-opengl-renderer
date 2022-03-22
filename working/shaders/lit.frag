@@ -15,7 +15,7 @@ struct PointLight
 {
 	vec3 position;
 	vec4 color;
-	vec3 properties;
+	vec4 properties;
 };
 
 // uniform buffers
@@ -35,7 +35,7 @@ layout(std140, binding = 1) uniform _Lighting
 	vec4 _Ambient;				// 16		32
 };
 
-layout(std140, binding = 2) uniform _PointLights
+layout(std140, binding = 2) uniform _PointLightData
 {
 	// size: 48 * LIGHTS_MAX
 	PointLight _PointLights[LIGHTS_MAX];
@@ -60,7 +60,7 @@ uniform sampler2D _Texture;
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 
 // specular
-uniform float _SpecularStrength = 1.0;
+uniform float _SpecularStrength = 1.5;
 uniform float _Smoothness = 0.9;
 
 //inout
@@ -70,12 +70,12 @@ in vec3 FragPos;
 out vec4 FragColour;
 
 // functions
-float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir)
+float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float radius)
 {
 	// specular highlight
 	float exponent = mix(2, 1024, _Smoothness);
-	vec3 reflectDir = reflect(lightDir, norm);
-	float spec = pow(max(dot(-fragDir, reflectDir), 0.0), exponent);
+	vec3 halfwayDir = normalize(lightDir + fragDir);
+	float spec = pow(max(dot(-halfwayDir, norm), 0.0), exponent);
 	return _SpecularStrength * spec;
 }
 
@@ -87,32 +87,34 @@ vec4 CalculateDirectionalLight(vec3 norm, vec3 fragDir)
 	float diffuse = max(dot(norm, -dir), 0.0);
 
 	// specular highlight
-	float specular = CalculateSpecularIntensity(norm, dir, fragDir);
+	float specular = CalculateSpecularIntensity(norm, dir, fragDir, 0.0);
 
 	return (diffuse + specular) * _DirLight.color;
 }
 
 vec4 CalculatePointLights(vec3 norm, vec3 fragDir)
 {
+	vec4 lightTotal;
 	for (int i = 0; i < LIGHTS_MAX; i++)
 	{
 		// light vec
-		vec3 lightPos = (_Camera.Vmat * vec4(_PointLights[i].position, 0.0)).xyz;
+		vec3 lightPos = (_Vmat * vec4(_PointLights[i].position, 1.0)).xyz;
 		
 		vec3 lightDir = FragPos - lightPos;
 		float dist = length(lightDir);
 		lightDir = lightDir / dist;
 
-		float diffuse = max(dot(normal, -lightDir), 0.0);
+		float diffuse = max(dot(norm, -lightDir), 0.0);
 
 		// specular
-		float specular = CalculateSpecularIntensity(norm, lightDir, fragDir);
+		float specular = CalculateSpecularIntensity(norm, lightDir, fragDir, _PointLights[i].properties.w);
 
 		// attenuation
-		float attenuation = 1.0 / (_PointLights[i].properties[0] + _PointLights[i].properties[1] * dist + _PointLights[i].properties * (dist * dist));
+		float attenuation = 1.0 / (_PointLights[i].properties.x + _PointLights[i].properties.y * dist + _PointLights[i].properties.z * (dist * dist));
 
-		return (diffuse + specular) * _PointLights[i].color * attenuation;
+		lightTotal += (diffuse + specular) * _PointLights[i].color * attenuation;
 	}
+	return lightTotal;
 }
 
 vec4 ProcessFog(vec4 color)
@@ -128,7 +130,7 @@ void main()
 {
 	vec3 norm = normalize(Normal);
 	vec3 viewDir = vec3(0, 0, 1);
-	vec3 FragDir = normalize(FragPos);
+	vec3 fragDir = normalize(FragPos);
 
 	vec4 totalLight;
 	totalLight += CalculateDirectionalLight(norm, fragDir);
