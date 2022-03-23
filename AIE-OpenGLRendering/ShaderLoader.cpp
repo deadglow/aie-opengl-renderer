@@ -1,7 +1,7 @@
 #include "ShaderLoader.h"
 #include "FileReader.h"
 #include "glad.h"
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
 #include <filesystem>
 #include <vector>
 #include <iostream>

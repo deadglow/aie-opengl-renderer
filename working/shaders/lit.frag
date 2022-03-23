@@ -28,20 +28,26 @@ layout (std140, binding = 0) uniform _Camera
 	mat4 _iVmat;		// 64		// 192
 };
 
-layout(std140, binding = 1) uniform _Lighting
+layout(std140, binding = 1) uniform _Globals
+{
+	float _Time;
+	float _DeltaTime;
+};
+
+layout(std140, binding = 2) uniform _Lighting
 {
 								// size		// offset
 	DirectionLight _DirLight;	// 16		0
 	vec4 _Ambient;				// 16		32
 };
 
-layout(std140, binding = 2) uniform _PointLightData
+layout(std140, binding = 3) uniform _PointLightData
 {
 	// size: 48 * LIGHTS_MAX
 	PointLight _PointLights[LIGHTS_MAX];
 };
 
-layout(std140, binding = 3) uniform _Fog
+layout(std140, binding = 4) uniform _Fog
 {
 								// size		// offset
 	vec4 _FogColor;				// 16		// 0
@@ -50,8 +56,7 @@ layout(std140, binding = 3) uniform _Fog
 
 // uniforms
 
-// base data
-uniform float _Time;
+// model data
 uniform mat4 _M2W;
 uniform mat4 _iM2W;
 

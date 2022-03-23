@@ -1,9 +1,9 @@
 #include "Shader.h"
 #include "glad.h"
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
 #include "Texture.h"
 #include "ShaderLoader.h"
-#include "gtc/type_ptr.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {

@@ -1,7 +1,7 @@
 #include "Camera.h"
-#include "glm.hpp"
-#include "ext/matrix_transform.hpp"
-#include "ext/matrix_clip_space.hpp"
+#include "glm/glm.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
 #include "Renderer.h"
 
 Camera::Camera()

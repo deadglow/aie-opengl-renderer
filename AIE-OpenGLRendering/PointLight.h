@@ -1,5 +1,5 @@
 #pragma once
-#include "glm.hpp"
+#include "glm/glm.hpp"
 
 class PointLight
 {
@@ -16,5 +16,6 @@ public:
 	~PointLight();
 
 	glm::vec4 GetFinalColor();
+	glm::vec4 GetProperties();
 };
 

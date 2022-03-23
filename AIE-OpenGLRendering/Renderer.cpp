@@ -2,9 +2,9 @@
 #include <iostream>
 #include "ShaderConfiguration.h"
 #include "MeshPrimitives.h"
-#include "glm.hpp"
-#include "ext/matrix_transform.hpp"
-#include "ext/matrix_clip_space.hpp"
+#include "glm/glm.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
 
 #define TEXTUREMAN "boletus.png"
 
@@ -16,6 +16,7 @@ double Renderer::deltaTime = 1.0;
 GLuint Renderer::uboCamera = -1;
 GLuint Renderer::uboLighting = -1;
 GLuint Renderer::uboLights = -1;
+GLuint Renderer::uboGlobals = -1;
 GLuint Renderer::uboFog = -1;
 
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
@@ -91,13 +92,21 @@ void Renderer::InitUBOs()
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboCamera);
 
+	// globals buffer
+	glGenBuffers(1, &uboGlobals);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 2, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboGlobals);
+
 	// lighting buffer
 	glGenBuffers(1, &uboLighting);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboLighting);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLighting);
 
 	// lights buffer
 	glGenBuffers(1, &uboLights);
@@ -105,7 +114,7 @@ void Renderer::InitUBOs()
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3 * MAX_LIGHTS, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLights);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboLights);
 
 	// fog buffer
 	glGenBuffers(1, &uboFog);
@@ -113,7 +122,17 @@ void Renderer::InitUBOs()
 	glBufferData(GL_UNIFORM_BUFFER, 20, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 4, uboFog);
+}
+
+void Renderer::SetGlobalsUBO()
+{
+	float floats[2];
+	floats[0] = (float)glfwGetTime();
+	floats[1] = deltaTime;
+	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
 void Renderer::SetCameraUBO(CameraShaderData csd)
@@ -150,6 +169,7 @@ void Renderer::SetLightsUBO()
 		lightArray[i] = lights[i];
 	}
 
+	// calculate the remaining slots
 	int diff = MAX_LIGHTS - size;
 
 	// fill default lights
@@ -165,20 +185,10 @@ void Renderer::SetLightsUBO()
 
 	for (int i = 0; i < MAX_LIGHTS; ++i)
 	{
-		glm::vec4 position;
-		glm::vec4 color;
-		glm::vec4 properties;
-		position = glm::vec4(lightArray[i].position, 1.0f);
-		color = glm::vec4(lightArray[i].GetFinalColor());
-		properties.x = lightArray[i].constant;
-		properties.y = lightArray[i].linear;
-		properties.z = lightArray[i].quadratic;
-		properties.w = lightArray[i].radius;
-
 		int shift = i * 3;
-		floats[shift + 0] = position;
-		floats[shift + 1] = color;
-		floats[shift + 2] = properties;
+		floats[shift + 0] = glm::vec4(lightArray[i].position, 1.0f);
+		floats[shift + 1] = lightArray[i].GetFinalColor();
+		floats[shift + 2] = lightArray[i].GetProperties();
 	}
 
 	// put the data in
@@ -300,6 +310,7 @@ void Renderer::Render()
 void Renderer::OnDraw()
 {
 	// set UBOS
+	SetGlobalsUBO();
 	SetLightingUBO();
 	SetLightsUBO();
 	SetFogUBO();

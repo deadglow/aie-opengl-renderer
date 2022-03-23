@@ -1,7 +1,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "ShaderLoader.h"
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
 
 GLFWwindow* Input::window = nullptr;
 glm::dvec2 Input::mousePos;

@@ -1,5 +1,5 @@
 #pragma once
-#include "glm.hpp"
+#include "glm/glm.hpp"
 #include "CameraShaderData.h"
 
 #define DEFAULT_FOV 70.0f

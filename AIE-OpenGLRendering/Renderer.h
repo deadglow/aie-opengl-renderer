@@ -1,6 +1,6 @@
 #pragma once
 #include "glad.h"
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
 #include "ShaderLoader.h"
 #include "TextureLoader.h"
 #include "ModelTransform.h"
@@ -24,6 +24,7 @@ private:
 	
 	// ubo
 	static GLuint uboCamera;
+	static GLuint uboGlobals;
 	static GLuint uboLighting;
 	static GLuint uboLights;
 	static GLuint uboFog;
@@ -36,6 +37,7 @@ private:
 	~Renderer() = default;
 	static void OnDraw();
 	static void InitUBOs();
+	static void SetGlobalsUBO();
 	static void SetLightingUBO();
 	static void SetFogUBO();
 	static void SetLightsUBO();

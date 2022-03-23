@@ -1,6 +1,6 @@
 #include "Mesh.h"
 #include "glad.h"
-#include "glfw3.h"
+#include "GLFW/glfw3.h"
 #include <iostream>
 
 Mesh::Mesh(std::string filename_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init, float unitScale_init)
