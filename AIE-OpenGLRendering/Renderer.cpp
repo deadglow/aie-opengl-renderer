@@ -6,7 +6,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
 
-#define TEXTUREMAN "boletus.png"
+#define BEANS "beancan.png"
 
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect = 1.0f;
@@ -68,6 +68,13 @@ int Renderer::Initialise()
 
 	InitUBOs();
 
+	// textures setup
+	TextureLoader::Initialise();
+	TextureLoader::LoadTexture(DEFAULT_TEX);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+
+
 	// shader setup
 	if (!ShaderLoader::InitialiseShaders())
 	{
@@ -76,8 +83,7 @@ int Renderer::Initialise()
 		return -1;
 	}
 
-	// textures setup
-	TextureLoader::Initialise();
+	ModelLoader::Initialise();
 
 	return 0;
 }
@@ -129,7 +135,7 @@ void Renderer::SetGlobalsUBO()
 {
 	float floats[2];
 	floats[0] = (float)glfwGetTime();
-	floats[1] = deltaTime;
+	floats[1] = (float)deltaTime;
 	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -205,12 +211,6 @@ void Renderer::SetFogUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Renderer::ApplyBaseShaderProperties()
-{
-	Shader* shader = ShaderLoader::GetCurrentShader();
-	shader->SetUniform("_Time", (float)glfwGetTime());
-}
-
 void Renderer::Shutdown()
 {
 	TextureLoader::Shutdown();
@@ -237,34 +237,76 @@ GLFWwindow* Renderer::GetWindow()
 	return Renderer::window;
 }
 
+double Renderer::GetDeltaTime()
+{
+	return deltaTime;
+}
+
+float Renderer::GetAspect()
+{
+	return aspect;
+}
+
 void Renderer::Start()
 {
 	// move da camera
 	camera.transform = glm::translate(camera.transform, glm::vec3(0, 0, 5));
 
-	// load da texture
-	TextureLoader::LoadTexture(TEXTUREMAN);
+	TextureLoader::LoadTexture(BEANS);
 	ShaderConfiguration* config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
-	config->AddProperty<Texture*>("_Texture", TextureLoader::GetTexture(TEXTUREMAN));
-	shaderConfigs.emplace(DEFAULT_SHADER, config);
+	config->AddTexture(TextureLoader::GetTexture(BEANS));
+	shaderConfigs.emplace("beans", config);
 	
-	// create model
-	Mesh* box = MeshPrimitives::CreateCube(1.0f, 1.0f, 1.0f);
-	Model* model = new Model("box");
-	model->AddMesh(box);
-	model->AddShaderConfig(shaderConfigs[DEFAULT_SHADER]);
-	model->SetShaderOfMesh(0, 0);
-	modelList.push_back(model);	
+	// crate
+	config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
+	TextureLoader::LoadTexture("BOX_full_albedo.png");
+	TextureLoader::LoadTexture("BOX_full_normal.png");
+	config->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
+	config->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
+	shaderConfigs.emplace("crate", config);
 
-	model->Load();
+	// trimble's stuff
+	config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
+	TextureLoader::LoadTexture("Map 1_TD_Checker_BaseMap.tga");
+	TextureLoader::LoadTexture("Map 1_TD_Checker_Normal.tga");
+	config->AddTexture(TextureLoader::GetTexture("Map 1_TD_Checker_BaseMap.tga"));
+	config->AddTexture(TextureLoader::GetTexture("Map 1_TD_Checker_Normal.tga"));
+	shaderConfigs.emplace("trimble", config);
 
-	// create model transform
-	for (int i = 0; i < 85; ++i)
+
+	// crate model
+	Model* model = ModelLoader::LoadModel("Box_final.obj");
+	model->AddShaderConfig(shaderConfigs["crate"]);
+	for (int i = 0; i < model->meshes.size(); ++i)
 	{
-		ModelTransform* modelT = new ModelTransform(model);
-		modelTransforms.push_back(modelT);
-		modelT->transform = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f * i, 0, 0));
+		model->SetShaderOfMesh(i, 0);
 	}
+	modelList.push_back(model);
+	ModelTransform* modelT = new ModelTransform(model);
+	modelTransforms.push_back(modelT);
+
+//	ModelTransform* modelT = new ModelTransform(model);
+	//modelTransforms.push_back(modelT);
+
+	// trimble model
+	model = ModelLoader::LoadModel("Obj_Pillow.fbx");
+	model->AddShaderConfig(shaderConfigs["trimble"]);
+	for (int i = 0; i < model->meshes.size(); ++i)
+	{
+		model->SetShaderOfMesh(i, 0);
+	}
+	modelList.push_back(model);
+
+
+	// create beans
+	//modelList.push_back(ModelLoader::LoadModel("beancan.fbx"));
+	//modelList[1]->AddShaderConfig(shaderConfigs["beans"]);
+	//modelList[1]->SetShaderOfMesh(0, 0);
+
+	//modelT->transform = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
+	//modelT->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
+	//modelT->transform = glm::translate(modelT->transform, glm::vec3(0, 3.0f, 0));
+
 
 	// create lights
 	PointLight light = PointLight();
@@ -275,20 +317,10 @@ void Renderer::Start()
 	lights.push_back(light);
 	lights.push_back(light);
 	lights[1].color = { 0.0f, 0.0f, 1.0f };
-	lights[1].intensity = 4.0f;
+	lights[1].intensity = 2.0f;
 	lights[0].radius = 1.0f;
 }
 
-double Renderer::GetDeltaTime()
-{
-	return deltaTime;
-}
-
-
-float Renderer::GetAspect()
-{
-	return aspect;
-}
 
 void Renderer::Render()
 {
@@ -315,10 +347,6 @@ void Renderer::OnDraw()
 	SetLightsUBO();
 	SetFogUBO();
 
-	for (int i = 0; i < modelTransforms.size(); ++i)
-	{
-		modelTransforms[i]->transform = glm::rotate(modelTransforms[i]->transform, glm::radians(10.0f * i) * (float)deltaTime, glm::vec3(0.0f, 1.0f, 0.0f));
-	}
 	camera.Draw();
 }
 

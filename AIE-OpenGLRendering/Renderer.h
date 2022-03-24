@@ -3,16 +3,19 @@
 #include "GLFW/glfw3.h"
 #include "ShaderLoader.h"
 #include "TextureLoader.h"
+#include "ModelLoader.h"
 #include "ModelTransform.h"
 #include "Camera.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 
-#define DEFAULT_SHADER "lit"
 #define RES_X 1280
 #define RES_Y 720
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
+
+#define DEFAULT_SHADER "lit"
+#define DEFAULT_TEX "default.png"
 
 class Renderer
 {
@@ -63,5 +66,4 @@ public:
 	static double GetDeltaTime();
 	static float GetAspect();
 	static void SetCameraUBO(CameraShaderData csd);
-	static void ApplyBaseShaderProperties();
 };

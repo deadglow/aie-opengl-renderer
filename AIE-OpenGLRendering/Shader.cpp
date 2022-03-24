@@ -26,6 +26,16 @@ const unsigned int Shader::GetID() const
 	return ID;
 }
 
+const int Shader::GetTextureCount() const
+{
+	return textureCount;
+}
+
+void Shader::SetTextureCount(const int value)
+{
+	textureCount = value;
+}
+
 const std::string Shader::GetName() const
 {
 	return name;
@@ -33,7 +43,9 @@ const std::string Shader::GetName() const
 
 const int Shader::GetUniformLocation(const std::string variable) const
 {
-	return glGetUniformLocation(ID, variable.c_str());
+	const char* cstring = variable.c_str();
+	int val = glGetUniformLocation(ID, cstring);
+	return val;
 }
 
 void Shader::SetUniform(const std::string variable, float value) const
@@ -69,9 +81,4 @@ void Shader::SetUniform(const std::string variable, const glm::vec4 value) const
 void Shader::SetUniform(const std::string variable, glm::mat4 value) const
 {
 	glUniformMatrix4fv(GetUniformLocation(variable), 1, GL_FALSE, glm::value_ptr(value));
-}
-
-void Shader::SetUniform(const std::string variable, Texture* tex) const
-{
-	SetUniform(variable, tex->GetID());
 }

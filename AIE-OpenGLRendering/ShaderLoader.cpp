@@ -214,6 +214,11 @@ bool ShaderLoader::LoadInShaders()
 	return shaderStateOkay;
 }
 
+void ShaderLoader::InitialiseShaderUniforms()
+{
+	
+}
+
 void ShaderLoader::DeleteVertexAndFragmentShaders()
 {
 	for (const auto& [key, value] : vertexShaders)

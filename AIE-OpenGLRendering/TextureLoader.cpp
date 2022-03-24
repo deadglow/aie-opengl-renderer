@@ -64,6 +64,7 @@ Texture* TextureLoader::LoadTexture(const std::string filename)
 {
 	if (textureFiles.count(filename))
 	{
+		stbi_set_flip_vertically_on_load(true);
 		// load image data
 		std::string path = GetTexturePath(filename);
 		int width, height, nrChannels;

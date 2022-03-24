@@ -3,9 +3,10 @@
 #include "GLFW/glfw3.h"
 #include <iostream>
 
-Mesh::Mesh(std::string filename_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init, float unitScale_init)
+Mesh::Mesh(std::string filename_init, glm::mat4 transform_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init, float unitScale_init)
 {
 	filename = filename_init;
+	transform = transform_init;
 	vertices = vertices_init;
 	triangles = triangles_init;
 	unitScale = unitScale_init;
@@ -27,7 +28,7 @@ void Mesh::LoadMesh()
 {
 	if (loaded)
 	{
-		std::cout << "Mesh already loaded." << std::endl;
+		std::cout << "Mesh " << filename << " already loaded." << std::endl;
 		return;
 	}
 
@@ -54,9 +55,13 @@ void Mesh::LoadMesh()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	glEnableVertexAttribArray(1);
 
-	// interpret vertex texcoords
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+	// interpret vertex tangents
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tangent));
 	glEnableVertexAttribArray(2);
+
+	// interpret vertex texcoords
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+	glEnableVertexAttribArray(3);
 
 	glBindVertexArray(0);
 

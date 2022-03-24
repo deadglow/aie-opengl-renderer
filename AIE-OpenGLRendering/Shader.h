@@ -10,6 +10,7 @@ class Shader
 private:
 	std::string name;
 	unsigned int ID;
+	int textureCount = 0;
 
 public:
 	Shader(unsigned int ID_init, std::string name_init);
@@ -18,6 +19,8 @@ public:
 	void Use();
 
 	const unsigned int GetID() const;
+	const int GetTextureCount() const;
+	void SetTextureCount(const int value);
 	const std::string GetName() const;
 
 	const int GetUniformLocation(const std::string variable) const;
@@ -29,6 +32,5 @@ public:
 	void SetUniform(const std::string variable, const glm::vec3 value) const;
 	void SetUniform(const std::string variable, const glm::vec4 value) const;
 	void SetUniform(const std::string variable, glm::mat4 value) const;
-	void SetUniform(const std::string variable, Texture* tex) const;
 };
 

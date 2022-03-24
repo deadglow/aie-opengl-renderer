@@ -1,9 +1,11 @@
-#version 450
+#version 460
 
 //Attributes that we expect from the vertex buffer
 layout (location = 0) in vec3 _Position;
 layout (location = 1) in vec3 _Normal;
-layout (location = 2) in vec2 _TexCoord;
+layout (location = 2) in vec3 _Tangent;
+layout (location = 3) in vec2 _TexCoord;
+
 
 layout (std140, binding = 0) uniform _Camera
 {
@@ -25,23 +27,26 @@ uniform mat4 _iM2W;
 uniform mat4 _NormalMat;
 
 // out
-out vec3 Normal;
-out vec2 TexCoord;
-out vec3 FragPos;
+out VS_OUT
+{
+	out vec3 FragPos;
+	out mat3 TBN;
+	out vec2 TexCoord;
+} vs_out;
 
 void main()
 {
-	float angle = sin(atan(_Position.x / _Position.z));
-	float timeAngle = sin(radians(_Time * 30));
-
-	float t = abs(angle - timeAngle);
 	// local to view
-	vec3 pos = _Position;
-	pos = pos * t;
-	pos.y = _Position.y;
-	FragPos = vec3(_Vmat * _M2W * vec4(_Position, 1));
+	vs_out.FragPos = vec3(_Vmat * _M2W * vec4(_Position, 1));
 	// world to perspective
-	gl_Position = _Pmat * vec4(FragPos, 1.0);
-	Normal = vec3(_NormalMat * vec4(_Normal, 0.0));
-	TexCoord = _TexCoord;
+	gl_Position = _Pmat * vec4(vs_out.FragPos, 1.0);
+	
+	vec3 normal = normalize(_Normal);
+	vec3 tangent = normalize(_Tangent);
+	tangent = normalize(tangent - dot(tangent, normal) * normal);
+	vec3 biTangent = cross(normal, tangent);
+	
+	vs_out.TBN = mat3(_NormalMat) * mat3(tangent, biTangent, normal);
+
+	vs_out.TexCoord = _TexCoord;
 }

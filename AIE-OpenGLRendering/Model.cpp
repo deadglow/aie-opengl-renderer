@@ -55,14 +55,16 @@ void Model::Unload()
 
 void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 {
-	glm::mat4 inverseTransform = glm::inverse(transform);
-	glm::mat4 normalMatrix = csd.vMatrix * transform;
-	normalMatrix[3] = { 0, 0, 0, 1 };
-
 	for (int i = 0; i < meshes.size(); ++i)
 	{
+		// make matrices
+		glm::mat4 t = transform * meshes[i]->transform;
+		glm::mat4 inverseTransform = glm::inverse(t);
+		glm::mat4 normalMatrix = csd.vMatrix * t;
+		normalMatrix[3] = { 0, 0, 0, 1 };
+
 		shaderConfigs[meshShaderLookup[i]]->UseShader();
-		ShaderLoader::GetCurrentShader()->SetUniform("_M2W", transform);
+		ShaderLoader::GetCurrentShader()->SetUniform("_M2W", t);
 		ShaderLoader::GetCurrentShader()->SetUniform("_W2M", inverseTransform);
 		ShaderLoader::GetCurrentShader()->SetUniform("_NormalMat", normalMatrix);
 		meshes[i]->Draw();

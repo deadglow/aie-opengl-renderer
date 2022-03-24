@@ -16,6 +16,7 @@ private:
 	static Shader* currentShader;
 
 	static bool LoadInShaders();
+	static void InitialiseShaderUniforms();
 	static void DeleteVertexAndFragmentShaders();
 	static void ClearShaders();
 

@@ -11,6 +11,7 @@ private:
 	Shader* shader = nullptr;
 	std::string shaderName;
 	std::vector<ShaderPropertyBase*> properties;
+	std::vector<Texture*> usedTextures;
 
 public:
 	ShaderConfiguration(Shader* shader_init);
@@ -22,6 +23,8 @@ public:
 		ShaderProperty<T>* prop = new ShaderProperty<T>(name, value);
 		properties.push_back(prop);
 	}
+
+	void AddTexture(Texture* texture);
 
 	void UseShader();
 	void ApplyConfiguration();

@@ -8,6 +8,7 @@ glm::dvec2 Input::mousePos;
 glm::dvec2 Input::lastMousePos;
 glm::dvec2 Input::mouseDelta;
 glm::vec3 Input::moveinput;
+bool Input::shift = false;
 bool Input::mouseLocked = false;
 
 void Input::Initialise(GLFWwindow* window_init)
@@ -43,6 +44,11 @@ glm::vec3 Input::GetMoveInput()
 	return moveinput;
 }
 
+bool Input::GetShift()
+{
+	return shift;
+}
+
 void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (action == GLFW_PRESS)
@@ -60,6 +66,9 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
 
+		if (key == GLFW_KEY_LEFT_SHIFT)
+			shift = true;
+
 		switch (key)
 		{
 		case GLFW_KEY_W:
@@ -82,9 +91,13 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			moveinput.y -= 1;
 			break;
 		}
+
 	}
 	if (action == GLFW_RELEASE)
 	{
+		if (key == GLFW_KEY_LEFT_SHIFT)
+			shift = false;
+
 		switch (key)
 		{
 		case GLFW_KEY_W:
@@ -107,5 +120,6 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			moveinput.y += 1;
 			break;
 		}
+
 	}
 }

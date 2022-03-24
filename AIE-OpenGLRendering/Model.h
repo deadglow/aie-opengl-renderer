@@ -18,13 +18,16 @@ public:
 	Model(const std::string filename_init);
 	~Model();
 
+	const bool IsLoaded() const;
+	std::string GetFilename() const;
+	
 	void AddMesh(Mesh* mesh);
 	void AddShaderConfig(ShaderConfiguration* shaderConfig);
+	void SetShaderOfMesh(const int meshIndex, const int shaderIndex);
+
 	void Load();
 	void Unload();
+	
 	void Draw(CameraShaderData csd, glm::mat4 transform);
-	void SetShaderOfMesh(const int meshIndex, const int shaderIndex);
-	std::string GetFilename() const;
-	const bool IsLoaded() const;
 };
 
