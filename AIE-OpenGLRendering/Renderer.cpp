@@ -15,7 +15,6 @@ double Renderer::deltaTime = 1.0;
 
 GLuint Renderer::uboCamera = -1;
 GLuint Renderer::uboLighting = -1;
-GLuint Renderer::uboLights = -1;
 GLuint Renderer::uboGlobals = -1;
 GLuint Renderer::uboFog = -1;
 
@@ -24,12 +23,10 @@ float Renderer::fogDensity = 0.000f;
 
 Camera Renderer::camera;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
-DirectionalLight Renderer::dirLight = DirectionalLight();
+std::vector<Light*> Renderer::lights;
 
-std::vector<Model*> Renderer::modelList;
 std::vector<ModelTransform*> Renderer::modelTransforms;
 std::unordered_map<std::string, ShaderConfiguration*> Renderer::shaderConfigs;
-std::vector<PointLight> Renderer::lights;
 
 
 int Renderer::Initialise()
@@ -73,6 +70,12 @@ int Renderer::Initialise()
 	TextureLoader::LoadTexture(DEFAULT_TEX);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
 
 
 	// shader setup
@@ -109,18 +112,10 @@ void Renderer::InitUBOs()
 	// lighting buffer
 	glGenBuffers(1, &uboLighting);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) + sizeof(LightShaderData) * MAX_LIGHTS + sizeof(int), NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLighting);
-
-	// lights buffer
-	glGenBuffers(1, &uboLights);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) * 3 * MAX_LIGHTS, NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboLights);
 
 	// fog buffer
 	glGenBuffers(1, &uboFog);
@@ -128,7 +123,7 @@ void Renderer::InitUBOs()
 	glBufferData(GL_UNIFORM_BUFFER, 20, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-	glBindBufferBase(GL_UNIFORM_BUFFER, 4, uboFog);
+	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
 }
 
 void Renderer::SetGlobalsUBO()
@@ -150,56 +145,20 @@ void Renderer::SetCameraUBO(CameraShaderData csd)
 
 void Renderer::SetLightingUBO()
 {
-	// create dir light data
-	glm::vec4 dirLightData[3];
-	dirLightData[0] = glm::vec4(dirLight.direction, 1.0f);
-	dirLightData[1] = dirLight.GetFinalColor();
-	dirLightData[2] = ambientLight;
-
-	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4) * 3, dirLightData);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Renderer::SetLightsUBO()
-{
-	constexpr int pointLightSize = sizeof(glm::vec4) * 3;
-
 	// generate light array
-	PointLight lightArray[MAX_LIGHTS];
-
-	int size = glm::min((int)lights.size(), MAX_LIGHTS);
+	int size = (int)lights.size();
+	LightShaderData shaderDataArray[MAX_LIGHTS];
 
 	for (int i = 0; i < size; ++i)
 	{
-		lightArray[i] = lights[i];
-	}
-
-	// calculate the remaining slots
-	int diff = MAX_LIGHTS - size;
-
-	// fill default lights
-	PointLight defaultLight = PointLight();
-	defaultLight.intensity = 0;
-	for (int i = size; i < MAX_LIGHTS; ++i)
-	{
-		lightArray[i] = defaultLight;
-	}
-
-	// generate data array
-	glm::vec4 floats[pointLightSize * MAX_LIGHTS];
-
-	for (int i = 0; i < MAX_LIGHTS; ++i)
-	{
-		int shift = i * 3;
-		floats[shift + 0] = glm::vec4(lightArray[i].position, 1.0f);
-		floats[shift + 1] = lightArray[i].GetFinalColor();
-		floats[shift + 2] = lightArray[i].GetProperties();
+		shaderDataArray[i] = lights[i]->ConstructShaderData();
 	}
 
 	// put the data in
-	glBindBuffer(GL_UNIFORM_BUFFER, uboLights);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, pointLightSize * MAX_LIGHTS, floats);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &ambientLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(LightShaderData) * MAX_LIGHTS, shaderDataArray);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightShaderData) * MAX_LIGHTS + sizeof(glm::vec4), sizeof(int), &size);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -213,6 +172,7 @@ void Renderer::SetFogUBO()
 
 void Renderer::Shutdown()
 {
+	ModelLoader::Shutdown();
 	TextureLoader::Shutdown();
 	ShaderLoader::Shutdown();
 	
@@ -224,9 +184,9 @@ void Renderer::Shutdown()
 	{
 		delete mt;
 	}
-	for (Model* model : modelList)
+	for (Light* light : lights)
 	{
-		delete model;
+		delete light;
 	}
 
 	glfwTerminate();
@@ -281,12 +241,9 @@ void Renderer::Start()
 	{
 		model->SetShaderOfMesh(i, 0);
 	}
-	modelList.push_back(model);
 	ModelTransform* modelT = new ModelTransform(model);
 	modelTransforms.push_back(modelT);
 
-//	ModelTransform* modelT = new ModelTransform(model);
-	//modelTransforms.push_back(modelT);
 
 	// trimble model
 	model = ModelLoader::LoadModel("Obj_Pillow.fbx");
@@ -295,32 +252,18 @@ void Renderer::Start()
 	{
 		model->SetShaderOfMesh(i, 0);
 	}
-	modelList.push_back(model);
-
-
-	// create beans
-	//modelList.push_back(ModelLoader::LoadModel("beancan.fbx"));
-	//modelList[1]->AddShaderConfig(shaderConfigs["beans"]);
-	//modelList[1]->SetShaderOfMesh(0, 0);
-
-	//modelT->transform = glm::rotate(glm::mat4(1.0f), glm::radians(180.0f), glm::vec3(0, 0, 1));
-	//modelT->transform *= glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1, 0, 0));
-	//modelT->transform = glm::translate(modelT->transform, glm::vec3(0, 3.0f, 0));
-
 
 	// create lights
-	PointLight light = PointLight();
-	light.position = { 5.0f, 0.0f, 2.0f };
-	light.color = { 1.0f, 0.0f, 0.0f };
-	light.intensity = 2.5f;
+	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, 1, -1)), glm::vec3(1), 1.0f);
+	lights.push_back(dirLight);
 
+
+	PointLight* light = new PointLight();
 	lights.push_back(light);
-	lights.push_back(light);
-	lights[1].color = { 0.0f, 0.0f, 1.0f };
-	lights[1].intensity = 2.0f;
-	lights[0].radius = 1.0f;
+
+	light->color = { 0.0f, 0.0f, 1.0f };
+	light->intensity = 1.0f;
 }
-
 
 void Renderer::Render()
 {
@@ -344,7 +287,6 @@ void Renderer::OnDraw()
 	// set UBOS
 	SetGlobalsUBO();
 	SetLightingUBO();
-	SetLightsUBO();
 	SetFogUBO();
 
 	camera.Draw();

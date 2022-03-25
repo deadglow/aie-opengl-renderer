@@ -1,22 +1,30 @@
 #version 460
 
-#define LIT
-#define FOG
 #define LIGHTS_MAX 5
 
 // structs
-struct DirectionLight
+struct Light
 {
-	vec3 direction;
-	vec4 color;
+	vec3 position;		// unused for directional
+	vec3 direction;		// unused for point
+	vec4 color;			// used for all
+	
+	vec4 properties;	// depends on light source:
+						// directional: nothing
+						// point: constant, linear, quadratic, radius
+	int type; 			// 0 = directional, 1 = point, 2 = spot
 };
 
-struct PointLight
-{
-	vec3 position;
-	vec4 color;
-	vec4 properties;
-};
+// light memory layout
+/*
+					// size		// offset
+vec3 position;		// 16		// 0
+vec3 direction;		// 16		// 16
+vec4 color;			// 16		// 32
+vec4 properties;	// 16		// 48
+int type 			// 4		// 64
+// total size = 68 + 12(pad) = 80
+*/ 
 
 // uniform buffers
 layout (std140, binding = 0) uniform _Camera
@@ -37,17 +45,12 @@ layout(std140, binding = 1) uniform _Globals
 layout(std140, binding = 2) uniform _Lighting
 {
 								// size		// offset
-	DirectionLight _DirLight;	// 16		0
-	vec4 _Ambient;				// 16		32
+	vec4 _Ambient;				// 16		// 0
+	Light _Lights[LIGHTS_MAX];	// 80*5		// 16
+	int _NumLights;				// 4		// 416
 };
 
-layout(std140, binding = 3) uniform _PointLightData
-{
-	// size: 48 * LIGHTS_MAX
-	PointLight _PointLights[LIGHTS_MAX];
-};
-
-layout(std140, binding = 4) uniform _Fog
+layout(std140, binding = 3) uniform _Fog
 {
 								// size		// offset
 	vec4 _FogColor;				// 16		// 0
@@ -88,16 +91,16 @@ float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float r
 {
 	// specular highlight
 	float t = _Smoothness * texture(_Texture3, fs_in.TexCoord).r;
-	float exponent = mix(2, 1024, _Smoothness);
+	float exponent = mix(2, 1024, t);
 	vec3 halfwayDir = normalize(lightDir + fragDir);
 	float spec = pow(max(dot(-halfwayDir, norm), 0.0), exponent);
 
 	return _SpecularStrength * spec;
 }
 
-vec4 CalculateDirectionalLight(vec3 norm, vec3 fragDir)
+vec4 CalculateDirectionalLight(int i, vec3 norm, vec3 fragDir)
 {
-	vec4 dir4 = _Vmat * vec4(_DirLight.direction, 0.0);
+	vec4 dir4 = _Vmat * vec4(_Lights[i].direction, 0.0);
 	vec3 dir = dir4.xyz;
 	// light
 	float diffuse = max(dot(norm, -dir), 0.0);
@@ -105,32 +108,47 @@ vec4 CalculateDirectionalLight(vec3 norm, vec3 fragDir)
 	// specular highlight
 	float specular = CalculateSpecularIntensity(norm, dir, fragDir, 0.0);
 
-	return (diffuse + specular) * _DirLight.color;
+	return (diffuse + specular) * _Lights[i].color;
 }
 
-vec4 CalculatePointLights(vec3 norm, vec3 fragDir)
+vec4 CalculatePointLight(int i, vec3 norm, vec3 fragDir)
 {
-	vec4 lightTotal;
-	for (int i = 0; i < LIGHTS_MAX; i++)
+	// light vec
+	vec3 lightPos = (_Vmat * vec4(_Lights[i].position, 1.0)).xyz;
+	
+	vec3 lightDir = fs_in.FragPos - lightPos;
+	float dist = length(lightDir);
+	lightDir = lightDir / dist;
+
+	float diffuse = max(dot(norm, -lightDir), 0.0);
+
+	vec4 properties = _Lights[i].properties;
+	// specular
+	float specular = CalculateSpecularIntensity(norm, lightDir, fragDir, properties.w);
+
+	// attenuation
+	float attenuation = 1.0 / (properties.x + properties.y * dist + properties.z * (dist * dist));
+
+	return (diffuse + specular) * _Lights[i].color * attenuation;
+}
+
+vec4 CalculateLights(vec3 norm, vec3 fragDir)
+{
+	vec4 lightValue = vec4(0, 0, 0, 1);
+	for (int i = 0; i < _NumLights; i++)
 	{
-		// light vec
-		vec3 lightPos = (_Vmat * vec4(_PointLights[i].position, 1.0)).xyz;
-		
-		vec3 lightDir = fs_in.FragPos - lightPos;
-		float dist = length(lightDir);
-		lightDir = lightDir / dist;
-
-		float diffuse = max(dot(norm, -lightDir), 0.0);
-
-		// specular
-		float specular = CalculateSpecularIntensity(norm, lightDir, fragDir, _PointLights[i].properties.w);
-
-		// attenuation
-		float attenuation = 1.0 / (_PointLights[i].properties.x + _PointLights[i].properties.y * dist + _PointLights[i].properties.z * (dist * dist));
-
-		lightTotal += (diffuse + specular) * _PointLights[i].color * attenuation;
+		switch(_Lights[i].type)
+		{
+			case 0:
+				lightValue += CalculateDirectionalLight(i, norm, fragDir);
+			break;
+			case 1:
+				lightValue += CalculatePointLight(i, norm, fragDir);
+			break;
+		}
 	}
-	return lightTotal;
+
+	return lightValue;
 }
 
 vec4 ProcessFog(vec4 color)
@@ -152,8 +170,7 @@ void main()
 	vec3 fragDir = normalize(fs_in.FragPos);
 
 	vec4 totalLight;
-	totalLight += CalculateDirectionalLight(norm, fragDir);
-	totalLight += CalculatePointLights(norm, fragDir);
+	totalLight += CalculateLights(norm, fragDir);
 	totalLight += _Ambient;
 
 	vec4 color = texture(_Texture1, fs_in.TexCoord) * _AlbedoColor * totalLight;

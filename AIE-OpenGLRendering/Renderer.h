@@ -29,7 +29,6 @@ private:
 	static GLuint uboCamera;
 	static GLuint uboGlobals;
 	static GLuint uboLighting;
-	static GLuint uboLights;
 	static GLuint uboFog;
 	
 	// fog
@@ -43,19 +42,16 @@ private:
 	static void SetGlobalsUBO();
 	static void SetLightingUBO();
 	static void SetFogUBO();
-	static void SetLightsUBO();
 public:
 	static Camera camera;
 	
 	// lighting
 	static glm::vec4 ambientLight;
-	static DirectionalLight dirLight;
+	static std::vector<Light*> lights;
 	
 	// lists
-	static std::vector<Model*> modelList;
 	static std::vector<ModelTransform*> modelTransforms;
 	static std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
-	static std::vector<PointLight> lights;
 
 
 	static int Initialise();

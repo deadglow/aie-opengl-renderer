@@ -15,7 +15,9 @@ Model::~Model()
 
 	for (int i = 0; i < meshes.size(); ++i)
 	{
-		delete meshes[i];
+		Mesh* mesh = meshes[i];
+		if (mesh)
+			delete mesh;
 	}
 	meshes.clear();
 }
@@ -39,6 +41,7 @@ void Model::Load()
 		{
 			meshes[i]->LoadMesh();
 		}
+		loaded = true;
 	}
 }
 
@@ -50,11 +53,14 @@ void Model::Unload()
 		{
 			meshes[i]->UnloadMesh();
 		}
+		loaded = false;
 	}
 }
 
 void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 {
+	if (!loaded) throw std::runtime_error("Model not loaded.");
+
 	for (int i = 0; i < meshes.size(); ++i)
 	{
 		// make matrices

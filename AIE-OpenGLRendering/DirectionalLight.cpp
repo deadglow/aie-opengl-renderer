@@ -1,10 +1,15 @@
 #include "DirectionalLight.h"
 
-DirectionalLight::DirectionalLight(glm::vec3 direction_init, glm::vec3 color_init, float intensity_init)
+DirectionalLight::DirectionalLight(glm::vec3 direction_init, glm::vec3 color_init, float intensity_init) : Light(color_init, intensity_init)
 {
     direction = direction_init;
-    color = color_init;
-    intensity = intensity_init;
+}
+
+DirectionalLight::DirectionalLight(const DirectionalLight& dirLight)
+{
+    this->color = dirLight.color;
+    this->intensity = dirLight.intensity;
+    this->direction = dirLight.direction;
 }
 
 DirectionalLight::DirectionalLight()
@@ -18,8 +23,17 @@ DirectionalLight::~DirectionalLight()
 {
 }
 
-
-glm::vec4 DirectionalLight::GetFinalColor()
+int DirectionalLight::GetType()
 {
-    return glm::vec4(color * intensity, 1.0f);
+    return 0;
+}
+
+LightShaderData DirectionalLight::ConstructShaderData()
+{
+    LightShaderData shaderData;
+    shaderData.type = GetType();
+    shaderData.direction = direction;
+    shaderData.color = GetFinalColor();
+
+    return shaderData;
 }

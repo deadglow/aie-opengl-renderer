@@ -21,11 +21,11 @@ int main()
 	Game game;
 
 	// main game loop
-	while (ShaderLoader::GetShaderStateOkay() && !glfwWindowShouldClose(Renderer::GetWindow()))
+	while (!glfwWindowShouldClose(Renderer::GetWindow()))
 	{
 		Input::UpdateInput();
-		Renderer::Render();
 		game.Update();
+		Renderer::Render();
 	}
 
 	// window has closed, clean up GLFW and exit

@@ -1,17 +1,18 @@
 #pragma once
-#include "glm/glm.hpp"
+#include "Light.h"
 
-class DirectionalLight
+class DirectionalLight :
+	public Light
 {
 public:
-	glm::vec3 direction;
-	glm::vec3 color = { 1.0f, 1.0f, 1.0f };
-	float intensity = 1.0f;
+	glm::vec3 direction{ 0, -1, 0 };
 
 	DirectionalLight(glm::vec3 direction_init, glm::vec3 color_init, float intensity_init);
+	DirectionalLight(const DirectionalLight& dirLight);
 	DirectionalLight();
 	~DirectionalLight();
 
-	glm::vec4 GetFinalColor();
+	int GetType();
+	LightShaderData ConstructShaderData();
 };
 
