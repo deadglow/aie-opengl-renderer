@@ -269,6 +269,7 @@ void Renderer::Start()
 	TextureLoader::LoadTexture("BOX_full_normal.png");
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
+	material->AddProperty("_Smoothness", 1.0f);
 	materials.emplace(material->GetName(), material);
 
 	// crate model
@@ -306,7 +307,7 @@ void Renderer::Render()
 	// clear the screen and start drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// imgui draw
+	// imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();

@@ -33,7 +33,7 @@ void RendererDebugMenu::DrawRenderData()
 
 	ImGui::InputFloat("Fog density", &Renderer::fogDensity, 0.0001f, 0.01f, "%.5f");
 	float col[3] = { Renderer::fogColor.x, Renderer::fogColor.y, Renderer::fogColor.z };
-	ImGui::ColorEdit3("Fog density", col);
+	ImGui::ColorEdit3("Fog color", col);
 	Renderer::fogColor = { col[0], col[1], col[2], 1.0f };
 
 	ImGui::End();
@@ -122,7 +122,14 @@ void RendererDebugMenu::DrawMaterialList()
 
 		for (int i = 0; i < selectedMaterial->usedTextures.size(); ++i)
 		{
-			ImGui::Button(selectedMaterial->usedTextures[i]->GetFilename().c_str());
+			ImGui::Selectable(selectedMaterial->usedTextures[i]->GetFilename().c_str());
+		}
+
+		ImGui::Spacing();
+		ImGui::Text("Properties");
+		for (int i = 0; i < selectedMaterial->properties.size(); ++i)
+		{
+			ImGui::Selectable(selectedMaterial->properties[i]->name.c_str());
 		}
 
 		ImGui::End();
