@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -19,112 +11,150 @@
     <Filter Include="OpenGL\glad">
       <UniqueIdentifier>{22bd7669-8ac9-4742-ad93-3a6dbe3ecfcb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Primitive">
+    <Filter Include="_Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="_Header Files\Primitive">
       <UniqueIdentifier>{4934f050-f0a8-4161-93e5-b9e41b5936eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Primitive">
-      <UniqueIdentifier>{6aa95850-ac1c-4a6f-a91b-4d1268555c7a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Lighting">
+    <Filter Include="_Header Files\Lighting">
       <UniqueIdentifier>{601f3229-2d18-4122-9915-337974c46b98}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Lighting">
-      <UniqueIdentifier>{e2764c77-6310-4cd5-9c36-50812cd5ab54}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Model">
-      <UniqueIdentifier>{afd9ba24-e268-45e5-9d4c-8e13ffae10d8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Shader">
-      <UniqueIdentifier>{534d0ece-cd5c-4c5a-9b93-c928e365ed85}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Texture">
-      <UniqueIdentifier>{db3215f2-3bac-4fb5-bb9a-95142b726489}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\Texture">
+    <Filter Include="_Header Files\Texture">
       <UniqueIdentifier>{2aad0171-ee42-4499-a849-a21870a8ab88}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Model">
+    <Filter Include="_Header Files\Model">
       <UniqueIdentifier>{f341c0ef-aca2-48f0-a9b1-7f0f8a456e8a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Shader">
+    <Filter Include="_Header Files\Shader">
       <UniqueIdentifier>{b1267238-48a9-48a8-943f-b2a68e00a6cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Header Files\IMGUI">
+      <UniqueIdentifier>{95a0cd4d-5e14-4eb6-a85f-5e3fed50ca88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="_Source Files\Primitive">
+      <UniqueIdentifier>{6aa95850-ac1c-4a6f-a91b-4d1268555c7a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files\Lighting">
+      <UniqueIdentifier>{e2764c77-6310-4cd5-9c36-50812cd5ab54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files\Model">
+      <UniqueIdentifier>{afd9ba24-e268-45e5-9d4c-8e13ffae10d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files\Shader">
+      <UniqueIdentifier>{534d0ece-cd5c-4c5a-9b93-c928e365ed85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files\Texture">
+      <UniqueIdentifier>{db3215f2-3bac-4fb5-bb9a-95142b726489}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Source Files\IMGUI">
+      <UniqueIdentifier>{10cbe6e5-51bb-4fcc-902e-285d2847a0a6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="glad.c">
       <Filter>OpenGL\glad</Filter>
     </ClCompile>
     <ClCompile Include="FileReader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Input.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files\Primitive</Filter>
+      <Filter>_Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="Triangle.cpp">
-      <Filter>Source Files\Primitive</Filter>
+      <Filter>_Source Files\Primitive</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DirectionalLight.cpp">
-      <Filter>Source Files\Lighting</Filter>
+      <Filter>_Source Files\Lighting</Filter>
     </ClCompile>
     <ClCompile Include="PointLight.cpp">
-      <Filter>Source Files\Lighting</Filter>
+      <Filter>_Source Files\Lighting</Filter>
     </ClCompile>
     <ClCompile Include="Mesh.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoader.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="ModelLoadFunctions.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="MeshPrimitives.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="ModelInstance.cpp">
-      <Filter>Source Files\Model</Filter>
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>_Source Files\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Material.cpp">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>_Source Files\Shader</Filter>
     </ClCompile>
     <ClCompile Include="ShaderLoader.cpp">
-      <Filter>Source Files\Shader</Filter>
+      <Filter>_Source Files\Shader</Filter>
     </ClCompile>
     <ClCompile Include="Texture.cpp">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>_Source Files\Texture</Filter>
     </ClCompile>
     <ClCompile Include="TextureLoader.cpp">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>_Source Files\Texture</Filter>
     </ClCompile>
     <ClCompile Include="stb_image.cpp">
-      <Filter>Source Files\Texture</Filter>
+      <Filter>_Source Files\Texture</Filter>
     </ClCompile>
     <ClCompile Include="Light.cpp">
-      <Filter>Source Files\Lighting</Filter>
+      <Filter>_Source Files\Lighting</Filter>
     </ClCompile>
     <ClCompile Include="MeshDrawData.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>_Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_demo.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_draw.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_glfw.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_impl_opengl3.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_tables.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_widgets.cpp">
+      <Filter>_Source Files\IMGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RendererDebugMenu.cpp">
+      <Filter>_Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,82 +165,112 @@
       <Filter>OpenGL\glad</Filter>
     </ClInclude>
     <ClInclude Include="FileReader.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>_Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="Triangle.h">
-      <Filter>Header Files\Primitive</Filter>
+      <Filter>_Header Files\Primitive</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraShaderData.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectionalLight.h">
-      <Filter>Header Files\Lighting</Filter>
+      <Filter>_Header Files\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="PointLight.h">
-      <Filter>Header Files\Lighting</Filter>
+      <Filter>_Header Files\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoader.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="ModelLoadFunctions.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="MeshPrimitives.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="ModelInstance.h">
-      <Filter>Header Files\Model</Filter>
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
-      <Filter>Header Files\Shader</Filter>
+      <Filter>_Header Files\Shader</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
-      <Filter>Header Files\Shader</Filter>
+      <Filter>_Header Files\Shader</Filter>
     </ClInclude>
     <ClInclude Include="ShaderLoader.h">
-      <Filter>Header Files\Shader</Filter>
+      <Filter>_Header Files\Shader</Filter>
     </ClInclude>
     <ClInclude Include="ShaderProperty.h">
-      <Filter>Header Files\Shader</Filter>
+      <Filter>_Header Files\Shader</Filter>
     </ClInclude>
     <ClInclude Include="stb_image.h">
-      <Filter>Header Files\Texture</Filter>
+      <Filter>_Header Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Texture.h">
-      <Filter>Header Files\Texture</Filter>
+      <Filter>_Header Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
-      <Filter>Header Files\Texture</Filter>
+      <Filter>_Header Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="Light.h">
-      <Filter>Header Files\Lighting</Filter>
+      <Filter>_Header Files\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="Lights.h">
-      <Filter>Header Files\Lighting</Filter>
+      <Filter>_Header Files\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="MeshDrawData.h">
-      <Filter>Header Files</Filter>
+      <Filter>_Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_glfw.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_internal.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_rectpack.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_textedit.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imstb_truetype.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_impl_opengl3_loader.h">
+      <Filter>_Header Files\IMGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RendererDebugMenu.h">
+      <Filter>_Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

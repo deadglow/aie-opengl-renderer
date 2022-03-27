@@ -157,6 +157,13 @@
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui_tables.cpp" />
+    <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -168,6 +175,7 @@
     <ClCompile Include="ModelInstance.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RendererDebugMenu.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
@@ -184,6 +192,15 @@
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="glad.h" />
+    <ClInclude Include="imconfig.h" />
+    <ClInclude Include="imgui.h" />
+    <ClInclude Include="imgui_impl_glfw.h" />
+    <ClInclude Include="imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="imgui_internal.h" />
+    <ClInclude Include="imstb_rectpack.h" />
+    <ClInclude Include="imstb_textedit.h" />
+    <ClInclude Include="imstb_truetype.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="khrplatform.h" />
     <ClInclude Include="Light.h" />
@@ -197,6 +214,7 @@
     <ClInclude Include="ModelInstance.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RendererDebugMenu.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="ShaderLoader.h" />

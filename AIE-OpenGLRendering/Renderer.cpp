@@ -1,8 +1,15 @@
 #include "Renderer.h"
-#include "MeshPrimitives.h"
+
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
+
+#include "RendererDebugMenu.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include "MeshPrimitives.h"
 #include <iostream>
 
 
@@ -86,6 +93,14 @@ int Renderer::Initialise()
 	}
 
 	ModelLoader::Initialise();
+
+	// set up imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 460");
 
 	return 0;
 }
@@ -189,10 +204,16 @@ void Renderer::SetFogUBO()
 
 void Renderer::Shutdown()
 {
+	// shutdown imgui
+	ImGui_ImplGlfw_Shutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui::DestroyContext();
+
 	ModelLoader::Shutdown();
 	TextureLoader::Shutdown();
 	ShaderLoader::Shutdown();
 	
+	// clear materials and instances
 	for (const auto [key, value] : materials)
 	{
 		delete value;
@@ -245,9 +266,8 @@ void Renderer::Start()
 	modelInstances.push_back(modelT);
 
 	// create lights
-	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, 1, -1)), glm::vec3(1), 1.0f);
+	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
 	lights.push_back(dirLight);
-
 
 	PointLight* light = new PointLight();
 	lights.push_back(light);
@@ -261,12 +281,21 @@ void Renderer::Render()
 	// clear the screen and start drawing
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// imgui draw
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
 	// calculate delta time
 	deltaTime = glfwGetTime() - lastTime;
 	lastTime = glfwGetTime();
 
 	// drawing here
 	OnDraw();
+
+	// imgui draw
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	// swapping buffers
 	glfwSwapBuffers(window);
@@ -283,5 +312,5 @@ void Renderer::OnDraw()
 	PrepareDrawCalls();
 
 	camera.Draw();
+	RendererDebugMenu::DrawImGui();
 }
-
