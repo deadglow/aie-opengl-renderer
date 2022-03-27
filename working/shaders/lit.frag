@@ -72,7 +72,7 @@ uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float _NormalMapScale = 1.0;
 
 // specular
-uniform float _SpecularStrength = 1.5;
+uniform float _SpecularStrength = 1;
 uniform float _Smoothness = 0.9;
 
 //inout
