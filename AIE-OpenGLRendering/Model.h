@@ -21,7 +21,7 @@ public:
 	std::string GetFilename() const;
 	
 	void AddMesh(Mesh* mesh);
-	void SetMaterial(const int index, Material* shaderConfig);
+	void SetMaterial(const int index, Material* material);
 
 	void Load();
 	void Unload();

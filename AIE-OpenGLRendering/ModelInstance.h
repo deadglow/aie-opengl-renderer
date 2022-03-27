@@ -1,6 +1,7 @@
 #pragma once
 #include "Model.h"
 #include "CameraShaderData.h"
+#include "Transform.h"
 
 class ModelInstance
 {
@@ -8,7 +9,7 @@ private:
 	Model* model = nullptr;
 	bool overrideMaterials = false;
 public:
-	glm::mat4 transform = glm::mat4(1.0f);
+	Transform transform;
 	std::vector<Material*> materialOverrides;
 
 	ModelInstance(Model* model_init);
@@ -18,5 +19,7 @@ public:
 	void AddToDrawCalls();
 	void SetMaterialOverride(int index, Material* mat);
 	void ClearMaterialOverrides();
+
+	Model* GetBaseModel() const;
 };
 

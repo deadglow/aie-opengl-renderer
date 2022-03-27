@@ -27,8 +27,8 @@ void Camera::UpdateVPMatrix()
 
 	shaderData.ipMatrix = glm::inverse(shaderData.pMatrix);
 
-	shaderData.vMatrix = glm::inverse(transform);
-	shaderData.ivMatrix = transform;
+	shaderData.vMatrix = glm::inverse(transform.matrix);
+	shaderData.ivMatrix = transform.matrix;
 }
 
 const CameraShaderData Camera::GetShaderData() const

@@ -4,10 +4,11 @@
 #include "GLFW/glfw3.h"
 #include "Renderer.h"
 
-Material::Material(Shader* shader_init)
+Material::Material(Shader* shader_init, const std::string name_init)
 {
 	shader = shader_init;
 	shaderName = shader->GetName();
+	materialName = name_init;
 }
 
 Material::~Material()
@@ -41,7 +42,17 @@ void Material::ApplyConfiguration()
 	// set texture bindings
 	for (int i = 0; i < usedTextures.size(); ++i)
 	{
-		glActiveTexture(GL_TEXTURE1 + i);
+		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, usedTextures[i]->GetID());
 	}
+}
+
+Shader* Material::GetShader() const
+{
+	return ShaderLoader::GetShader(shaderName);
+}
+
+const std::string Material::GetName() const
+{
+	return materialName;
 }

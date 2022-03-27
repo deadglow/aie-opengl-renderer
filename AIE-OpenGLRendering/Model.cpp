@@ -30,9 +30,9 @@ void Model::AddMesh(Mesh* mesh)
 	defaultMaterials.resize(meshes.size());
 }
 
-void Model::SetMaterial(const int index, Material* shaderConfig)
+void Model::SetMaterial(const int index, Material* material)
 {
-	defaultMaterials[index] = shaderConfig;
+	defaultMaterials[index] = material;
 }
 
 void Model::Load()

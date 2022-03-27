@@ -53,9 +53,12 @@ public:
 	const GLuint GetID() const;
 	const int GetWidth() const;
 	const int GetHeight() const;
+	const std::string GetFilename() const;
+
 	void SetWrapMode(TEX_WrapMode s, TEX_WrapMode t);
 	void SetMipMapFilter(TEX_MipMapFiltering filter);
 	void SetFilter(TEX_Filtering filter);
 	void UpdateTexture();
+
 };
 

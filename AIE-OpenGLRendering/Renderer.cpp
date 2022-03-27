@@ -30,7 +30,7 @@ Camera Renderer::camera;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
 std::vector<Light*> Renderer::lights;
 
-std::vector<ModelInstance*> Renderer::modelInstances;
+std::list<ModelInstance*> Renderer::modelInstances;
 std::unordered_map<std::string, Material*> Renderer::materials;
 std::unordered_map<Material*, std::vector<MeshDrawData>> Renderer::drawCalls;
 
@@ -105,23 +105,6 @@ int Renderer::Initialise()
 	return 0;
 }
 
-void Renderer::PrepareDrawCalls()
-{
-	drawCalls.clear();
-	for (int i = 0; i < modelInstances.size(); ++i)
-	{
-		modelInstances[i]->AddToDrawCalls();
-	}
-}
-
-void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
-{
-	if (!drawCalls.count(mat))
-	{
-		drawCalls.emplace(mat, std::vector<MeshDrawData>());
-	}
-	drawCalls[mat].push_back(data);
-}
 
 void Renderer::InitUBOs()
 {
@@ -156,6 +139,35 @@ void Renderer::InitUBOs()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
+}
+
+void Renderer::Shutdown()
+{
+	// shutdown imgui
+	ImGui_ImplGlfw_Shutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui::DestroyContext();
+
+	// shutdown loaders
+	ModelLoader::Shutdown();
+	TextureLoader::Shutdown();
+	ShaderLoader::Shutdown();
+	
+	// clear materials and instances
+	for (const auto [key, value] : materials)
+	{
+		delete value;
+	}
+	for (ModelInstance* mt : modelInstances)
+	{
+		delete mt;
+	}
+	for (Light* light : lights)
+	{
+		delete light;
+	}
+
+	glfwTerminate();
 }
 
 void Renderer::SetGlobalsUBO()
@@ -202,34 +214,6 @@ void Renderer::SetFogUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Renderer::Shutdown()
-{
-	// shutdown imgui
-	ImGui_ImplGlfw_Shutdown();
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui::DestroyContext();
-
-	ModelLoader::Shutdown();
-	TextureLoader::Shutdown();
-	ShaderLoader::Shutdown();
-	
-	// clear materials and instances
-	for (const auto [key, value] : materials)
-	{
-		delete value;
-	}
-	for (ModelInstance* mt : modelInstances)
-	{
-		delete mt;
-	}
-	for (Light* light : lights)
-	{
-		delete light;
-	}
-
-	glfwTerminate();
-}
-
 GLFWwindow* Renderer::GetWindow()
 {
 	return Renderer::window;
@@ -245,25 +229,66 @@ float Renderer::GetAspect()
 	return aspect;
 }
 
+void Renderer::AddModelInstance(ModelInstance* instance)
+{
+	modelInstances.push_back(instance);
+}
+
+void Renderer::RemoveModelInstance(ModelInstance* instance)
+{
+	modelInstances.remove(instance);
+	delete instance;
+}
+
+void Renderer::PrepareDrawCalls()
+{
+	drawCalls.clear();
+	for (const auto value : modelInstances)
+	{
+		value->AddToDrawCalls();
+	}
+}
+
+void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
+{
+	if (!drawCalls.count(mat))
+	{
+		drawCalls.emplace(mat, std::vector<MeshDrawData>());
+	}
+	drawCalls[mat].push_back(data);
+}
+
 void Renderer::Start()
 {
 	// move da camera
-	camera.transform = glm::translate(camera.transform, glm::vec3(0, 0, 5));
+	camera.transform.SetPosition(glm::vec3(0, 0, 5));
 
 	// crate
-	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER));
+	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), "crate");
 	TextureLoader::LoadTexture("BOX_full_albedo.png");
 	TextureLoader::LoadTexture("BOX_full_normal.png");
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
-	materials.emplace("crate", material);
+	materials.emplace(material->GetName(), material);
 
 	// crate model
 	Model* model = ModelLoader::LoadModel("Box_final.obj");
 	model->SetMaterial(0, materials["crate"]);
-	
+
 	ModelInstance* modelT = new ModelInstance(model);
 	modelInstances.push_back(modelT);
+
+	// beans
+	material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), "beans");
+	TextureLoader::LoadTexture("beancan.png");
+	material->AddTexture(TextureLoader::GetTexture("beancan.png"));
+	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEX));
+	materials.emplace(material->GetName(), material);
+	
+	// bean model
+	model = ModelLoader::LoadModel("beancan.fbx");
+	model->SetMaterial(0, materials["beans"]);
+
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);

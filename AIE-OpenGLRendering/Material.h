@@ -10,11 +10,13 @@ class Material
 private:
 	Shader* shader = nullptr;
 	std::string shaderName;
-	std::vector<ShaderPropertyBase*> properties;
-	std::vector<Texture*> usedTextures;
+	std::string materialName;
 
 public:
-	Material(Shader* shader_init);
+	std::vector<Texture*> usedTextures;
+	std::vector<ShaderPropertyBase*> properties;
+
+	Material(Shader* shader_init, const std::string name_init);
 	~Material();
 
 	template<class T>
@@ -28,5 +30,8 @@ public:
 
 	void UseShader();
 	void ApplyConfiguration();
+
+	Shader* GetShader() const;
+	const std::string GetName() const;
 };
 

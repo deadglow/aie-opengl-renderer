@@ -8,12 +8,12 @@ class ModelLoader
 {
 private:
 	static std::string dir;
-	static std::unordered_map<std::string, Model*> modelList;
 
-	static Model* CreateModel(const std::string filepath);
+	static Model* CreateModel(const std::string filepath, const std::string filename);
 
 	ModelLoader() = delete;
 public:
+	static std::unordered_map<std::string, Model*> modelList;
 
 	static void Initialise();
 	static void Shutdown();

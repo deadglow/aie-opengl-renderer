@@ -1,6 +1,7 @@
 #pragma once
 #include "glm/glm.hpp"
 #include "CameraShaderData.h"
+#include "Transform.h"
 
 #define DEFAULT_FOV 70.0f
 #define DEFAULT_NEARPLANE 0.1f
@@ -17,8 +18,8 @@ private:
 
 	CameraShaderData shaderData;
 public:
+	Transform transform;
 	bool perspective = true;
-	glm::mat4 transform = glm::mat4(1.0f);
 	Camera();
 	~Camera();
 

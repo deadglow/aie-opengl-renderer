@@ -51,18 +51,24 @@ public:
 	static float fogDensity;
 
 	// lists
-	static std::vector<ModelInstance*> modelInstances;
+	static std::list<ModelInstance*> modelInstances;
 	static std::unordered_map<std::string, Material*> materials;
 	static std::unordered_map<Material*, std::vector<MeshDrawData>> drawCalls;
 
 	static int Initialise();
 	static void Shutdown();
-	static GLFWwindow* GetWindow();
+
 	static void Start();
+	static void Render();
+	static void SetCameraUBO(CameraShaderData csd);
+	
 	static void PrepareDrawCalls();
 	static void AddToDrawCall(Material* mat, MeshDrawData data);
-	static void Render();
+	
+	static GLFWwindow* GetWindow();
 	static double GetDeltaTime();
 	static float GetAspect();
-	static void SetCameraUBO(CameraShaderData csd);
+
+	static void AddModelInstance(ModelInstance* instance);
+	static void RemoveModelInstance(ModelInstance* instance);
 };

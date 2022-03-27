@@ -5,7 +5,7 @@
 #include <vector>
 
 // do this do this
-Model* MeshLoadFunctions::CreateModelFromFile(const std::string filepath)
+Model* MeshLoadFunctions::CreateModelFromFile(const std::string filepath, const std::string filename)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
@@ -16,7 +16,7 @@ Model* MeshLoadFunctions::CreateModelFromFile(const std::string filepath)
 		return nullptr;
 	}
 
-	Model* model = new Model(filepath);
+	Model* model = new Model(filename);
 
 	ProcessNode(model, scene->mRootNode, scene);
 

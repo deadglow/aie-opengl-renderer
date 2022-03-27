@@ -58,6 +58,11 @@ const int Texture::GetHeight() const
     return height;
 }
 
+const std::string Texture::GetFilename() const
+{
+    return filename;
+}
+
 void Texture::SetWrapMode(TEX_WrapMode s, TEX_WrapMode t)
 {
     wrapMode[0] = s;

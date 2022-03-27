@@ -13,7 +13,7 @@ void ModelInstance::Draw(CameraShaderData csd)
 {
 	if (model)
 	{
-		model->Draw(csd, transform);
+		model->Draw(csd, transform.matrix);
 	}
 }
 
@@ -21,11 +21,11 @@ void ModelInstance::AddToDrawCalls()
 {
 	if (overrideMaterials)
 	{
-		model->AddToDrawCall(transform, &materialOverrides);
+		model->AddToDrawCall(transform.matrix, &materialOverrides);
 	}
 	else
 	{
-		model->AddToDrawCall(transform);
+		model->AddToDrawCall(transform.matrix);
 	}
 }
 
@@ -42,4 +42,9 @@ void ModelInstance::SetMaterialOverride(int index, Material* mat)
 void ModelInstance::ClearMaterialOverrides()
 {
 	overrideMaterials = false;
+}
+
+Model* ModelInstance::GetBaseModel() const
+{
+	return model;
 }

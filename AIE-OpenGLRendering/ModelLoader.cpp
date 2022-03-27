@@ -10,9 +10,9 @@ namespace fs = std::filesystem;
 std::string ModelLoader::dir = fs::current_path().string() + "/models";
 std::unordered_map<std::string, Model*> ModelLoader::modelList;
 
-Model* ModelLoader::CreateModel(const std::string filepath)
+Model* ModelLoader::CreateModel(const std::string filepath, const std::string filename)
 {
-	return MeshLoadFunctions::CreateModelFromFile(filepath);
+	return MeshLoadFunctions::CreateModelFromFile(filepath, filename);
 }
 
 void ModelLoader::Initialise()
@@ -28,7 +28,7 @@ void ModelLoader::Initialise()
 			std::string extension = path.filename().extension().string();
 			if (extension == ".obj" || extension == ".fbx")
 			{
-				Model* model = CreateModel(path.string());
+				Model* model = CreateModel(path.string(), path.filename().string());
 				modelList.emplace(path.filename().string(), model);
 				continue;
 			}
@@ -58,7 +58,10 @@ void ModelLoader::PrintAllMeshFiles()
 
 Model* ModelLoader::GetModel(const std::string filename)
 {
-	return modelList.at(filename);
+	if (modelList.count(filename))
+		return modelList.at(filename);
+	else
+		return nullptr;
 }
 
 Model* ModelLoader::LoadModel(const std::string filename)

@@ -65,10 +65,9 @@ uniform mat4 _M2W;
 uniform mat4 _iM2W;
 
 // sampler
-layout (binding = 0) uniform sampler2D _Texture0;		// default
-layout (binding = 1) uniform sampler2D _Texture1;		// diffuse
-layout (binding = 2) uniform sampler2D _Texture2;		// normal map
-layout (binding = 3) uniform sampler2D _Texture3;		// specular map
+layout (binding = 0) uniform sampler2D _Texture0;		// diffuse
+layout (binding = 1) uniform sampler2D _Texture1;		// normal map
+layout (binding = 2) uniform sampler2D _Texture2;		// specular map
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float _NormalMapScale = 1.0;
 
@@ -90,7 +89,7 @@ out vec4 FragColour;
 float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float radius)
 {
 	// specular highlight
-	float t = _Smoothness * texture(_Texture3, fs_in.TexCoord).r;
+	float t = _Smoothness * texture(_Texture2, fs_in.TexCoord).r;
 	float exponent = mix(2, 1024, t);
 	vec3 halfwayDir = normalize(lightDir + fragDir);
 	float spec = pow(max(dot(-halfwayDir, norm), 0.0), exponent);
@@ -162,7 +161,7 @@ vec4 ProcessFog(vec4 color)
 
 void main()
 {
-	vec3 norm = texture(_Texture2, fs_in.TexCoord).rgb;
+	vec3 norm = texture(_Texture1, fs_in.TexCoord).rgb;
 	norm = norm * 2.0 - 1.0;
 	norm = normalize(fs_in.TBN * norm);
 
@@ -173,7 +172,7 @@ void main()
 	totalLight += CalculateLights(norm, fragDir);
 	totalLight += _Ambient;
 
-	vec4 color = texture(_Texture1, fs_in.TexCoord) * _AlbedoColor * totalLight;
+	vec4 color = texture(_Texture0, fs_in.TexCoord) * _AlbedoColor * totalLight;
 	
 	// do fog
 	FragColour = ProcessFog(color);

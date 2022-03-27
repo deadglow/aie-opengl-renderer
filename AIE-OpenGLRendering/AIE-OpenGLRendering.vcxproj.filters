@@ -129,9 +129,6 @@
     <ClCompile Include="Light.cpp">
       <Filter>_Source Files\Lighting</Filter>
     </ClCompile>
-    <ClCompile Include="MeshDrawData.cpp">
-      <Filter>_Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="imgui.cpp">
       <Filter>_Source Files\IMGUI</Filter>
     </ClCompile>
@@ -155,6 +152,12 @@
     </ClCompile>
     <ClCompile Include="RendererDebugMenu.cpp">
       <Filter>_Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>_Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshDrawData.cpp">
+      <Filter>_Source Files\Model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -239,9 +242,6 @@
     <ClInclude Include="Lights.h">
       <Filter>_Header Files\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="MeshDrawData.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="imconfig.h">
       <Filter>_Header Files\IMGUI</Filter>
     </ClInclude>
@@ -271,6 +271,12 @@
     </ClInclude>
     <ClInclude Include="RendererDebugMenu.h">
       <Filter>_Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>_Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshDrawData.h">
+      <Filter>_Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
