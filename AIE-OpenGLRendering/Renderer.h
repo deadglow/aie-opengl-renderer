@@ -4,10 +4,10 @@
 #include "ShaderLoader.h"
 #include "TextureLoader.h"
 #include "ModelLoader.h"
-#include "ModelTransform.h"
 #include "Camera.h"
-#include "DirectionalLight.h"
-#include "PointLight.h"
+#include "ModelInstance.h"
+#include "Lights.h"
+#include "MeshDrawData.h"
 
 #define RES_X 1280
 #define RES_Y 720
@@ -31,9 +31,6 @@ private:
 	static GLuint uboLighting;
 	static GLuint uboFog;
 	
-	// fog
-	static glm::vec4 fogColor;
-	static float fogDensity;
 
 	Renderer() = delete;
 	~Renderer() = default;
@@ -49,15 +46,21 @@ public:
 	static glm::vec4 ambientLight;
 	static std::vector<Light*> lights;
 	
-	// lists
-	static std::vector<ModelTransform*> modelTransforms;
-	static std::unordered_map<std::string, ShaderConfiguration*> shaderConfigs;
+	// fog
+	static glm::vec4 fogColor;
+	static float fogDensity;
 
+	// lists
+	static std::vector<ModelInstance*> modelInstances;
+	static std::unordered_map<std::string, Material*> materials;
+	static std::unordered_map<Material*, std::vector<MeshDrawData>> drawCalls;
 
 	static int Initialise();
 	static void Shutdown();
 	static GLFWwindow* GetWindow();
 	static void Start();
+	static void PrepareDrawCalls();
+	static void AddToDrawCall(Material* mat, MeshDrawData data);
 	static void Render();
 	static double GetDeltaTime();
 	static float GetAspect();

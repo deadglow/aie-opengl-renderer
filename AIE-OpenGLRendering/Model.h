@@ -8,12 +8,11 @@ class Model
 {
 private:
 	std::string filename;
-	std::vector<unsigned int> meshShaderLookup;
 	bool loaded = false;
 
 public:
 	std::vector<Mesh*> meshes;
-	std::vector<ShaderConfiguration*> shaderConfigs;
+	std::vector<Material*> defaultMaterials;
 	
 	Model(const std::string filename_init);
 	~Model();
@@ -22,12 +21,13 @@ public:
 	std::string GetFilename() const;
 	
 	void AddMesh(Mesh* mesh);
-	void AddShaderConfig(ShaderConfiguration* shaderConfig);
-	void SetShaderOfMesh(const int meshIndex, const int shaderIndex);
+	void SetMaterial(const int index, Material* shaderConfig);
 
 	void Load();
 	void Unload();
 	
 	void Draw(CameraShaderData csd, glm::mat4 transform);
+	void AddToDrawCall(glm::mat4 transform, std::vector<Material*>* materialLookup);
+	void AddToDrawCall(glm::mat4 transform);
 };
 

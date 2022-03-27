@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <string>
-#include "ShaderConfiguration.h"
+#include "Material.h"
 
 class ShaderLoader
 {

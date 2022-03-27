@@ -1,12 +1,10 @@
 #include "Renderer.h"
-#include <iostream>
-#include "ShaderConfiguration.h"
 #include "MeshPrimitives.h"
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
+#include <iostream>
 
-#define BEANS "beancan.png"
 
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect = 1.0f;
@@ -25,8 +23,9 @@ Camera Renderer::camera;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
 std::vector<Light*> Renderer::lights;
 
-std::vector<ModelTransform*> Renderer::modelTransforms;
-std::unordered_map<std::string, ShaderConfiguration*> Renderer::shaderConfigs;
+std::vector<ModelInstance*> Renderer::modelInstances;
+std::unordered_map<std::string, Material*> Renderer::materials;
+std::unordered_map<Material*, std::vector<MeshDrawData>> Renderer::drawCalls;
 
 
 int Renderer::Initialise()
@@ -89,6 +88,24 @@ int Renderer::Initialise()
 	ModelLoader::Initialise();
 
 	return 0;
+}
+
+void Renderer::PrepareDrawCalls()
+{
+	drawCalls.clear();
+	for (int i = 0; i < modelInstances.size(); ++i)
+	{
+		modelInstances[i]->AddToDrawCalls();
+	}
+}
+
+void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
+{
+	if (!drawCalls.count(mat))
+	{
+		drawCalls.emplace(mat, std::vector<MeshDrawData>());
+	}
+	drawCalls[mat].push_back(data);
 }
 
 void Renderer::InitUBOs()
@@ -176,11 +193,11 @@ void Renderer::Shutdown()
 	TextureLoader::Shutdown();
 	ShaderLoader::Shutdown();
 	
-	for (const auto [key, value] : shaderConfigs)
+	for (const auto [key, value] : materials)
 	{
 		delete value;
 	}
-	for (ModelTransform* mt : modelTransforms)
+	for (ModelInstance* mt : modelInstances)
 	{
 		delete mt;
 	}
@@ -212,46 +229,20 @@ void Renderer::Start()
 	// move da camera
 	camera.transform = glm::translate(camera.transform, glm::vec3(0, 0, 5));
 
-	TextureLoader::LoadTexture(BEANS);
-	ShaderConfiguration* config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
-	config->AddTexture(TextureLoader::GetTexture(BEANS));
-	shaderConfigs.emplace("beans", config);
-	
 	// crate
-	config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
+	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER));
 	TextureLoader::LoadTexture("BOX_full_albedo.png");
 	TextureLoader::LoadTexture("BOX_full_normal.png");
-	config->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
-	config->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
-	shaderConfigs.emplace("crate", config);
-
-	// trimble's stuff
-	config = new ShaderConfiguration(ShaderLoader::GetShader(DEFAULT_SHADER));
-	TextureLoader::LoadTexture("Map 1_TD_Checker_BaseMap.tga");
-	TextureLoader::LoadTexture("Map 1_TD_Checker_Normal.tga");
-	config->AddTexture(TextureLoader::GetTexture("Map 1_TD_Checker_BaseMap.tga"));
-	config->AddTexture(TextureLoader::GetTexture("Map 1_TD_Checker_Normal.tga"));
-	shaderConfigs.emplace("trimble", config);
-
+	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
+	material->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
+	materials.emplace("crate", material);
 
 	// crate model
 	Model* model = ModelLoader::LoadModel("Box_final.obj");
-	model->AddShaderConfig(shaderConfigs["crate"]);
-	for (int i = 0; i < model->meshes.size(); ++i)
-	{
-		model->SetShaderOfMesh(i, 0);
-	}
-	ModelTransform* modelT = new ModelTransform(model);
-	modelTransforms.push_back(modelT);
-
-
-	// trimble model
-	model = ModelLoader::LoadModel("Obj_Pillow.fbx");
-	model->AddShaderConfig(shaderConfigs["trimble"]);
-	for (int i = 0; i < model->meshes.size(); ++i)
-	{
-		model->SetShaderOfMesh(i, 0);
-	}
+	model->SetMaterial(0, materials["crate"]);
+	
+	ModelInstance* modelT = new ModelInstance(model);
+	modelInstances.push_back(modelT);
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, 1, -1)), glm::vec3(1), 1.0f);
@@ -279,7 +270,6 @@ void Renderer::Render()
 
 	// swapping buffers
 	glfwSwapBuffers(window);
-
 }
 
 void Renderer::OnDraw()
@@ -288,6 +278,9 @@ void Renderer::OnDraw()
 	SetGlobalsUBO();
 	SetLightingUBO();
 	SetFogUBO();
+
+	// prep draw calls
+	PrepareDrawCalls();
 
 	camera.Draw();
 }

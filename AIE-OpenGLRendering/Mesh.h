@@ -1,7 +1,7 @@
 #pragma once
 #include "Vertex.h"
 #include "Triangle.h"
-#include "ShaderConfiguration.h"
+#include "Material.h"
 #include <vector>
 #include <string>
 

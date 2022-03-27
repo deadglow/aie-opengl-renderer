@@ -1,5 +1,7 @@
 #include "Model.h"
 #include "ShaderLoader.h"
+#include "MeshDrawData.h"
+#include "Renderer.h"
 
 Model::Model(const std::string filename_init)
 {
@@ -25,12 +27,12 @@ Model::~Model()
 void Model::AddMesh(Mesh* mesh)
 {
 	meshes.push_back(mesh);
-	meshShaderLookup.push_back(0);
+	defaultMaterials.resize(meshes.size());
 }
 
-void Model::AddShaderConfig(ShaderConfiguration* shaderConfig)
+void Model::SetMaterial(const int index, Material* shaderConfig)
 {
-	shaderConfigs.push_back(shaderConfig);
+	defaultMaterials[index] = shaderConfig;
 }
 
 void Model::Load()
@@ -69,17 +71,27 @@ void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 		glm::mat4 normalMatrix = csd.vMatrix * t;
 		normalMatrix[3] = { 0, 0, 0, 1 };
 
-		shaderConfigs[meshShaderLookup[i]]->UseShader();
-		ShaderLoader::GetCurrentShader()->SetUniform("_M2W", t);
-		ShaderLoader::GetCurrentShader()->SetUniform("_W2M", inverseTransform);
-		ShaderLoader::GetCurrentShader()->SetUniform("_NormalMat", normalMatrix);
+		defaultMaterials[i]->UseShader();
 		meshes[i]->Draw();
 	}
 }
 
-void Model::SetShaderOfMesh(const int meshIndex, const int shaderIndex)
+void Model::AddToDrawCall(glm::mat4 transform, std::vector<Material*>* materialLookup)
 {
-	meshShaderLookup[meshIndex] = shaderIndex;
+	if (!loaded) throw std::runtime_error("Model not loaded.");
+
+	for (int i = 0; i < meshes.size(); ++i)
+	{
+		glm::mat4 t = transform * meshes[i]->transform;
+		glm::mat4 inverseTransform = glm::inverse(t);
+		MeshDrawData drawData(meshes[i], t, inverseTransform);
+		Renderer::AddToDrawCall(materialLookup->at(i), drawData);
+	}
+}
+
+void Model::AddToDrawCall(glm::mat4 transform)
+{
+	AddToDrawCall(transform, &defaultMaterials);
 }
 
 std::string Model::GetFilename() const

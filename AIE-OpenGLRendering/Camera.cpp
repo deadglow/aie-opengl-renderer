@@ -43,11 +43,20 @@ void Camera::Draw()
 	// create uniform buffer
 	Renderer::SetCameraUBO(shaderData);
 
-	for (int i = 0; i < Renderer::modelTransforms.size(); ++i)
-	{
-		ModelTransform* model = Renderer::modelTransforms[i];
+	std::unordered_map<Material*, std::vector<MeshDrawData>>::iterator iter;
 
-		model->Draw(shaderData);
-	}
-	
+	for (iter = Renderer::drawCalls.begin(); iter != Renderer::drawCalls.end(); iter++)
+	{
+		// use shader and then draw all meshes
+		(*iter).first->UseShader();
+
+		std::vector<MeshDrawData>* meshes = &(*iter).second;
+		for (int i = 0; i < meshes->size(); ++i)
+		{
+			// do layermask shit here
+
+			// draw mesh with de cam data
+			meshes->at(i).Draw(shaderData);
+		}
+	}	
 }

@@ -13,6 +13,7 @@ private:
 	float farPlane = DEFAULT_FARPLANE;
 	float fieldOfView = glm::radians(DEFAULT_FOV);
 	float orthoSize = 10.0f;
+	int layerMask = INT_MAX;
 
 	CameraShaderData shaderData;
 public:
