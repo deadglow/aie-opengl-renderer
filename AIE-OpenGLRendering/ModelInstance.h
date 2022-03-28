@@ -21,5 +21,6 @@ public:
 	void ClearMaterialOverrides();
 
 	Model* GetBaseModel() const;
+	const bool IsOverridingMaterials() const;
 };
 

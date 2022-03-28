@@ -3,10 +3,13 @@
 #include <string>
 #include <sstream>
 #include "imgui.h"
+#include <unordered_map>
 
 ModelInstance* RendererDebugMenu::selectedInstance = nullptr;
 Model* RendererDebugMenu::selectedBaseModel = nullptr;
 Material* RendererDebugMenu::selectedMaterial = nullptr;
+int RendererDebugMenu::dropDownSelected = -1;
+
 
 void RendererDebugMenu::DrawImGui()
 {
@@ -51,6 +54,7 @@ void RendererDebugMenu::DrawModelCreation()
 				ModelInstance* instance = new ModelInstance(selectedBaseModel);
 				instance->transform.SetPosition(Renderer::cameraStack.front().transform.GetPosition());
 				Renderer::AddModelInstance(instance);
+				SelectInstance(instance);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("Unload"))
@@ -97,7 +101,67 @@ void RendererDebugMenu::DrawInstanceEditing()
 		if (ImGui::Button("Delete instance"))
 		{
 			Renderer::RemoveModelInstance(selectedInstance);
-			selectedInstance = nullptr;
+			SelectInstance(nullptr);
+			ImGui::End();
+			return;
+		}
+
+		ImGui::Spacing();
+		ImGui::Text("Material Overrides");
+		if (selectedInstance->IsOverridingMaterials())
+		{
+			for (int i = 0; i < selectedInstance->materialOverrides.size(); ++i)
+			{
+				if (ImGui::Button((std::to_string(i) + ", " + selectedInstance->materialOverrides[i]->GetName()).c_str()))
+				{
+					dropDownSelected = i;
+				}
+
+				if (i == dropDownSelected)
+				{
+					// generate list of materials
+					std::vector<Material*> matList;
+					std::vector<std::string> materialNames;
+					int count = 0;
+					int selected = -1;
+					for (const auto [key, value] : Renderer::materials)
+					{
+						matList.push_back(value);
+						materialNames.push_back(value->GetName());
+						
+						// store the index of the currently used material
+						if (selectedInstance->materialOverrides[i] == value)
+							selected = count;
+
+						count++;
+					}
+
+					// build char* array
+					std::vector<const char*> charArrays;
+					for (int j = 0; j < materialNames.size(); ++j)
+					{
+						charArrays.push_back(materialNames[j].c_str());
+					}
+
+					ImGui::ListBox("Select material", &selected, &(charArrays[0]), charArrays.size());
+
+					selectedInstance->SetMaterialOverride(i, matList[selected]);
+				}
+
+			}
+
+
+			if (ImGui::Button("Clear Material Overrides"))
+			{
+				selectedInstance->ClearMaterialOverrides();
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Override Materials"))
+			{
+				selectedInstance->SetMaterialOverride(0, selectedInstance->GetBaseModel()->defaultMaterials[0]);
+			}
 		}
 	}
 	else
@@ -112,13 +176,30 @@ void RendererDebugMenu::DrawInstanceSelection()
 {
 	ImGui::Begin("Instance Selection");
 
+	std::unordered_map<std::string, int> nameList;
+
 	for (const auto instance : Renderer::modelInstances)
 	{
 		bool isSelected = selectedInstance == instance;
 		std::string name = instance->GetBaseModel()->GetFilename();
+		
+		// count names
+		if (nameList.count(name) > 0)
+		{
+			nameList[name]++;
+			name = name + " " + std::to_string(nameList[name] - 1);
+		}
+		else
+		{
+			nameList.emplace(name, 1);
+		}
+
 		ImGui::Selectable(name.c_str(), &isSelected);
 		if (isSelected)
-			selectedInstance = instance;
+		{
+			if (selectedInstance != instance)
+				SelectInstance(instance);
+		}
 	}
 
 	ImGui::End();
@@ -131,8 +212,8 @@ void RendererDebugMenu::DrawMaterialList()
 	if (selectedMaterial)
 	{
 		selectedMaterial->UseShader();
-		ImGui::Begin("Current material");
 
+		ImGui::Text("Textures");
 		for (int i = 0; i < selectedMaterial->usedTextures.size(); ++i)
 		{
 			ImGui::Selectable(selectedMaterial->usedTextures[i]->GetFilename().c_str());
@@ -145,7 +226,6 @@ void RendererDebugMenu::DrawMaterialList()
 			ImGui::Selectable(selectedMaterial->properties[i]->name.c_str());
 		}
 
-		ImGui::End();
 	}
 	else
 	{
@@ -161,4 +241,10 @@ void RendererDebugMenu::DrawMaterialList()
 	}
 
 	ImGui::End();
+}
+
+void RendererDebugMenu::SelectInstance(ModelInstance* instance)
+{
+	selectedInstance = instance;
+	dropDownSelected = -1;
 }

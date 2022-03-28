@@ -34,6 +34,7 @@ void ModelInstance::SetMaterialOverride(int index, Material* mat)
 	if (!overrideMaterials)
 	{
 		materialOverrides = model->defaultMaterials;
+		overrideMaterials = true;
 	}
 
 	materialOverrides[index] = mat;
@@ -47,4 +48,9 @@ void ModelInstance::ClearMaterialOverrides()
 Model* ModelInstance::GetBaseModel() const
 {
 	return model;
+}
+
+const bool ModelInstance::IsOverridingMaterials() const
+{
+	return overrideMaterials;
 }
