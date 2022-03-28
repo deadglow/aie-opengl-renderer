@@ -44,11 +44,26 @@ void RendererDebugMenu::DrawModelCreation()
 	ImGui::Begin("Model Creation");
 	if (selectedBaseModel)
 	{
-		if (ImGui::Button("Create instance"))
+		if (selectedBaseModel->IsLoaded())
 		{
-			ModelInstance* instance = new ModelInstance(selectedBaseModel);
-			instance->transform.SetPosition(Renderer::camera.transform.GetPosition());
-			Renderer::AddModelInstance(instance);
+			if (ImGui::Button("Create instance"))
+			{
+				ModelInstance* instance = new ModelInstance(selectedBaseModel);
+				instance->transform.SetPosition(Renderer::cameraStack.front().transform.GetPosition());
+				Renderer::AddModelInstance(instance);
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Unload"))
+			{
+				selectedBaseModel->Unload();
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Load"))
+			{
+				selectedBaseModel->Load();
+			}
 		}
 	}
 	else
@@ -56,8 +71,6 @@ void RendererDebugMenu::DrawModelCreation()
 
 	for (const auto entry : ModelLoader::modelList)
 	{
-		if (!entry.second->IsLoaded()) continue;
-
 		bool isSelected = selectedBaseModel == entry.second;
 		std::string name = entry.second->GetFilename() + " " + std::to_string(entry.second->meshes.size());
 		ImGui::Selectable(name.c_str(), &isSelected);
@@ -77,7 +90,7 @@ void RendererDebugMenu::DrawInstanceEditing()
 		ImGui::Text((std::string("Current model instance: ") + selectedInstance->GetBaseModel()->GetFilename()).c_str());
 		glm::vec3 pos = selectedInstance->transform.GetPosition();
 		float posArray[3] = { pos.x, pos.y, pos.z };
-		ImGui::DragFloat3("Position", posArray);
+		ImGui::DragFloat3("Position", posArray, 0.1f);
 		pos = { posArray[0], posArray[1], posArray[2] };
 		selectedInstance->transform.SetPosition(pos);
 

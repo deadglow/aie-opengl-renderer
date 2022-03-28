@@ -14,8 +14,9 @@
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
 
-#define DEFAULT_SHADER "lit"
-#define DEFAULT_TEX "default.png"
+#define DEFAULT_SHADER "unlit"
+#define DEFAULT_TEXTURE "default.png"
+#define DEFAULT_MODEL "default.obj"
 
 class Renderer
 {
@@ -34,13 +35,15 @@ private:
 
 	Renderer() = delete;
 	~Renderer() = default;
-	static void OnDraw();
 	static void InitUBOs();
 	static void SetGlobalsUBO();
 	static void SetLightingUBO();
 	static void SetFogUBO();
+
+	static void OnDraw();
+	static void PrepareDrawCalls();
 public:
-	static Camera camera;
+	static std::list<Camera> cameraStack;
 	
 	// lighting
 	static glm::vec4 ambientLight;
@@ -62,7 +65,6 @@ public:
 	static void Render();
 	static void SetCameraUBO(CameraShaderData csd);
 	
-	static void PrepareDrawCalls();
 	static void AddToDrawCall(Material* mat, MeshDrawData data);
 	
 	static GLFWwindow* GetWindow();

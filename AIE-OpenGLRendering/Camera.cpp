@@ -50,13 +50,13 @@ void Camera::Draw()
 		// use shader and then draw all meshes
 		(*iter).first->UseShader();
 
-		std::vector<MeshDrawData>* meshes = &(*iter).second;
-		for (int i = 0; i < meshes->size(); ++i)
+		std::vector<MeshDrawData>* meshDrawDataList = &(*iter).second;
+		for (int i = 0; i < meshDrawDataList->size(); ++i)
 		{
 			// do layermask shit here
 
 			// draw mesh with de cam data
-			meshes->at(i).Draw(shaderData);
+			meshDrawDataList->at(i).Draw(shaderData);
 		}
 	}	
 }

@@ -1,30 +1,43 @@
-#version 450
+#version 460
 
 //Attributes that we expect from the vertex buffer
 layout (location = 0) in vec3 _Position;
 layout (location = 1) in vec3 _Normal;
-layout (location = 2) in vec2 _TexCoord;
+layout (location = 2) in vec3 _Tangent;
+layout (location = 3) in vec2 _TexCoord;
 
-uniform float _Time;
-uniform mat4 _VP;
-uniform mat4 _iVP;
+layout (std140, binding = 0) uniform _Camera
+{
+	mat4 _Pmat;
+	mat4 _iPmat;
+	mat4 _Vmat;
+	mat4 _iVmat;
+};
+
+layout(std140, binding = 1) uniform _Globals
+{
+	float _Time;
+	float _DeltaTime;
+};
+
+// model data
 uniform mat4 _M2W;
-uniform mat4 _NormalMatrix;
-uniform vec3 _CamPos;
-uniform vec3 _CamDir;
-uniform float _NearZ;
-uniform float _FarZ;
+uniform mat4 _iM2W;
+uniform mat4 _NormalMat;
 
-out vec3 Normal;
-out vec2 TexCoord;
-out vec4 NDCPos;
-out vec3 FragPos;
+// out
+out VS_OUT
+{
+	out vec3 FragPos;
+	out vec2 TexCoord;
+} vs_out;
 
 void main()
 {
-	FragPos = vec3(_M2W * vec4(_Position, 1));
-	NDCPos = _VP * vec4(FragPos, 1.0);
-	gl_Position = NDCPos;
-	Normal = mat3(_NormalMatrix) * _Normal;
-	TexCoord = _TexCoord;
+	// local to view
+	vs_out.FragPos = vec3(_Vmat * _M2W * vec4(_Position, 1));
+	// world to perspective
+	gl_Position = _Pmat * vec4(vs_out.FragPos, 1.0);
+	
+	vs_out.TexCoord = _TexCoord;
 }

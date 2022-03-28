@@ -26,7 +26,7 @@ GLuint Renderer::uboFog = -1;
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
 float Renderer::fogDensity = 0.000f;
 
-Camera Renderer::camera;
+std::list<Camera> Renderer::cameraStack;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
 std::vector<Light*> Renderer::lights;
 
@@ -73,15 +73,15 @@ int Renderer::Initialise()
 
 	// textures setup
 	TextureLoader::Initialise();
-	TextureLoader::LoadTexture(DEFAULT_TEX);
+	TextureLoader::LoadTexture(DEFAULT_TEXTURE);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEX)->GetID());
+	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
 
 
 	// shader setup
@@ -91,8 +91,15 @@ int Renderer::Initialise()
 		glfwTerminate();
 		return -1;
 	}
+	// set up default material
+	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), DEFAULT_SHADER);
+	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
+	materials.emplace(material->GetName(), material);
 
+	// load models
 	ModelLoader::Initialise();
+	Model* model = ModelLoader::LoadModel(DEFAULT_MODEL);
+	model->SetAllMaterials(materials[DEFAULT_SHADER]);
 
 	// set up imgui
 	IMGUI_CHECKVERSION();
@@ -261,10 +268,11 @@ void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
 void Renderer::Start()
 {
 	// move da camera
-	camera.transform.SetPosition(glm::vec3(0, 0, 5));
+	cameraStack.push_back(Camera());
+	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
 
 	// crate
-	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), "crate");
+	Material* material = new Material(ShaderLoader::GetShader("lit"), "crate");
 	TextureLoader::LoadTexture("BOX_full_albedo.png");
 	TextureLoader::LoadTexture("BOX_full_normal.png");
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
@@ -280,10 +288,10 @@ void Renderer::Start()
 	modelInstances.push_back(modelT);
 
 	// beans
-	material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), "beans");
+	material = new Material(ShaderLoader::GetShader("lit"), "beans");
 	TextureLoader::LoadTexture("beancan.png");
 	material->AddTexture(TextureLoader::GetTexture("beancan.png"));
-	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEX));
+	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
 	materials.emplace(material->GetName(), material);
 	
 	// bean model
@@ -337,6 +345,10 @@ void Renderer::OnDraw()
 	// prep draw calls
 	PrepareDrawCalls();
 
-	camera.Draw();
+	auto iter = cameraStack.begin();
+	for (iter; iter != cameraStack.end(); iter++)
+	{
+		(*iter).Draw();
+	}
 	RendererDebugMenu::DrawImGui();
 }

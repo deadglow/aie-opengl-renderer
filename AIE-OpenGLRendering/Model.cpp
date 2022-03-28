@@ -35,6 +35,14 @@ void Model::SetMaterial(const int index, Material* material)
 	defaultMaterials[index] = material;
 }
 
+void Model::SetAllMaterials(Material* material)
+{
+	for (int i = 0; i < meshes.size(); ++i)
+	{
+		SetMaterial(i, material);
+	}
+}
+
 void Model::Load()
 {
 	if (!loaded)
@@ -61,7 +69,11 @@ void Model::Unload()
 
 void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 {
-	if (!loaded) throw std::runtime_error("Model not loaded.");
+	if (!loaded)
+	{
+		ModelLoader::GetModel(DEFAULT_MODEL)->Draw(csd, transform);
+		return;
+	}
 
 	for (int i = 0; i < meshes.size(); ++i)
 	{
@@ -78,7 +90,11 @@ void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 
 void Model::AddToDrawCall(glm::mat4 transform, std::vector<Material*>* materialLookup)
 {
-	if (!loaded) throw std::runtime_error("Model not loaded.");
+	if (!loaded)
+	{
+		ModelLoader::GetModel(DEFAULT_MODEL)->AddToDrawCall(transform);
+		return;
+	}
 
 	for (int i = 0; i < meshes.size(); ++i)
 	{

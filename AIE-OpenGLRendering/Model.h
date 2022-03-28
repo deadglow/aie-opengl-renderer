@@ -22,6 +22,7 @@ public:
 	
 	void AddMesh(Mesh* mesh);
 	void SetMaterial(const int index, Material* material);
+	void SetAllMaterials(Material* material);
 
 	void Load();
 	void Unload();

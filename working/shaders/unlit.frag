@@ -1,40 +1,61 @@
-#version 450
+#version 460
 
-in vec3 Normal;
-in vec2 TexCoord;
-in vec4 NDCPos;
-in vec3 FragPos;
-out vec4 FragColour;
+// uniform buffers
+layout (std140, binding = 0) uniform _Camera
+{
+						// size		//offset
+	mat4 _Pmat;			// 64		// 0
+	mat4 _iPmat;		// 64		// 64
+	mat4 _Vmat;			// 64		// 128
+	mat4 _iVmat;		// 64		// 192
+};
 
-uniform sampler2D _Texture;
+layout(std140, binding = 1) uniform _Globals
+{
+	float _Time;
+	float _DeltaTime;
+};
+
+layout(std140, binding = 3) uniform _Fog
+{
+								// size		// offset
+	vec4 _FogColor;				// 16		// 0
+	float _FogDensity;			// 4		// 16
+};
+
+
+// uniforms //
+
+// model data
+uniform mat4 _M2W;
+uniform mat4 _iM2W;
+
+// sampler
+layout (binding = 0) uniform sampler2D _Texture0;		// diffuse
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-uniform float _Time;
-uniform mat4 _VP;
-uniform mat4 _iVP;
-uniform mat4 _M2W;
-uniform mat4 _NormalMatrix;
-uniform vec3 _CamPos;
-uniform vec3 _CamDir;
-uniform float _NearZ;
-uniform float _FarZ;
-uniform vec4 _Ambient = vec4(0.1, 0.1, 0.1, 1) * 0.5;
-
-uniform vec3 _DirLight = vec3(0, -1, 0);
-uniform vec4 _LightCol = vec4(1.5, 1.5, 1.5, 1.5);
-uniform float _SpecularStrength = 1.0;
-uniform float _Roughness = 0.3;
-
-uniform vec4 _FogColor = vec4(0.0f, 0.02f, 0.07f, 1.0f);
-uniform float _FogDensity = 0.0015;
-
-void main()
+//inout
+in VS_OUT
 {
-	// fog
-	vec4 worldPos = _iVP * NDCPos;
-	vec3 delta = _CamPos - worldPos.xyz;
+	in vec3 FragPos;
+	in vec2 TexCoord;
+} fs_in;
+
+out vec4 FragColour;
+
+// functions
+
+vec4 ProcessFog(vec4 color)
+{
+	vec3 delta = -fs_in.FragPos;
 	float depth = dot(delta, delta) * _FogDensity;
 	float t = clamp(depth, 0, 1);
 
-	FragColour = mix(texture(_Texture, TexCoord) * _AlbedoColor, _FogColor, t);
+	return mix(color, _FogColor, t);
+}
+
+void main()
+{
+	// do fog
+	FragColour = ProcessFog(texture(_Texture0, fs_in.TexCoord));
 }

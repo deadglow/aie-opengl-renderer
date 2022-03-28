@@ -1,6 +1,7 @@
 #include "ModelLoader.h"
 #include "FileReader.h"
 #include "ModelLoadFunctions.h"
+#include "Renderer.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
@@ -29,6 +30,7 @@ void ModelLoader::Initialise()
 			if (extension == ".obj" || extension == ".fbx")
 			{
 				Model* model = CreateModel(path.string(), path.filename().string());
+				model->SetAllMaterials(Renderer::materials[DEFAULT_SHADER]);
 				modelList.emplace(path.filename().string(), model);
 				continue;
 			}

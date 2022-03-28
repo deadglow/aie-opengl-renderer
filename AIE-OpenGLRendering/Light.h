@@ -1,16 +1,13 @@
 #pragma once
 #include "glm/glm.hpp"
 
-struct LightShaderData
+struct alignas(16) LightShaderData
 {
-	glm::vec3 position = glm::vec3(0);
-	float padding0 = 1.0f;
-	glm::vec3 direction = glm::vec3(0, 0, 1);
-	float padding1 = 0.0f;
-	glm::vec4 color = glm::vec4(1);
-	glm::vec4 properties = glm::vec4(1);
-	int type = 0;
-	float padding2[3] = { 0, 0, 0 };
+	alignas(16) glm::vec3 position = glm::vec3(0);
+	alignas(16) glm::vec3 direction = glm::vec3(0, 0, 1);
+	alignas(16) glm::vec4 color = glm::vec4(1);
+	alignas(16) glm::vec4 properties = glm::vec4(1);
+	alignas(4) int type = 0;
 };
 
 class Light
