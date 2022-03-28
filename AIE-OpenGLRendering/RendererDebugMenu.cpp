@@ -92,11 +92,27 @@ void RendererDebugMenu::DrawInstanceEditing()
 	if (selectedInstance)
 	{
 		ImGui::Text((std::string("Current model instance: ") + selectedInstance->GetBaseModel()->GetFilename()).c_str());
+
+		// pos
 		glm::vec3 pos = selectedInstance->transform.GetPosition();
 		float posArray[3] = { pos.x, pos.y, pos.z };
 		ImGui::DragFloat3("Position", posArray, 0.1f);
 		pos = { posArray[0], posArray[1], posArray[2] };
 		selectedInstance->transform.SetPosition(pos);
+		ImGui::SameLine();
+		if (ImGui::Button("ResetPos"))
+			selectedInstance->transform.SetPosition({ 0, 0, 0 });
+
+		// rot
+		glm::vec3 rotation = selectedInstance->transform.GetRotation();
+		float rotArray[3] = { glm::degrees(rotation.x), glm::degrees(rotation.y), glm::degrees(rotation.z) };
+		ImGui::DragFloat3("Rotation", rotArray, 0.5f);
+		rotation = { glm::radians(rotArray[0]), glm::radians(rotArray[1]), glm::radians(rotArray[2]) };
+		selectedInstance->transform.SetRotation(rotation);
+		ImGui::SameLine();
+		if (ImGui::Button("ResetRot"))
+			selectedInstance->transform.SetRotation({ 0, 0, 0 });
+
 
 		if (ImGui::Button("Delete instance"))
 		{

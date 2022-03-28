@@ -63,7 +63,7 @@ int Renderer::Initialise()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	glClearColor(0.0f, 0.02f, 0.07f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	// enable msaa
 	glfwWindowHint(GLFW_SAMPLES, 4);
