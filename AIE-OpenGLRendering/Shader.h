@@ -3,7 +3,7 @@
 #include <string>
 #include <unordered_set>
 
-class Texture;
+class Texture2D;
 
 class Shader
 {

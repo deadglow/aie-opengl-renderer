@@ -9,7 +9,7 @@ namespace fs = std::filesystem;
 
 std::string TextureLoader::dir = fs::current_path().string() + "/textures";;
 std::unordered_map<std::string, std::string> TextureLoader::textureFiles;
-std::unordered_map<std::string, Texture*> TextureLoader::textureLookup;
+std::unordered_map<std::string, Texture2D*> TextureLoader::textureLookup;
 
 void TextureLoader::Initialise()
 {
@@ -55,12 +55,17 @@ const std::string TextureLoader::GetTexturePath(const std::string filename)
 	return textureFiles.at(filename);
 }
 
-Texture* TextureLoader::GetTexture(const std::string filename)
+Texture2D* TextureLoader::GetTexture(const std::string filename)
 {
 	return textureLookup.at(filename);
 }
 
-Texture* TextureLoader::LoadTexture(const std::string filename)
+Cubemap* TextureLoader::GetCubemap(const std::string filename)
+{
+	return cubemapLookup.at(filename);
+}
+
+Texture2D* TextureLoader::LoadTexture(const std::string filename)
 {
 	if (textureFiles.count(filename))
 	{
@@ -72,7 +77,7 @@ Texture* TextureLoader::LoadTexture(const std::string filename)
 
 		if (data)
 		{
-			Texture* texture = new Texture(data, width, height, nrChannels, filename);
+			Texture2D* texture = new Texture2D(data, width, height, nrChannels, filename);
 
 			// we're now done with the data
 			stbi_image_free(data);
@@ -92,6 +97,39 @@ Texture* TextureLoader::LoadTexture(const std::string filename)
 	}
 	else
 		return nullptr;
+}
+
+Cubemap* TextureLoader::LoadCubemap(const std::string facePaths[6])
+{
+	unsigned int id = -1;
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
+	int width, height, nrChannels;
+	// right, left, top, bottom, back, front
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		unsigned char* data = stbi_load(facePaths[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			GLenum format = (GLenum)Texture2D::CalculateFormat(nrChannels);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap failed to load path: " + facePaths[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	
+	//---------------------------------------------------------------------------------------------
 }
 
 void TextureLoader::UnloadTexture(const std::string filename)

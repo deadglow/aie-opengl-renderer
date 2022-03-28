@@ -159,6 +159,9 @@
     <ClCompile Include="MeshDrawData.cpp">
       <Filter>_Source Files\Model</Filter>
     </ClCompile>
+    <ClCompile Include="Cubemap.cpp">
+      <Filter>_Source Files\Texture</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad.h">
@@ -277,6 +280,9 @@
     </ClInclude>
     <ClInclude Include="MeshDrawData.h">
       <Filter>_Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubemap.h">
+      <Filter>_Header Files\Texture</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

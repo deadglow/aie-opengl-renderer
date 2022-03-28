@@ -20,7 +20,7 @@ Material::~Material()
 	properties.clear();
 }
 
-void Material::AddTexture(Texture* texture)
+void Material::AddTexture(Texture2D* texture)
 {
 	usedTextures.push_back(texture);
 }

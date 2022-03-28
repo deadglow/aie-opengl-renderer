@@ -31,9 +31,10 @@ enum class TEX_Format : GLenum
 	RG = GL_RG,
 	RGB = GL_RGB,
 	RGBA = GL_RGBA,
+	INVALID = -1
 };
 
-class Texture
+class Texture2D
 {
 private:
 	GLuint id = -1;
@@ -46,8 +47,8 @@ private:
 	TEX_Filtering magFilter = TEX_Filtering::Linear;
 	std::string filename = "";
 public:
-	Texture(unsigned char* data, const int width_init, const int height_init, const int nrChannels_init, const std::string filename_init);
-	~Texture();
+	Texture2D(unsigned char* data, const int width_init, const int height_init, const int nrChannels_init, const std::string filename_init);
+	~Texture2D();
 
 	const bool IsLoaded() const;
 	const GLuint GetID() const;
@@ -60,5 +61,6 @@ public:
 	void SetFilter(TEX_Filtering filter);
 	void UpdateTexture();
 
+	static TEX_Format CalculateFormat(const int numChannels);
 };
 

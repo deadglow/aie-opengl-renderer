@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Cubemap.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="FileReader.cpp" />
@@ -189,6 +190,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraShaderData.h" />
+    <ClInclude Include="Cubemap.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="FileReader.h" />
     <ClInclude Include="Game.h" />

@@ -13,7 +13,7 @@ private:
 	std::string materialName;
 
 public:
-	std::vector<Texture*> usedTextures;
+	std::vector<Texture2D*> usedTextures;
 	std::vector<ShaderPropertyBase*> properties;
 
 	Material(Shader* shader_init, const std::string name_init);

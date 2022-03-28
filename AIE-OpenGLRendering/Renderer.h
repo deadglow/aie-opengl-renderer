@@ -17,6 +17,7 @@
 #define DEFAULT_SHADER "unlit"
 #define DEFAULT_TEXTURE "default.png"
 #define DEFAULT_MODEL "default.obj"
+#define SKYBOX_SHADER "skybox"
 
 class Renderer
 {
@@ -41,6 +42,7 @@ private:
 	static void SetFogUBO();
 
 	static void OnDraw();
+	static void DrawSkybox();
 	static void PrepareDrawCalls();
 public:
 	static std::list<Camera> cameraStack;

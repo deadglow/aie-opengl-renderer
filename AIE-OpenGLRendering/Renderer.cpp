@@ -187,6 +187,12 @@ void Renderer::SetGlobalsUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
+void Renderer::DrawSkybox()
+{
+	materials.at(SKYBOX_SHADER)->UseShader();
+
+}
+
 void Renderer::SetCameraUBO(CameraShaderData csd)
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
@@ -313,7 +319,7 @@ void Renderer::Start()
 void Renderer::Render()
 {
 	// clear the screen and start drawing
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();
@@ -326,6 +332,7 @@ void Renderer::Render()
 
 	// drawing here
 	OnDraw();
+	// skybox
 
 	// imgui draw
 	ImGui::Render();

@@ -1,27 +1,14 @@
 #include "Texture.h"
 
-Texture::Texture(unsigned char* data, const int width_init, const int height_init, const int nrChannels_init, const std::string filename_init)
+Texture2D::Texture2D(unsigned char* data, const int width_init, const int height_init, const int nrChannels_init, const std::string filename_init)
 {
     glGenTextures(1, &id);
     width = width_init;
     height = height_init;
     filename = filename_init;
 
-    switch (nrChannels_init)
-    {
-    case 1:
-        format = TEX_Format::R;
-        break;
-    case 2:
-        format = TEX_Format::RG;
-        break;
-    case 3:
-        format = TEX_Format::RGB;
-        break;
-    case 4:
-        format = TEX_Format::RGBA;
-        break;
-    }
+    format = CalculateFormat(nrChannels_init);
+
 
     UpdateTexture();
     // assign texture data
@@ -30,7 +17,7 @@ Texture::Texture(unsigned char* data, const int width_init, const int height_ini
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-Texture::~Texture()
+Texture2D::~Texture2D()
 {
     if (IsLoaded())
     {
@@ -38,48 +25,48 @@ Texture::~Texture()
     }
 }
 
-const bool Texture::IsLoaded() const
+const bool Texture2D::IsLoaded() const
 {
     return id != -1;
 }
 
-const GLuint Texture::GetID() const
+const GLuint Texture2D::GetID() const
 {
     return id;
 }
 
-const int Texture::GetWidth() const
+const int Texture2D::GetWidth() const
 {
     return width;
 }
 
-const int Texture::GetHeight() const
+const int Texture2D::GetHeight() const
 {
     return height;
 }
 
-const std::string Texture::GetFilename() const
+const std::string Texture2D::GetFilename() const
 {
     return filename;
 }
 
-void Texture::SetWrapMode(TEX_WrapMode s, TEX_WrapMode t)
+void Texture2D::SetWrapMode(TEX_WrapMode s, TEX_WrapMode t)
 {
     wrapMode[0] = s;
     wrapMode[1] = t;
 }
 
-void Texture::SetMipMapFilter(TEX_MipMapFiltering filter)
+void Texture2D::SetMipMapFilter(TEX_MipMapFiltering filter)
 {
     minFilter = filter;
 }
 
-void Texture::SetFilter(TEX_Filtering filter)
+void Texture2D::SetFilter(TEX_Filtering filter)
 {
     magFilter = filter;
 }
 
-void Texture::UpdateTexture()
+void Texture2D::UpdateTexture()
 {
     glBindTexture(GL_TEXTURE_2D, id);
 
@@ -93,4 +80,25 @@ void Texture::UpdateTexture()
         
     // unbind
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+TEX_Format Texture2D::CalculateFormat(const int numChannels)
+{
+    switch (numChannels)
+    {
+    case 1:
+        return TEX_Format::R;
+        break;
+    case 2:
+        return TEX_Format::RG;
+        break;
+    case 3:
+        return TEX_Format::RGB;
+        break;
+    case 4:
+        return TEX_Format::RGBA;
+        break;
+    }
+    
+    return TEX_Format::INVALID;
 }
