@@ -300,12 +300,13 @@ void Renderer::Start()
 	material->AddProperty("_Smoothness", 1.0f);
 	materials.emplace(material->GetName(), material);
 
-	// crate model
+		// crate model
 	Model* model = ModelLoader::LoadModel("Box_final.obj");
 	model->SetMaterial(0, materials["crate"]);
-
 	ModelInstance* modelT = new ModelInstance(model);
 	modelInstances.push_back(modelT);
+
+	skyboxMaterial->AddTexture()
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);

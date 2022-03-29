@@ -58,5 +58,7 @@ void Camera::Draw()
 			// draw mesh with de cam data
 			meshDrawDataList->at(i).Draw(shaderData);
 		}
-	}	
+	}
+
+	Renderer::DrawSkybox();
 }

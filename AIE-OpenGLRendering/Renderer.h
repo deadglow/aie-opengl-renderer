@@ -45,7 +45,6 @@ private:
 	static void SetFogUBO();
 
 	static void OnDraw();
-	static void DrawSkybox();
 	static void PrepareDrawCalls();
 public:
 	static std::list<Camera> cameraStack;
@@ -75,6 +74,7 @@ public:
 	static void SetCameraUBO(CameraShaderData csd);
 	
 	static void AddToDrawCall(Material* mat, MeshDrawData data);
+	static void DrawSkybox();
 	
 	static GLFWwindow* GetWindow();
 	static double GetDeltaTime();
