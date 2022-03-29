@@ -47,5 +47,5 @@ out vec4 FragColour;
 
 void main()
 {
-	FragColour = (texture(_Texture0, fs_in.TexCoord));
+	//FragColour = (texture(_Texture0, fs_in.TexCoord));
 }

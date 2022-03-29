@@ -96,6 +96,7 @@ int Renderer::Initialise()
 		glfwTerminate();
 		return -1;
 	}
+
 	// set up default materials
 		// unlit
 	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_UNLIT), DEFAULT_SHADER_UNLIT);
@@ -293,10 +294,8 @@ void Renderer::Start()
 
 	// crate
 	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_LIT), "crate");
-	TextureLoader::LoadTexture("BOX_full_albedo.png");
-	TextureLoader::LoadTexture("BOX_full_normal.png");
-	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
-	material->AddTexture(TextureLoader::GetTexture("BOX_full_normal.png"));
+	material->AddTexture(TextureLoader::LoadTexture("BOX_full_albedo.png"));
+	material->AddTexture(TextureLoader::LoadTexture("BOX_full_normal.png"));
 	material->AddProperty("_Smoothness", 1.0f);
 	materials.emplace(material->GetName(), material);
 
@@ -306,7 +305,8 @@ void Renderer::Start()
 	ModelInstance* modelT = new ModelInstance(model);
 	modelInstances.push_back(modelT);
 
-	skyboxMaterial->AddTexture()
+	Cubemap* cubemap = TextureLoader::LoadCubemap("skybox.cubemap");
+	skyboxMaterial->AddTexture(cubemap);
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);

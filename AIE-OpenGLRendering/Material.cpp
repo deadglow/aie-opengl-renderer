@@ -20,7 +20,7 @@ Material::~Material()
 	properties.clear();
 }
 
-void Material::AddTexture(Texture2D* texture)
+void Material::AddTexture(Texture* texture)
 {
 	usedTextures.push_back(texture);
 }
@@ -42,8 +42,25 @@ void Material::ApplyConfiguration()
 	// set texture bindings
 	for (int i = 0; i < usedTextures.size(); ++i)
 	{
+		TEX_Type type = usedTextures[i]->GetTexType();
+
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, usedTextures[i]->GetID());
+
+		switch (type)
+		{
+		case TEX_Type::Texture2D:
+		{
+			glBindTexture(GL_TEXTURE_2D, usedTextures[i]->GetID());
+
+		}
+		break;
+
+		case TEX_Type::Cubemap:
+		{
+			glBindTexture(GL_TEXTURE_CUBE_MAP, usedTextures[i]->GetID());
+		}
+		break;
+		}
 	}
 }
 

@@ -12,8 +12,7 @@ private:
 	static std::string dir;
 	static std::unordered_map<std::string, std::string> textureFiles;
 	static std::unordered_map<std::string, std::string> cubemapFiles;
-	static std::unordered_map<std::string, Texture2D*> textureLookup;
-	static std::unordered_map<std::string, Cubemap*> cubemapLookup;
+	static std::unordered_map<std::string, Texture*> textureLookup;
 
 	TextureLoader() = delete;
 public:

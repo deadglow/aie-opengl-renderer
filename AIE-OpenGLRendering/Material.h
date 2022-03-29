@@ -1,6 +1,8 @@
 #pragma once
 #include "Shader.h"
 #include "ShaderProperty.h"
+#include "Texture2D.h"
+#include "Cubemap.h"
 #include <vector>
 #include <string>
 
@@ -13,7 +15,7 @@ private:
 	std::string materialName;
 
 public:
-	std::vector<Texture2D*> usedTextures;
+	std::vector<Texture*> usedTextures;
 	std::vector<ShaderPropertyBase*> properties;
 
 	Material(Shader* shader_init, const std::string name_init);
@@ -26,7 +28,7 @@ public:
 		properties.push_back(prop);
 	}
 
-	void AddTexture(Texture2D* texture);
+	void AddTexture(Texture* texture);
 
 	void UseShader();
 	void ApplyConfiguration();

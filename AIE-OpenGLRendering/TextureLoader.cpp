@@ -11,8 +11,7 @@ namespace fs = std::filesystem;
 std::string TextureLoader::dir = fs::current_path().string() + "/textures";;
 std::unordered_map<std::string, std::string> TextureLoader::textureFiles;
 std::unordered_map<std::string, std::string> TextureLoader::cubemapFiles;
-std::unordered_map<std::string, Texture2D*> TextureLoader::textureLookup;
-std::unordered_map<std::string, Cubemap*> TextureLoader::cubemapLookup;
+std::unordered_map<std::string, Texture*> TextureLoader::textureLookup;
 
 void TextureLoader::Initialise()
 {
@@ -25,14 +24,9 @@ void TextureLoader::Initialise()
 
 			fs::path path = entry.path();
 			std::string extension = path.filename().extension().string();
-			if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga")
+			if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga" || extension == ".cubemap")
 			{
 				textureFiles.emplace(path.filename().string(), path.string());
-				continue;
-			}
-			else if (extension == ".cubemap")
-			{
-				cubemapLookup.emplace(path.filename().string(), path.string());
 				continue;
 			}
 		}
@@ -65,12 +59,12 @@ const std::string TextureLoader::GetTexturePath(const std::string filename)
 
 Texture2D* TextureLoader::GetTexture(const std::string filename)
 {
-	return textureLookup.at(filename);
+	return (Texture2D*)textureLookup.at(filename);
 }
 
 Cubemap* TextureLoader::GetCubemap(const std::string filename)
 {
-	return cubemapLookup.at(filename);
+	return (Cubemap*)textureLookup.at(filename);
 }
 
 Texture2D* TextureLoader::LoadTexture(const std::string filename)
@@ -122,21 +116,23 @@ Cubemap* TextureLoader::LoadCubemap(const std::string filename)
 	if (FileReader::LoadFileAsStringVector(&lines, pathString) < 1) return nullptr;
 
 	std::string faceTextures[6];
+	int lastValidLine = 0;
 	for (int i = 0; i < 6; ++i)
 	{
-		if (i >= lines.size())
+		if (i >= lines.size() || lines[i].size() <= 1)
 		{
 			std::cout << "Not enough textures for cubemap, filling with last texture." << std::endl;
-			faceTextures[i] = faceTextures[lines.size() - 1];
+			faceTextures[i] = faceTextures[lastValidLine];
 		}
 		else
 		{
 			faceTextures[i] = lines[i];
+			lastValidLine = i;
 		}
 	}
 
 	fs::path path = pathString;
-	path = path.root_directory();
+	path = path.;
 
 	unsigned int id = -1;
 	glGenTextures(1, &id);
@@ -165,6 +161,8 @@ Cubemap* TextureLoader::LoadCubemap(const std::string filename)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	
 	Cubemap* cubemap = new Cubemap(id, filename);
+
+	textureLookup.emplace(filename, cubemap);
 	
 	return cubemap;
 	//---------------------------------------------------------------------------------------------
