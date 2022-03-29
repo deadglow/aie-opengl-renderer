@@ -8,7 +8,7 @@
 Model* MeshLoadFunctions::CreateModelFromFile(const std::string filepath, const std::string filename)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -52,12 +52,18 @@ Mesh* MeshLoadFunctions::ProcessMesh(Model* model, aiMesh* mesh, glm::mat4 trans
 		Vertex vertex;
 		aiVector3D vec = mesh->mVertices[i];
 		vertex.pos = { vec.x, vec.y, vec.z };
-		vec = mesh->mNormals[i];
-		vertex.normal = { vec.x, vec.y, vec.z };
-		vec = mesh->mTangents[i];
-		vertex.tangent = { vec.x, vec.y, vec.z };
+		if (mesh->HasNormals())
+		{
+			vec = mesh->mNormals[i];
+			vertex.normal = { vec.x, vec.y, vec.z };
+		}
+		if (mesh->HasTangentsAndBitangents())
+		{
+			vec = mesh->mTangents[i];
+			vertex.tangent = { vec.x, vec.y, vec.z };
+		}
 
-		if (mesh->mTextureCoords)
+		if (mesh->HasTextureCoords(0))
 		{
 			aiVector3D texCoord = mesh->mTextureCoords[0][i];
 			vertex.texCoord = { texCoord.x, texCoord.y };

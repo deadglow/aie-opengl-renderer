@@ -18,11 +18,7 @@ layout(std140, binding = 1) uniform _Globals
 };
 
 
-// out
-out VS_OUT
-{
-	out vec3 TexCoord;
-} vs_out;
+out vec3 TexCoord;
 
 void main()
 {

@@ -3,13 +3,12 @@
 #include "GLFW/glfw3.h"
 #include <iostream>
 
-Mesh::Mesh(std::string filename_init, glm::mat4 transform_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init, float unitScale_init)
+Mesh::Mesh(std::string filename_init, glm::mat4 transform_init, std::vector<Vertex> vertices_init, std::vector<Triangle> triangles_init)
 {
 	filename = filename_init;
 	transform = transform_init;
 	vertices = vertices_init;
 	triangles = triangles_init;
-	unitScale = unitScale_init;
 }
 
 Mesh::~Mesh()

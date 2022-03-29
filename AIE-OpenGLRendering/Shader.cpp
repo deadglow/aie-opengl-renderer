@@ -1,7 +1,6 @@
 #include "Shader.h"
 #include "glad.h"
 #include "GLFW/glfw3.h"
-#include "Texture.h"
 #include "ShaderLoader.h"
 #include "glm/gtc/type_ptr.hpp"
 

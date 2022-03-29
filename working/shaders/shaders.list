@@ -1,3 +1,4 @@
 unlit,unlit.vert,unlit.frag
 lit,lit.vert,lit.frag
 skybox,skybox.vert,skybox.frag
+colorwave,unlit.vert,colorwave.frag

@@ -31,35 +31,41 @@ enum class TEX_Format : GLenum
 	RG = GL_RG,
 	RGB = GL_RGB,
 	RGBA = GL_RGBA,
-	INVALID = -1
+	INVALID = UINT_MAX
 };
 
-class Texture2D
+enum class TEX_Type : int
 {
-private:
+	Texture1D = GL_TEXTURE_1D,
+	Texture2D = GL_TEXTURE_2D,
+	Texture3D = GL_TEXTURE_3D,
+	Cubemap = GL_TEXTURE_CUBE_MAP,
+	Texture1DArray = GL_TEXTURE_1D_ARRAY,
+	Texture2DArray = GL_TEXTURE_2D_ARRAY,
+	CubeMapArray = GL_TEXTURE_CUBE_MAP_ARRAY
+};
+
+class Texture
+{
+protected:
 	GLuint id = -1;
-	int width = -1;
-	int height = -1;
-	float borderColor[4] = { 1, 1, 1, 1 };
-	TEX_Format format = TEX_Format::RGB;
-	TEX_WrapMode wrapMode[2] = { TEX_WrapMode::Wrap, TEX_WrapMode::Wrap};
+	std::string filename = "";
+
 	TEX_MipMapFiltering minFilter = TEX_MipMapFiltering::LinearMipMapLinear;
 	TEX_Filtering magFilter = TEX_Filtering::Linear;
-	std::string filename = "";
+
 public:
-	Texture2D(unsigned char* data, const int width_init, const int height_init, const int nrChannels_init, const std::string filename_init);
-	~Texture2D();
+	Texture(const GLuint id_init, const std::string filename);
+	virtual ~Texture();
 
 	const bool IsLoaded() const;
 	const GLuint GetID() const;
-	const int GetWidth() const;
-	const int GetHeight() const;
 	const std::string GetFilename() const;
 
-	void SetWrapMode(TEX_WrapMode s, TEX_WrapMode t);
 	void SetMipMapFilter(TEX_MipMapFiltering filter);
 	void SetFilter(TEX_Filtering filter);
-	void UpdateTexture();
+	virtual void UpdateTextureProperties();
+	virtual TEX_Type GetTexType();
 
 	static TEX_Format CalculateFormat(const int numChannels);
 };

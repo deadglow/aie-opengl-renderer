@@ -14,10 +14,13 @@
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
 
-#define DEFAULT_SHADER "unlit"
+#define DEFAULT_SHADER_UNLIT "unlit"
+#define DEFAULT_SHADER_LIT "lit"
 #define DEFAULT_TEXTURE "default.png"
 #define DEFAULT_MODEL "default.obj"
-#define SKYBOX_SHADER "skybox"
+
+#define DEFAULT_SHADER_SKYBOX "skybox"
+#define DEFAULT_SKYBOX_MODEL "skybox.obj"
 
 class Renderer
 {
@@ -54,6 +57,10 @@ public:
 	// fog
 	static glm::vec4 fogColor;
 	static float fogDensity;
+
+	// skybox
+	static Material* skyboxMaterial;
+	static Model* skybox;
 
 	// lists
 	static std::list<ModelInstance*> modelInstances;

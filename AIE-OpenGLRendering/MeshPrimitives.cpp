@@ -112,7 +112,7 @@ Mesh* MeshPrimitives::CreateCube(float width, float height, float depth)
 	}
 
 	// vertices and indices complete
-	Mesh* box = new Mesh("Primitive_Box", glm::mat4(1.0f), verticesList, triangles, 1.0f);
+	Mesh* box = new Mesh("Primitive_Box", glm::mat4(1.0f), verticesList, triangles);
 	return box;
 }
 

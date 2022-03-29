@@ -26,6 +26,9 @@ GLuint Renderer::uboFog = -1;
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
 float Renderer::fogDensity = 0.000f;
 
+Material* Renderer::skyboxMaterial = nullptr;
+Model* Renderer::skybox = nullptr;
+
 std::list<Camera> Renderer::cameraStack;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
 std::vector<Light*> Renderer::lights;
@@ -60,29 +63,31 @@ int Renderer::Initialise()
 	// enable depth buffer
 	glEnable(GL_DEPTH_TEST);
 
+	// enable backface culling
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
+	// set clear color
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+	// turn off vsync
+	glfwSwapInterval(0);
 
 	// enable msaa
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	glEnable(GL_MULTISAMPLE);
 
+	// create and initialise UBOs
 	InitUBOs();
 
 	// textures setup
 	TextureLoader::Initialise();
 	TextureLoader::LoadTexture(DEFAULT_TEXTURE);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
-
+	for (int i = 0; i < 11; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
+	}
 
 	// shader setup
 	if (!ShaderLoader::InitialiseShaders())
@@ -91,15 +96,27 @@ int Renderer::Initialise()
 		glfwTerminate();
 		return -1;
 	}
-	// set up default material
-	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER), DEFAULT_SHADER);
+	// set up default materials
+		// unlit
+	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_UNLIT), DEFAULT_SHADER_UNLIT);
 	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
 	materials.emplace(material->GetName(), material);
+		// lit
+	material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_LIT), DEFAULT_SHADER_LIT);
+	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
+	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
+	materials.emplace(material->GetName(), material);
+		// skybox
+	skyboxMaterial = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_SKYBOX), DEFAULT_SHADER_SKYBOX);
 
-	// load models
+	// model setup
 	ModelLoader::Initialise();
+		// default cube
 	Model* model = ModelLoader::LoadModel(DEFAULT_MODEL);
-	model->SetAllMaterials(materials[DEFAULT_SHADER]);
+	model->SetAllMaterials(materials[DEFAULT_SHADER_UNLIT]);
+		// skybox
+	skybox = ModelLoader::LoadModel(DEFAULT_SKYBOX_MODEL);
+	skybox->SetAllMaterials(skyboxMaterial);
 
 	// set up imgui
 	IMGUI_CHECKVERSION();
@@ -155,6 +172,8 @@ void Renderer::Shutdown()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui::DestroyContext();
 
+	delete skyboxMaterial;
+
 	// shutdown loaders
 	ModelLoader::Shutdown();
 	TextureLoader::Shutdown();
@@ -187,11 +206,6 @@ void Renderer::SetGlobalsUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void Renderer::DrawSkybox()
-{
-	materials.at(SKYBOX_SHADER)->UseShader();
-
-}
 
 void Renderer::SetCameraUBO(CameraShaderData csd)
 {
@@ -278,7 +292,7 @@ void Renderer::Start()
 	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
 
 	// crate
-	Material* material = new Material(ShaderLoader::GetShader("lit"), "crate");
+	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_LIT), "crate");
 	TextureLoader::LoadTexture("BOX_full_albedo.png");
 	TextureLoader::LoadTexture("BOX_full_normal.png");
 	material->AddTexture(TextureLoader::GetTexture("BOX_full_albedo.png"));
@@ -293,18 +307,6 @@ void Renderer::Start()
 	ModelInstance* modelT = new ModelInstance(model);
 	modelInstances.push_back(modelT);
 
-	// beans
-	material = new Material(ShaderLoader::GetShader("lit"), "beans");
-	TextureLoader::LoadTexture("beancan.png");
-	material->AddTexture(TextureLoader::GetTexture("beancan.png"));
-	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
-	materials.emplace(material->GetName(), material);
-	
-	// bean model
-	model = ModelLoader::LoadModel("beancan.fbx");
-	model->SetMaterial(0, materials["beans"]);
-
-
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
 	lights.push_back(dirLight);
@@ -316,10 +318,16 @@ void Renderer::Start()
 	light->intensity = 1.0f;
 }
 
+void Renderer::DrawSkybox()
+{
+	skyboxMaterial->UseShader();
+	skybox->meshes[0]->Draw();
+}
+
 void Renderer::Render()
 {
 	// clear the screen and start drawing
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();

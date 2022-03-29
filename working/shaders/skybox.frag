@@ -21,10 +21,7 @@ layout (binding = 0) uniform samplerCube _Cubemap;		// cubemap
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 
 //inout
-in VS_OUT
-{
-	in vec3 TexCoord;
-} fs_in;
+in vec3 TexCoord;
 
 out vec4 FragColour;
 

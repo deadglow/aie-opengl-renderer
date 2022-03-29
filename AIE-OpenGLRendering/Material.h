@@ -26,7 +26,7 @@ public:
 		properties.push_back(prop);
 	}
 
-	void AddTexture(Texture* texture);
+	void AddTexture(Texture2D* texture);
 
 	void UseShader();
 	void ApplyConfiguration();

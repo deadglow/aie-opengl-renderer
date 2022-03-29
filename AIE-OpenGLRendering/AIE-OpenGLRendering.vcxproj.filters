@@ -117,7 +117,7 @@
     <ClCompile Include="ShaderLoader.cpp">
       <Filter>_Source Files\Shader</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Texture2D.cpp">
       <Filter>_Source Files\Texture</Filter>
     </ClCompile>
     <ClCompile Include="TextureLoader.cpp">
@@ -160,6 +160,9 @@
       <Filter>_Source Files\Model</Filter>
     </ClCompile>
     <ClCompile Include="Cubemap.cpp">
+      <Filter>_Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>_Source Files\Texture</Filter>
     </ClCompile>
   </ItemGroup>
@@ -233,7 +236,7 @@
     <ClInclude Include="stb_image.h">
       <Filter>_Header Files\Texture</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Texture2D.h">
       <Filter>_Header Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
@@ -282,6 +285,9 @@
       <Filter>_Header Files\Model</Filter>
     </ClInclude>
     <ClInclude Include="Cubemap.h">
+      <Filter>_Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
       <Filter>_Header Files\Texture</Filter>
     </ClInclude>
   </ItemGroup>

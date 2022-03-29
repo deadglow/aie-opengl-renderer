@@ -1,40 +1,35 @@
 #include "Cubemap.h"
 
-Cubemap::Cubemap()
+
+Cubemap::Cubemap(GLuint id_init, const std::string filename_init) : Texture(id_init, filename_init)
 {
+    id = id_init;
+    filename = filename_init;
+
+    UpdateTextureProperties();
 }
 
 Cubemap::~Cubemap()
 {
+    if (IsLoaded())
+    {
+        glDeleteTextures(1, &id);
+    }
 }
 
-const bool Cubemap::IsLoaded() const
+void Cubemap::UpdateTextureProperties()
 {
-    return false;
+    glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
+    // set texture parameters
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, (GLenum)minFilter);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, (GLenum)magFilter);
+
+    // unbind
+    glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-const GLuint Cubemap::GetID() const
+TEX_Type Cubemap::GetTexType()
 {
-    return GLuint();
-}
-
-const std::string Cubemap::GetFilename() const
-{
-    return std::string();
-}
-
-void Cubemap::SetWrapMode(TEX_WrapMode s, TEX_WrapMode t)
-{
-}
-
-void Cubemap::SetMipMapFilter(TEX_MipMapFiltering filter)
-{
-}
-
-void Cubemap::SetFilter(TEX_Filtering filter)
-{
-}
-
-void Cubemap::UpdateTexture()
-{
+    return TEX_Type::Cubemap;
 }

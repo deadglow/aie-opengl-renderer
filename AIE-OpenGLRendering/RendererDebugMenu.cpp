@@ -250,6 +250,7 @@ void RendererDebugMenu::DrawMaterialList()
 
 	for (const auto [key, value] : Renderer::materials)
 	{
+		if (key == DEFAULT_SHADER_UNLIT) continue;
 		bool isSelected = value == selectedMaterial;
 		ImGui::Selectable(value->GetName().c_str(), &isSelected);
 		if (isSelected)
