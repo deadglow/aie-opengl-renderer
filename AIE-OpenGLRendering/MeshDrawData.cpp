@@ -19,6 +19,7 @@ void MeshDrawData::Draw(CameraShaderData csd)
 	// calculate view space normal matrix
 	glm::mat4 normalMatrix = csd.vMatrix * m2w;
 	normalMatrix[3] = { 0, 0, 0, 1 };
+
 	ShaderLoader::GetCurrentShader()->SetUniform("_NormalMat", normalMatrix);
 
 	mesh->Draw();

@@ -82,11 +82,14 @@ int Renderer::Initialise()
 
 	// textures setup
 	TextureLoader::Initialise();
-	TextureLoader::LoadTexture(DEFAULT_TEXTURE);
+	TextureLoader::LoadTexture(TEXTURE_DEFAULT_WHITE);
+	TextureLoader::LoadTexture(TEXTURE_DEFAULT_ERROR);
+	TextureLoader::LoadTexture(TEXTURE_DEFAULT_NORMAL);
+	Cubemap* cubemap = TextureLoader::LoadCubemap(SKYBOX_DEFAULT_CUBEMAP);
 	for (int i = 0; i < 11; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(DEFAULT_TEXTURE)->GetID());
+		glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR)->GetID());
 	}
 
 	// shader setup
@@ -97,26 +100,33 @@ int Renderer::Initialise()
 		return -1;
 	}
 
+	// set skybox texture
+
 	// set up default materials
 		// unlit
-	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_UNLIT), DEFAULT_SHADER_UNLIT);
-	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
+	Material* material = new Material(ShaderLoader::GetShader(SHADER_DEFAULT_UNLIT), SHADER_DEFAULT_UNLIT);
+	material->AddTexture(TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR));
 	materials.emplace(material->GetName(), material);
 		// lit
-	material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_LIT), DEFAULT_SHADER_LIT);
-	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
-	material->AddTexture(TextureLoader::GetTexture(DEFAULT_TEXTURE));
+	material = new Material(ShaderLoader::GetShader(SHADER_DEFAULT_LIT), SHADER_DEFAULT_LIT);
+	material->AddTexture(TextureLoader::GetTexture(TEXTURE_DEFAULT_WHITE));
+	material->AddTexture(TextureLoader::GetTexture(TEXTURE_DEFAULT_NORMAL));
+	material->AddTexture(TextureLoader::GetTexture(TEXTURE_DEFAULT_WHITE));
+	material->AddTexture(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
+	material->AddProperty("_Smoothness", 0.3f);
+	material->AddProperty("_Reflectivity", 0.3f);
 	materials.emplace(material->GetName(), material);
 		// skybox
-	skyboxMaterial = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_SKYBOX), DEFAULT_SHADER_SKYBOX);
+	skyboxMaterial = new Material(ShaderLoader::GetShader(SKYBOX_DEFAULT_SHADER), SKYBOX_DEFAULT_SHADER);
+	skyboxMaterial->AddTexture(cubemap);
 
 	// model setup
 	ModelLoader::Initialise();
 		// default cube
-	Model* model = ModelLoader::LoadModel(DEFAULT_MODEL);
-	model->SetAllMaterials(materials[DEFAULT_SHADER_UNLIT]);
+	Model* model = ModelLoader::LoadModel(MODEL_DEFAULT);
+	model->SetAllMaterials(materials[SHADER_DEFAULT_UNLIT]);
 		// skybox
-	skybox = ModelLoader::LoadModel(DEFAULT_SKYBOX_MODEL);
+	skybox = ModelLoader::LoadModel(SKYBOX_DEFAULT_MODEL);
 	skybox->SetAllMaterials(skyboxMaterial);
 
 	// set up imgui
@@ -268,6 +278,16 @@ void Renderer::RemoveModelInstance(ModelInstance* instance)
 	delete instance;
 }
 
+void Renderer::DrawSkybox()
+{
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
+	skyboxMaterial->UseShader();
+	skybox->meshes[0]->Draw();
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+}
+
 void Renderer::PrepareDrawCalls()
 {
 	drawCalls.clear();
@@ -288,15 +308,16 @@ void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
 
 void Renderer::Start()
 {
-	// move da camera
 	cameraStack.push_back(Camera());
-	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
 
 	// crate
-	Material* material = new Material(ShaderLoader::GetShader(DEFAULT_SHADER_LIT), "crate");
+	Material* material = new Material(ShaderLoader::GetShader(SHADER_DEFAULT_LIT), "crate");
 	material->AddTexture(TextureLoader::LoadTexture("BOX_full_albedo.png"));
 	material->AddTexture(TextureLoader::LoadTexture("BOX_full_normal.png"));
-	material->AddProperty("_Smoothness", 1.0f);
+	material->AddTexture(TextureLoader::GetTexture(TEXTURE_DEFAULT_WHITE));
+	material->AddTexture(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
+	material->AddProperty("_Smoothness", 0.95f);
+	material->AddProperty("_Reflectivity", 0.35f);
 	materials.emplace(material->GetName(), material);
 
 		// crate model
@@ -305,8 +326,6 @@ void Renderer::Start()
 	ModelInstance* modelT = new ModelInstance(model);
 	modelInstances.push_back(modelT);
 
-	Cubemap* cubemap = TextureLoader::LoadCubemap("skybox.cubemap");
-	skyboxMaterial->AddTexture(cubemap);
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
@@ -317,18 +336,14 @@ void Renderer::Start()
 
 	light->color = { 0.0f, 0.0f, 1.0f };
 	light->intensity = 1.0f;
+
+	// move da camera
+	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
 }
 
-void Renderer::DrawSkybox()
-{
-	skyboxMaterial->UseShader();
-	skybox->meshes[0]->Draw();
-}
 
 void Renderer::Render()
 {
-	// clear the screen and start drawing
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();

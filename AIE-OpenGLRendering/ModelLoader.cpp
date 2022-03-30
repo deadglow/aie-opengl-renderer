@@ -30,7 +30,7 @@ void ModelLoader::Initialise()
 			if (extension == ".obj" || extension == ".fbx")
 			{
 				Model* model = CreateModel(path.string(), path.filename().string());
-				model->SetAllMaterials(Renderer::materials[DEFAULT_SHADER_UNLIT]);
+				model->SetAllMaterials(Renderer::materials[SHADER_DEFAULT_UNLIT]);
 				modelList.emplace(path.filename().string(), model);
 				continue;
 			}

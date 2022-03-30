@@ -71,19 +71,23 @@ void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 {
 	if (!loaded)
 	{
-		ModelLoader::GetModel(DEFAULT_MODEL)->Draw(csd, transform);
+		ModelLoader::GetModel(MODEL_DEFAULT)->Draw(csd, transform);
 		return;
 	}
 
 	for (int i = 0; i < meshes.size(); ++i)
 	{
+
 		// make matrices
-		glm::mat4 t = transform * meshes[i]->transform;
-		glm::mat4 inverseTransform = glm::inverse(t);
-		glm::mat4 normalMatrix = csd.vMatrix * t;
+		glm::mat4 m2w = transform * meshes[i]->transform;
+		glm::mat4 w2m = glm::inverse(m2w);
+		glm::mat4 normalMatrix = csd.vMatrix * m2w;
 		normalMatrix[3] = { 0, 0, 0, 1 };
 
 		defaultMaterials[i]->UseShader();
+		ShaderLoader::GetCurrentShader()->SetUniform("_M2W", m2w);
+		ShaderLoader::GetCurrentShader()->SetUniform("_W2M", w2m);
+		ShaderLoader::GetCurrentShader()->SetUniform("_NormalMat", normalMatrix);
 		meshes[i]->Draw();
 	}
 }
@@ -92,7 +96,7 @@ void Model::AddToDrawCall(glm::mat4 transform, std::vector<Material*>* materialL
 {
 	if (!loaded)
 	{
-		ModelLoader::GetModel(DEFAULT_MODEL)->AddToDrawCall(transform);
+		ModelLoader::GetModel(MODEL_DEFAULT)->AddToDrawCall(transform);
 		return;
 	}
 

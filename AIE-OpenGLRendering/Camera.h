@@ -7,6 +7,13 @@
 #define DEFAULT_NEARPLANE 0.1f
 #define DEFAULT_FARPLANE 100.0f;
 
+enum class CameraClearType : unsigned char
+{
+	None,
+	Skybox,
+	ClearColor
+};
+
 class Camera
 {
 private:
@@ -20,8 +27,9 @@ private:
 public:
 	Transform transform;
 	bool perspective = true;
-	Camera();
-	~Camera();
+	CameraClearType clearType = CameraClearType::Skybox;
+	Camera() = default;
+	~Camera() = default;
 
 	void UpdateVPMatrix();
 	const CameraShaderData GetShaderData() const;

@@ -14,13 +14,18 @@
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
 
-#define DEFAULT_SHADER_UNLIT "unlit"
-#define DEFAULT_SHADER_LIT "lit"
-#define DEFAULT_TEXTURE "default.png"
-#define DEFAULT_MODEL "default.obj"
+#define SHADER_DEFAULT_UNLIT "unlit"
+#define SHADER_DEFAULT_LIT "lit"
 
-#define DEFAULT_SHADER_SKYBOX "skybox"
-#define DEFAULT_SKYBOX_MODEL "skybox.obj"
+#define TEXTURE_DEFAULT_WHITE "_default_white.png"
+#define TEXTURE_DEFAULT_ERROR "_default_error.png"
+#define TEXTURE_DEFAULT_NORMAL "_default_normal.png"
+
+#define MODEL_DEFAULT "default.obj"
+
+#define SKYBOX_DEFAULT_CUBEMAP "skybox_grass.cubemap"
+#define SKYBOX_DEFAULT_SHADER "skybox"
+#define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
 class Renderer
 {
@@ -39,6 +44,7 @@ private:
 
 	Renderer() = delete;
 	~Renderer() = default;
+
 	static void InitUBOs();
 	static void SetGlobalsUBO();
 	static void SetLightingUBO();

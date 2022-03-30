@@ -132,7 +132,7 @@ Cubemap* TextureLoader::LoadCubemap(const std::string filename)
 	}
 
 	fs::path path = pathString;
-	path = path.;
+	path = path.parent_path();
 
 	unsigned int id = -1;
 	glGenTextures(1, &id);
@@ -142,7 +142,9 @@ Cubemap* TextureLoader::LoadCubemap(const std::string filename)
 	// right, left, top, bottom, back, front
 	for (unsigned int i = 0; i < 6; ++i)
 	{
-		unsigned char* data = stbi_load((path.string() + faceTextures[i]).c_str(), &width, &height, &nrChannels, 0);
+		stbi_set_flip_vertically_on_load(true);
+
+		unsigned char* data = stbi_load((path.string() + "/" + faceTextures[i]).c_str(), &width, &height, &nrChannels, 0);
 		if (data)
 		{
 			GLenum format = (GLenum)Texture2D::CalculateFormat(nrChannels);

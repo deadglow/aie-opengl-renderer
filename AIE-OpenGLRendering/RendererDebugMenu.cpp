@@ -4,6 +4,7 @@
 #include <sstream>
 #include "imgui.h"
 #include <unordered_map>
+#include <typeinfo>
 
 ModelInstance* RendererDebugMenu::selectedInstance = nullptr;
 Model* RendererDebugMenu::selectedBaseModel = nullptr;
@@ -221,6 +222,7 @@ void RendererDebugMenu::DrawInstanceSelection()
 	ImGui::End();
 }
 
+bool materialListEnabled = false;
 void RendererDebugMenu::DrawMaterialList()
 {
 	ImGui::Begin("Material List");
@@ -239,7 +241,16 @@ void RendererDebugMenu::DrawMaterialList()
 		ImGui::Text("Properties");
 		for (int i = 0; i < selectedMaterial->properties.size(); ++i)
 		{
-			ImGui::Selectable(selectedMaterial->properties[i]->name.c_str());
+			ShaderPropertyBase* prop = selectedMaterial->properties[i];
+			ShaderProperty<float>* val = dynamic_cast<ShaderProperty<float>*>(prop);
+			if (val)
+			{
+				ImGui::DragFloat(val->name.c_str(), &val->value, 0.001f);
+			}
+			else
+			{
+				ImGui::Selectable(prop->name.c_str());
+			}
 		}
 
 	}
@@ -250,7 +261,7 @@ void RendererDebugMenu::DrawMaterialList()
 
 	for (const auto [key, value] : Renderer::materials)
 	{
-		if (key == DEFAULT_SHADER_UNLIT) continue;
+		if (key == SHADER_DEFAULT_UNLIT) continue;
 		bool isSelected = value == selectedMaterial;
 		ImGui::Selectable(value->GetName().c_str(), &isSelected);
 		if (isSelected)

@@ -23,6 +23,9 @@ out vec3 TexCoord;
 void main()
 {
 	// world to perspective
-	TexCoord = _Position;
-	gl_Position = _Pmat * _Vmat * vec4(_Position, 0.0);
+	vec3 tex = normalize(-_Position);
+	TexCoord = tex;
+
+	vec4 pos = _Pmat * _Vmat * vec4(_Position * 1, 0.0);
+	gl_Position = pos.xyww;
 }

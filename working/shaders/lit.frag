@@ -65,15 +65,17 @@ uniform mat4 _M2W;
 uniform mat4 _iM2W;
 
 // sampler
-layout (binding = 0) uniform sampler2D _Texture0;		// diffuse
-layout (binding = 1) uniform sampler2D _Texture1;		// normal map
-layout (binding = 2) uniform sampler2D _Texture2;		// specular map
+layout (binding = 0) uniform sampler2D _Diffuse;		// diffuse
+layout (binding = 1) uniform sampler2D _NormalMap;		// normal map
+layout (binding = 2) uniform sampler2D _SpecMap;		// specular map
+layout (binding = 3) uniform samplerCube _Cubemap;		// cubemap
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float _NormalMapScale = 1.0;
 
 // specular
 uniform float _SpecularStrength = 1;
 uniform float _Smoothness = 0.9;
+uniform float _Reflectivity = 0.1;
 
 //inout
 in VS_OUT
@@ -89,7 +91,7 @@ out vec4 FragColour;
 float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float radius)
 {
 	// specular highlight
-	float t = _Smoothness * texture(_Texture2, fs_in.TexCoord).r;
+	float t = _Smoothness * texture(_SpecMap, fs_in.TexCoord).r;
 	float exponent = mix(2, 1024, t);
 	vec3 halfwayDir = normalize(lightDir + fragDir);
 	float spec = pow(max(dot(-halfwayDir, norm), 0.0), exponent);
@@ -150,6 +152,16 @@ vec4 CalculateLights(vec3 norm, vec3 fragDir)
 	return lightValue;
 }
 
+vec4 CalculateCubemapColor(vec3 norm, vec3 fragDir)
+{
+	vec3 eyeDir = fragDir;
+	vec3 reflected = normalize(reflect(eyeDir, norm));
+
+	vec3 transformed = mat3(_iVmat) * reflected;
+	
+	return vec4(texture(_Cubemap, -transformed).rgb * _Reflectivity, 1.0);
+}
+
 vec4 ProcessFog(vec4 color)
 {
 	vec3 delta = -fs_in.FragPos;
@@ -161,7 +173,7 @@ vec4 ProcessFog(vec4 color)
 
 void main()
 {
-	vec3 norm = texture(_Texture1, fs_in.TexCoord).rgb;
+	vec3 norm = texture(_NormalMap, fs_in.TexCoord).rgb;
 	norm = norm * 2.0 - 1.0;
 	norm = normalize(fs_in.TBN * norm);
 
@@ -172,7 +184,8 @@ void main()
 	totalLight += CalculateLights(norm, fragDir);
 	totalLight += _Ambient;
 
-	vec4 color = texture(_Texture0, fs_in.TexCoord) * _AlbedoColor * totalLight;
+	vec4 color = texture(_Diffuse, fs_in.TexCoord) * _AlbedoColor * totalLight;
+	color += CalculateCubemapColor(norm, fragDir);
 	
 	// do fog
 	FragColour = ProcessFog(color);

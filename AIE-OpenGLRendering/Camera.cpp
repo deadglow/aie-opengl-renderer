@@ -4,14 +4,6 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "Renderer.h"
 
-Camera::Camera()
-{
-}
-
-Camera::~Camera()
-{
-}
-
 void Camera::UpdateVPMatrix()
 {
 	if (perspective)
@@ -38,6 +30,9 @@ const CameraShaderData Camera::GetShaderData() const
 
 void Camera::Draw()
 {
+	// clear the depth buffer and start drawing
+	glClear(GL_DEPTH_BUFFER_BIT);
+
 	UpdateVPMatrix();
 
 	// create uniform buffer
@@ -60,5 +55,6 @@ void Camera::Draw()
 		}
 	}
 
-	Renderer::DrawSkybox();
-}
+	if (clearType == CameraClearType::Skybox)
+		Renderer::DrawSkybox();
+	}
