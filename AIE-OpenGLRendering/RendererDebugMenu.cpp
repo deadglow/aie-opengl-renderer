@@ -9,6 +9,7 @@
 ModelInstance* RendererDebugMenu::selectedInstance = nullptr;
 Model* RendererDebugMenu::selectedBaseModel = nullptr;
 Material* RendererDebugMenu::selectedMaterial = nullptr;
+Texture* RendererDebugMenu::selectedTexture = nullptr;
 int RendererDebugMenu::dropDownSelected = -1;
 
 
@@ -23,6 +24,8 @@ void RendererDebugMenu::DrawImGui()
 	DrawInstanceSelection();
 
 	DrawMaterialList();
+
+	DrawTexturesList();
 }
 
 void RendererDebugMenu::DrawRenderData()
@@ -36,9 +39,8 @@ void RendererDebugMenu::DrawRenderData()
 	ImGui::Text(stream.str().c_str());
 
 	ImGui::InputFloat("Fog density", &Renderer::fogDensity, 0.0001f, 0.01f, "%.5f");
-	float col[3] = { Renderer::fogColor.x, Renderer::fogColor.y, Renderer::fogColor.z };
-	ImGui::ColorEdit3("Fog color", col);
-	Renderer::fogColor = { col[0], col[1], col[2], 1.0f };
+	float* color = (float*)&Renderer::fogColor;
+	ImGui::ColorEdit3("Fog color", color);
 
 	ImGui::End();
 }
@@ -141,7 +143,7 @@ void RendererDebugMenu::DrawInstanceEditing()
 					std::vector<std::string> materialNames;
 					int count = 0;
 					int selected = -1;
-					for (const auto [key, value] : Renderer::materials)
+					for (const auto [key, value] : MaterialLoader::materialLookup)
 					{
 						matList.push_back(value);
 						materialNames.push_back(value->GetName());
@@ -222,14 +224,13 @@ void RendererDebugMenu::DrawInstanceSelection()
 	ImGui::End();
 }
 
-bool materialListEnabled = false;
 void RendererDebugMenu::DrawMaterialList()
 {
 	ImGui::Begin("Material List");
 
 	if (selectedMaterial)
 	{
-		selectedMaterial->UseShader();
+		selectedMaterial->UseMaterial();
 
 		ImGui::Text("Textures");
 		for (int i = 0; i < selectedMaterial->usedTextures.size(); ++i)
@@ -242,15 +243,22 @@ void RendererDebugMenu::DrawMaterialList()
 		for (int i = 0; i < selectedMaterial->properties.size(); ++i)
 		{
 			ShaderPropertyBase* prop = selectedMaterial->properties[i];
-			ShaderProperty<float>* val = dynamic_cast<ShaderProperty<float>*>(prop);
-			if (val)
+
+			ShaderProperty<glm::vec4>* col = dynamic_cast<ShaderProperty<glm::vec4>*>(prop);
+			if (col)
 			{
-				ImGui::DragFloat(val->name.c_str(), &val->value, 0.001f);
+				float* floats = (float*)&col->value;
+				ImGui::ColorEdit4(col->name.c_str(), floats);
+				continue;
 			}
-			else
+			ShaderProperty<float>* flt = dynamic_cast<ShaderProperty<float>*>(prop);
+			if (flt)
 			{
-				ImGui::Selectable(prop->name.c_str());
+				ImGui::DragFloat(flt->name.c_str(), &flt->value, 0.001f);
+				continue;
 			}
+
+			ImGui::Selectable(prop->name.c_str());
 		}
 
 	}
@@ -259,13 +267,53 @@ void RendererDebugMenu::DrawMaterialList()
 		ImGui::Text("No material selected.");
 	}
 
-	for (const auto [key, value] : Renderer::materials)
+	for (const auto [key, value] : MaterialLoader::materialLookup)
 	{
 		if (key == SHADER_DEFAULT_UNLIT) continue;
 		bool isSelected = value == selectedMaterial;
 		ImGui::Selectable(value->GetName().c_str(), &isSelected);
 		if (isSelected)
 			selectedMaterial = value;
+	}
+
+	ImGui::End();
+}
+
+void RendererDebugMenu::DrawTexturesList()
+{
+	ImGui::Begin("Texture List");
+
+	if (selectedTexture)
+	{
+		if (selectedTexture->IsLoaded())
+		{
+			if (ImGui::Button("Unload"))
+				selectedTexture->Unload();
+
+			ImGui::SameLine();
+			if (selectedTexture->GetTexType() == TEX_Type::Cubemap)
+			{
+				if (ImGui::Button("Set Skybox"))
+				{
+					Renderer::SetSkybox((Cubemap*)selectedTexture);
+				}
+			}
+		}
+		else
+		{
+			if (ImGui::Button("Load"))
+				selectedTexture->Load();
+		}
+	}
+
+	for (const auto [key, value] : TextureLoader::textureLookup)
+	{
+		if (key == TEXTURE_DEFAULT_ERROR) continue;
+
+		bool isSelected = value == selectedTexture;
+		ImGui::Selectable(value->GetFilename().c_str(), &isSelected);
+		if (isSelected)
+			selectedTexture = value;
 	}
 
 	ImGui::End();

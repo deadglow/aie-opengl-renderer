@@ -9,7 +9,7 @@
 
 namespace fs = std::filesystem;
 
-std::string ShaderLoader::dir = fs::current_path().string() + "/shaders";
+std::string ShaderLoader::dir = fs::current_path().string() + "\\shaders";
 std::string ShaderLoader::shaderListFilename = "shaders.list";
 std::unordered_map<std::string, unsigned int> ShaderLoader::vertexShaders;
 std::unordered_map<std::string, unsigned int> ShaderLoader::fragmentShaders;

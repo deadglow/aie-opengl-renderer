@@ -68,7 +68,7 @@ uniform mat4 _iM2W;
 layout (binding = 0) uniform sampler2D _Diffuse;		// diffuse
 layout (binding = 1) uniform sampler2D _NormalMap;		// normal map
 layout (binding = 2) uniform sampler2D _SpecMap;		// specular map
-layout (binding = 3) uniform samplerCube _Cubemap;		// cubemap
+layout (binding = 15) uniform samplerCube _Cubemap;		// cubemap
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float _NormalMapScale = 1.0;
 

@@ -7,6 +7,7 @@ private:
 	static ModelInstance* selectedInstance;
 	static Model* selectedBaseModel;
 	static Material* selectedMaterial;
+	static Texture* selectedTexture;
 	static int dropDownSelected;
 
 
@@ -15,6 +16,7 @@ private:
 	static void DrawInstanceEditing();
 	static void DrawInstanceSelection();
 	static void DrawMaterialList();
+	static void DrawTexturesList();
 	static void SelectInstance(ModelInstance* instance);
 public:
 	RendererDebugMenu() = delete;

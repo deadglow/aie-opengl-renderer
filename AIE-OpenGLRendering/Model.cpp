@@ -84,7 +84,7 @@ void Model::Draw(CameraShaderData csd, glm::mat4 transform)
 		glm::mat4 normalMatrix = csd.vMatrix * m2w;
 		normalMatrix[3] = { 0, 0, 0, 1 };
 
-		defaultMaterials[i]->UseShader();
+		defaultMaterials[i]->UseMaterial();
 		ShaderLoader::GetCurrentShader()->SetUniform("_M2W", m2w);
 		ShaderLoader::GetCurrentShader()->SetUniform("_W2M", w2m);
 		ShaderLoader::GetCurrentShader()->SetUniform("_NormalMat", normalMatrix);

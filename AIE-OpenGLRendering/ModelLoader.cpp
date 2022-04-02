@@ -1,14 +1,15 @@
 #include "ModelLoader.h"
-#include "FileReader.h"
 #include "ModelLoadFunctions.h"
+#include "FileReader.h"
 #include "Renderer.h"
+#include "MaterialLoader.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
 
 namespace fs = std::filesystem;
 
-std::string ModelLoader::dir = fs::current_path().string() + "/models";
+std::string ModelLoader::dir = fs::current_path().string() + "\\models";
 std::unordered_map<std::string, Model*> ModelLoader::modelList;
 
 Model* ModelLoader::CreateModel(const std::string filepath, const std::string filename)
@@ -18,23 +19,17 @@ Model* ModelLoader::CreateModel(const std::string filepath, const std::string fi
 
 void ModelLoader::Initialise()
 {
-	// find all mesh files in the meshes folder
-	if (fs::exists(dir) && fs::is_directory(dir))
-	{
-		for (fs::directory_entry const& entry : fs::recursive_directory_iterator(dir))
-		{
-			if (!fs::is_regular_file(entry)) continue;
+	std::vector<fs::path> paths;
+	std::vector<std::string> extensions{ ".obj", ".fbx", ".blend"};
 
-			fs::path path = entry.path();
-			std::string extension = path.filename().extension().string();
-			if (extension == ".obj" || extension == ".fbx")
-			{
-				Model* model = CreateModel(path.string(), path.filename().string());
-				model->SetAllMaterials(Renderer::materials[SHADER_DEFAULT_UNLIT]);
-				modelList.emplace(path.filename().string(), model);
-				continue;
-			}
-		}
+	// find all mesh files in the meshes folder
+	FileReader::GetAllFilesWithExtensions(dir, &extensions, &paths);
+
+	for (int i = 0; i < paths.size(); ++i)
+	{
+		Model* model = CreateModel(paths[i].string(), paths[i].filename().string());
+		model->SetAllMaterials(MaterialLoader::GetMaterial(MATERIAL_DEFAULT));
+		modelList.emplace(paths[i].filename().string(), model);
 	}
 }
 

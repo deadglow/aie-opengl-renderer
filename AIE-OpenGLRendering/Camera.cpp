@@ -43,7 +43,7 @@ void Camera::Draw()
 	for (iter = Renderer::drawCalls.begin(); iter != Renderer::drawCalls.end(); iter++)
 	{
 		// use shader and then draw all meshes
-		(*iter).first->UseShader();
+		(*iter).first->UseMaterial();
 
 		std::vector<MeshDrawData>* meshDrawDataList = &(*iter).second;
 		for (int i = 0; i < meshDrawDataList->size(); ++i)

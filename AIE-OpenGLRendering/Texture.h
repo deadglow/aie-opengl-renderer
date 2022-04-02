@@ -55,17 +55,24 @@ protected:
 	TEX_Filtering magFilter = TEX_Filtering::Linear;
 
 public:
-	Texture(const GLuint id_init, const std::string filename);
+	Texture(const std::string filename_init);
 	virtual ~Texture();
 
 	const bool IsLoaded() const;
+
+	virtual void Load();
+	virtual void Unload();
+
+	void SetID(GLuint newid);
 	const GLuint GetID() const;
+
 	const std::string GetFilename() const;
 
 	void SetMipMapFilter(TEX_MipMapFiltering filter);
 	void SetFilter(TEX_Filtering filter);
 	virtual void UpdateTextureProperties();
 	virtual TEX_Type GetTexType();
+
 
 	static TEX_Format CalculateFormat(const int numChannels);
 };

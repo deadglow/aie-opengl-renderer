@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "ShaderLoader.h"
 #include "TextureLoader.h"
+#include "MaterialLoader.h"
 #include "ModelLoader.h"
 #include "Camera.h"
 #include "ModelInstance.h"
@@ -13,9 +14,11 @@
 #define RES_Y 1080
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
+#define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
 
 #define SHADER_DEFAULT_UNLIT "unlit"
 #define SHADER_DEFAULT_LIT "lit"
+#define MATERIAL_DEFAULT SHADER_DEFAULT_LIT
 
 #define TEXTURE_DEFAULT_WHITE "_default_white.png"
 #define TEXTURE_DEFAULT_ERROR "_default_error.png"
@@ -69,7 +72,6 @@ public:
 
 	// lists
 	static std::list<ModelInstance*> modelInstances;
-	static std::unordered_map<std::string, Material*> materials;
 	static std::unordered_map<Material*, std::vector<MeshDrawData>> drawCalls;
 
 	static int Initialise();
@@ -88,4 +90,6 @@ public:
 
 	static void AddModelInstance(ModelInstance* instance);
 	static void RemoveModelInstance(ModelInstance* instance);
+
+	static void SetSkybox(Cubemap* cubemap);
 };

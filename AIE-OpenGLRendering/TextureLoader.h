@@ -11,12 +11,13 @@ class TextureLoader
 private:
 	static std::string dir;
 	static std::unordered_map<std::string, std::string> textureFiles;
-	static std::unordered_map<std::string, std::string> cubemapFiles;
-	static std::unordered_map<std::string, Texture*> textureLookup;
 
 	TextureLoader() = delete;
-public:
 
+	static void LoadTexture2D(Texture2D* tex);
+	static void LoadCubemap(Cubemap* tex);
+public:
+	static std::unordered_map<std::string, Texture*> textureLookup;
 	static void Initialise();
 	static void Shutdown();
 	static void PrintAllTextureFiles();
@@ -24,8 +25,7 @@ public:
 	static const std::string GetTexturePath(const std::string filename);
 	static Texture2D* GetTexture(const std::string filename);
 	static Cubemap* GetCubemap(const std::string filename);
-	static Texture2D* LoadTexture(const std::string filename);
-	static Cubemap* LoadCubemap(const std::string filename);
-	static void UnloadTexture(const std::string filename);
+	static void LoadTexture(Texture* tex);
+	static void UnloadTexture(Texture* tex);
 };
 

@@ -165,6 +165,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>_Source Files\Texture</Filter>
     </ClCompile>
+    <ClCompile Include="MaterialLoader.cpp">
+      <Filter>_Source Files\Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="glad.h">
@@ -289,6 +292,9 @@
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>_Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialLoader.h">
+      <Filter>_Header Files\Shader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

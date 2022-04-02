@@ -5,7 +5,7 @@
 
 #define DEFAULT_FOV 70.0f
 #define DEFAULT_NEARPLANE 0.1f
-#define DEFAULT_FARPLANE 100.0f;
+#define DEFAULT_FARPLANE 500.0f;
 
 enum class CameraClearType : unsigned char
 {

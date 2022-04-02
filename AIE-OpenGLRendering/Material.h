@@ -30,7 +30,7 @@ public:
 
 	void AddTexture(Texture* texture);
 
-	void UseShader();
+	void UseMaterial();
 	void ApplyConfiguration();
 
 	Shader* GetShader() const;

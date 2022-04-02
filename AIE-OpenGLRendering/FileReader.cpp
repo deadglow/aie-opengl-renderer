@@ -48,7 +48,7 @@ int FileReader::LoadFileAsStringVector(std::vector<std::string>* lines, const st
     }
 }
 
-int FileReader::GetAllFilesWithExtension(std::string dir, std::string extension, std::vector<fs::path>* paths)
+int FileReader::GetAllFilesWithExtensions(std::string dir, std::vector<std::string>* extensions, std::vector<fs::path>* paths)
 {
     if (fs::exists(dir) && fs::is_directory(dir))
     {
@@ -57,10 +57,13 @@ int FileReader::GetAllFilesWithExtension(std::string dir, std::string extension,
             if (!fs::is_regular_file(entry)) continue;
             fs::path path = entry.path();
 
-            if (path.extension() == extension)
+            for (int i = 0; i < extensions->size(); ++i)
             {
-                paths->push_back(path);
-                continue;
+                if (path.extension() == (*extensions)[i])
+                {
+                    paths->push_back(path);
+                    break;
+                }
             }
         }
         return (int)paths->size();

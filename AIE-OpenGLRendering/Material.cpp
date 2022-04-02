@@ -25,10 +25,11 @@ void Material::AddTexture(Texture* texture)
 	usedTextures.push_back(texture);
 }
 
-void Material::UseShader()
+void Material::UseMaterial()
 {
 	// we get it by name so hot reloading works (shader object would go poof on a reload)
-	ShaderLoader::GetShader(shaderName)->Use();
+	shader = ShaderLoader::GetShader(shaderName);
+	shader->Use();
 	ApplyConfiguration();
 }
 
@@ -42,9 +43,18 @@ void Material::ApplyConfiguration()
 	// set texture bindings
 	for (int i = 0; i < usedTextures.size(); ++i)
 	{
+			
+
 		TEX_Type type = usedTextures[i]->GetTexType();
 
 		glActiveTexture(GL_TEXTURE0 + i);
+
+		// use default texture if unloaded
+		if (!usedTextures[i]->IsLoaded())
+		{
+			glBindTexture(GL_TEXTURE_2D, TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR)->GetID());
+			continue;
+		}
 
 		switch (type)
 		{

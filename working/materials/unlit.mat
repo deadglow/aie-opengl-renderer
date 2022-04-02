@@ -1,0 +1,6 @@
+{
+	"name":"unlit",
+	"shader":"unlit",
+	"textures":["_default_error.png"],
+	"properties":[]
+}

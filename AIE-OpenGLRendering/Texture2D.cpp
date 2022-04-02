@@ -1,22 +1,12 @@
 #include "Texture2D.h"
 
-Texture2D::Texture2D(unsigned int id_init, const std::string filename_init, const int width_init, const int height_init, TEX_Format format_init) : Texture(id_init, filename_init)
+Texture2D::Texture2D(const std::string filename_init) : Texture(filename_init)
 {
-    id = id_init;
-    width = width_init;
-    height = height_init;
-    filename = filename_init;
-    format = format_init;
-
-    UpdateTextureProperties();
 }
 
 Texture2D::~Texture2D()
 {
-    if (IsLoaded())
-    {
-        glDeleteTextures(1, &id);
-    }
+    
 }
 
 const int Texture2D::GetWidth() const
@@ -33,6 +23,14 @@ void Texture2D::SetWrapMode(TEX_WrapMode s, TEX_WrapMode t)
 {
     wrapMode[0] = s;
     wrapMode[1] = t;
+}
+
+void Texture2D::SetProperties(const int width_init, const int height_init, const TEX_Format format_init)
+{
+    width = width_init;
+    height = height_init;
+    format = format_init;
+    UpdateTextureProperties();
 }
 
 void Texture2D::UpdateTextureProperties()

@@ -8,27 +8,36 @@
 
 namespace fs = std::filesystem;
 
-std::string TextureLoader::dir = fs::current_path().string() + "/textures";;
+std::string TextureLoader::dir = fs::current_path().string() + "\\textures";;
 std::unordered_map<std::string, std::string> TextureLoader::textureFiles;
-std::unordered_map<std::string, std::string> TextureLoader::cubemapFiles;
 std::unordered_map<std::string, Texture*> TextureLoader::textureLookup;
+
+
+
 
 void TextureLoader::Initialise()
 {
-	// find all texture files in the textures folder
-	if (fs::exists(dir) && fs::is_directory(dir))
-	{
-		for (fs::directory_entry const& entry : fs::recursive_directory_iterator(dir))
-		{
-			if (!fs::is_regular_file(entry)) continue;
+	std::vector<fs::path> paths;
+	std::vector<std::string> extensions{ ".png", ".jpg", ".jpeg", ".tga", ".cubemap" };
 
-			fs::path path = entry.path();
-			std::string extension = path.filename().extension().string();
-			if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".tga" || extension == ".cubemap")
-			{
-				textureFiles.emplace(path.filename().string(), path.string());
-				continue;
-			}
+	// find all texture files in the textures folder
+	FileReader::GetAllFilesWithExtensions(dir, &extensions, &paths);
+
+	for (int i = 0; i < paths.size(); ++i)
+	{
+		std::string filename = paths[i].filename().string();
+		textureFiles.emplace(filename, paths[i].string());
+		
+		if (paths[i].extension().string() == ".cubemap")
+		{
+			// create cubemap
+			Cubemap* cubemap = new Cubemap(filename);
+			textureLookup.emplace(filename, cubemap);
+		}
+		else
+		{
+			Texture2D* tex = new Texture2D(filename);
+			textureLookup.emplace(filename, tex);
 		}
 	}
 }
@@ -67,14 +76,30 @@ Cubemap* TextureLoader::GetCubemap(const std::string filename)
 	return (Cubemap*)textureLookup.at(filename);
 }
 
-Texture2D* TextureLoader::LoadTexture(const std::string filename)
+void TextureLoader::LoadTexture(Texture* tex)
 {
-	// fail if texture isn't found
-	if (!textureFiles.count(filename)) return nullptr;
+	// fail if already loaded
+	if (tex->IsLoaded())
+		return;
 
+	switch (tex->GetTexType())
+	{
+	case TEX_Type::Texture2D:
+		LoadTexture2D((Texture2D*)tex);
+		break;
+	case TEX_Type::Cubemap:
+		LoadCubemap((Cubemap*)tex);
+		break;
+	default:
+		break;
+	}
+}
+
+void TextureLoader::LoadTexture2D(Texture2D* tex)
+{
 	stbi_set_flip_vertically_on_load(true);
 	// load image data
-	std::string path = GetTexturePath(filename);
+	std::string path = GetTexturePath(tex->GetFilename());
 	int width, height, nrChannels;
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 
@@ -88,32 +113,28 @@ Texture2D* TextureLoader::LoadTexture(const std::string filename)
 		glTexImage2D(GL_TEXTURE_2D, 0, (GLenum)format, width, height, 0, (GLenum)format, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
-		Texture2D* texture = new Texture2D(id, filename, width, height, format);
+		tex->SetID(id);
+		tex->SetProperties(width, height, format);
 
 		// we're now done with the data
 		stbi_image_free(data);
 
-		// add to the texture lookup
-		textureLookup.emplace(filename, texture);
-
-		std::cout << "Successfully loaded texture " << filename << std::endl;
-		return texture;
+		std::cout << "Successfully loaded texture " << tex->GetFilename() << std::endl;
 	}
 	else
 	{
 		stbi_image_free(data);
 		std::cout << "Failed to load image from disk." << std::endl;
-		return nullptr;
 	}
 }
 
-Cubemap* TextureLoader::LoadCubemap(const std::string filename)
+void TextureLoader::LoadCubemap(Cubemap* tex)
 {
 	std::vector<std::string> lines;
-	std::string pathString = GetTexturePath(filename);
-	
+	std::string pathString = GetTexturePath(tex->GetFilename());
+
 	// cancel if not enough lines are read
-	if (FileReader::LoadFileAsStringVector(&lines, pathString) < 1) return nullptr;
+	if (FileReader::LoadFileAsStringVector(&lines, pathString) < 1) return;
 
 	std::string faceTextures[6];
 	int lastValidLine = 0;
@@ -161,26 +182,30 @@ Cubemap* TextureLoader::LoadCubemap(const std::string filename)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	
-	Cubemap* cubemap = new Cubemap(id, filename);
 
-	textureLookup.emplace(filename, cubemap);
-	
-	return cubemap;
-	//---------------------------------------------------------------------------------------------
+	tex->SetID(id);
+	tex->UpdateTextureProperties();
+	std::cout << "Loaded cubemap: " << tex->GetFilename() << std::endl;
 }
 
-void TextureLoader::UnloadTexture(const std::string filename)
+void TextureLoader::UnloadTexture(Texture* tex)
 {
-	if (textureLookup.count(filename))
-	{
-		delete textureLookup[filename];
+	// texture already unloaded?
+	if (!tex->IsLoaded()) return;
 
-		textureLookup.erase(filename);
-		std::cout << "Unloaded texture " << filename << std::endl;
-	}
-	else
+	GLuint id = tex->GetID();
+	glDeleteTextures(1, &id);
+	tex->SetID(-1);
+
+	switch (tex->GetTexType())
 	{
-		std::cout << "Texture " << filename << " not loaded." << std::endl;
+	case TEX_Type::Texture2D:
+		std::cout << "Unloaded texture: " << tex->GetFilename() << std::endl;
+		break;
+	case TEX_Type::Cubemap:
+		std::cout << "Unloaded cubemap: " << tex->GetFilename() << std::endl;
+		break;
+	default:
+		break;
 	}
 }

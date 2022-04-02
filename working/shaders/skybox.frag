@@ -17,7 +17,7 @@ layout(std140, binding = 1) uniform _Globals
 };
 
 // sampler
-layout (binding = 0) uniform samplerCube _Cubemap;		// cubemap
+layout (binding = 15) uniform samplerCube _Cubemap;		// cubemap
 uniform vec4 _AlbedoColor = vec4(1.0, 1.0, 1.0, 1.0);
 
 //inout
