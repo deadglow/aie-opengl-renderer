@@ -23,11 +23,16 @@ GLuint Renderer::uboLighting = -1;
 GLuint Renderer::uboGlobals = -1;
 GLuint Renderer::uboFog = -1;
 
-glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
-float Renderer::fogDensity = 0.000f;
 
 Material* Renderer::skyboxMaterial = nullptr;
 Model* Renderer::skybox = nullptr;
+Mesh* Renderer::screenPlane = nullptr;
+
+unsigned int Renderer::renderFramebuffer = -1;
+unsigned int Renderer::renderTexture = -1;
+
+glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
+float Renderer::fogDensity = 0.000f;
 
 std::list<Camera> Renderer::cameraStack;
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
@@ -66,15 +71,12 @@ int Renderer::Initialise()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	// set clear color
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
 	// turn off vsync
 	glfwSwapInterval(0);
 
 	// enable msaa
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	glEnable(GL_MULTISAMPLE);
+	//glfwWindowHint(GLFW_SAMPLES, 4);
+	//glEnable(GL_MULTISAMPLE);
 
 	// create and initialise UBOs
 	InitUBOs();
@@ -112,6 +114,12 @@ int Renderer::Initialise()
 		// skybox
 	skybox = ModelLoader::LoadModel(SKYBOX_DEFAULT_MODEL);
 	skybox->SetAllMaterials(skyboxMaterial);
+
+	// set up screen plane
+	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, 1 }, { -1, 0, 0 });
+	screenPlane->LoadMesh();
+
+	CreateRenderTexture();
 
 	// set up imgui
 	IMGUI_CHECKVERSION();
@@ -168,6 +176,7 @@ void Renderer::Shutdown()
 	ImGui::DestroyContext();
 
 	delete skyboxMaterial;
+	delete screenPlane;
 
 	// shutdown loaders
 	ModelLoader::Shutdown();
@@ -188,6 +197,7 @@ void Renderer::Shutdown()
 	glfwTerminate();
 }
 
+// UBOS
 void Renderer::SetGlobalsUBO()
 {
 	float floats[2];
@@ -197,7 +207,6 @@ void Renderer::SetGlobalsUBO()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
-
 
 void Renderer::SetCameraUBO(CameraShaderData csd)
 {
@@ -233,19 +242,36 @@ void Renderer::SetFogUBO()
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-GLFWwindow* Renderer::GetWindow()
+void Renderer::CreateRenderTexture()
 {
-	return Renderer::window;
-}
+	// create render texture
+	glGenFramebuffers(1, &renderFramebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, renderFramebuffer);
 
-double Renderer::GetDeltaTime()
-{
-	return deltaTime;
-}
+	// color buffer
+	glGenTextures(1, &renderTexture);
+	glBindTexture(GL_TEXTURE_2D, renderTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)TEX_Format::RGB, RES_X, RES_Y, 0, (GLint)TEX_Format::RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)TEX_Filtering::Linear);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)TEX_Filtering::Linear);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
-float Renderer::GetAspect()
-{
-	return aspect;
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture, 0);
+
+	// depth and stencil buffer
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RES_X, RES_Y);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cout << "Render texture not complete." << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::AddModelInstance(ModelInstance* instance)
@@ -314,7 +340,6 @@ void Renderer::Start()
 
 void Renderer::Render()
 {
-
 	// imgui new frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -342,14 +367,42 @@ void Renderer::OnDraw()
 	SetLightingUBO();
 	SetFogUBO();
 
-	// prep draw calls
 	PrepareDrawCalls();
 
+	// draw to render texture
+	glBindFramebuffer(GL_FRAMEBUFFER, renderFramebuffer);
 	auto iter = cameraStack.begin();
 	for (iter; iter != cameraStack.end(); iter++)
 	{
 		(*iter).Draw();
 	}
+	
+	// draw to default surface
+	glDisable(GL_DEPTH_TEST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, renderTexture);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);
+	ShaderLoader::GetShader(POSTPROCESS_SHADER)->Use();
+	screenPlane->Draw();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glEnable(GL_DEPTH_TEST);
 
 	RendererDebugMenu::DrawImGui();
+}
+
+GLFWwindow* Renderer::GetWindow()
+{
+	return Renderer::window;
+}
+
+double Renderer::GetDeltaTime()
+{
+	return deltaTime;
+}
+
+float Renderer::GetAspect()
+{
+	return aspect;
 }

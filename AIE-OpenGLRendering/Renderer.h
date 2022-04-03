@@ -30,6 +30,8 @@
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
+#define POSTPROCESS_SHADER "postprocess"
+
 class Renderer
 {
 private:
@@ -44,6 +46,12 @@ private:
 	static GLuint uboLighting;
 	static GLuint uboFog;
 	
+	static Material* skyboxMaterial;
+	static Model* skybox;
+	static Mesh* screenPlane;
+
+	static unsigned int renderFramebuffer;
+	static unsigned int renderTexture;
 
 	Renderer() = delete;
 	~Renderer() = default;
@@ -52,6 +60,8 @@ private:
 	static void SetGlobalsUBO();
 	static void SetLightingUBO();
 	static void SetFogUBO();
+
+	static void CreateRenderTexture();
 
 	static void OnDraw();
 	static void PrepareDrawCalls();
@@ -65,10 +75,6 @@ public:
 	// fog
 	static glm::vec4 fogColor;
 	static float fogDensity;
-
-	// skybox
-	static Material* skyboxMaterial;
-	static Model* skybox;
 
 	// lists
 	static std::list<ModelInstance*> modelInstances;

@@ -1,5 +1,42 @@
 #include "MeshPrimitives.h"
 
+Mesh* MeshPrimitives::CreatePlane(float width, float height, glm::vec3 normal, glm::vec3 tangent)
+{
+	glm::mat3 transform;
+	transform[0] = -tangent;
+	transform[1] = glm::cross(normal, tangent);
+	transform[2] = normal;
+	Vertex vertices[4]
+	{
+		{ {-1, -1, 0},	normal, tangent, { 0, 0 }},
+		{ {1, -1, 0},	normal, tangent, { 1, 0 }},
+		{ {1, 1, 0},	normal, tangent, { 1, 1 }},
+		{ {-1, 1, 0},	normal, tangent, { 0, 1 }}
+	};
+
+	for (int i = 0; i < 4; ++i)
+	{
+		vertices[i].pos.x *= width;
+		vertices[i].pos.y *= height;
+		vertices[i].pos = transform * vertices[i].pos;
+	}
+
+	Triangle tris[2]
+	{
+		{0, 1, 3},
+		{2, 3, 1}
+	};
+
+	std::vector<Vertex> verticesList;
+	verticesList.resize(4);
+	memcpy_s(&verticesList[0], sizeof(vertices), vertices, sizeof(vertices));
+	std::vector<Triangle> triangles;
+	triangles.resize(2);
+	memcpy_s(&triangles[0], sizeof(tris), tris, sizeof(tris));
+
+	return new Mesh("Primitive_Plane", glm::mat4(1.0f), verticesList, triangles);
+}
+
 Mesh* MeshPrimitives::CreateCube(float width, float height, float depth)
 {
 	// front, right, back, left, up, down
@@ -126,7 +163,7 @@ Mesh* MeshPrimitives::CreateCylinder(float radius, float height)
 	return nullptr;
 }
 
-Mesh* MeshPrimitives::CreateSausage(float radius, float height)
+Mesh* MeshPrimitives::CreateBean(float radius, float height)
 {
 	return nullptr;
 }
