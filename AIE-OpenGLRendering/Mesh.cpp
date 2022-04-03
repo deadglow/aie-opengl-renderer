@@ -13,7 +13,8 @@ Mesh::Mesh(std::string filename_init, glm::mat4 transform_init, std::vector<Vert
 
 Mesh::~Mesh()
 {
-	UnloadMesh();
+	if (loaded)
+		UnloadMesh();
 }
 
 void Mesh::Draw() const

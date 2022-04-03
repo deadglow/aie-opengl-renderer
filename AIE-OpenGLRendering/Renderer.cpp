@@ -28,8 +28,7 @@ Material* Renderer::skyboxMaterial = nullptr;
 Model* Renderer::skybox = nullptr;
 Mesh* Renderer::screenPlane = nullptr;
 
-unsigned int Renderer::renderFramebuffer = -1;
-unsigned int Renderer::renderTexture = -1;
+RenderTarget* Renderer::mainRenderTarget = nullptr;
 
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
 float Renderer::fogDensity = 0.000f;
@@ -177,6 +176,7 @@ void Renderer::Shutdown()
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui::DestroyContext();
 
+	delete mainRenderTarget;
 	delete skyboxMaterial;
 	delete screenPlane;
 
@@ -246,34 +246,10 @@ void Renderer::SetFogUBO()
 
 void Renderer::CreateRenderTexture()
 {
-	// create render texture
-	glGenFramebuffers(1, &renderFramebuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, renderFramebuffer);
-
-	// color buffer
-	glGenTextures(1, &renderTexture);
-	glBindTexture(GL_TEXTURE_2D, renderTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)TEX_Format::RGB, RES_X, RES_Y, 0, (GLint)TEX_Format::RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLint)TEX_Filtering::Linear);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLint)TEX_Filtering::Linear);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTexture, 0);
-
-	// depth and stencil buffer
-	unsigned int rbo;
-	glGenRenderbuffers(1, &rbo);
-	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, RES_X, RES_Y);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cout << "Render texture not complete." << std::endl;
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", true);
+	Material* renderMaterial = new Material(ShaderLoader::GetShader(POSTPROCESS_SHADER), "render.mat");
+	renderMaterial->AddTexture(mainRenderTarget->GetTexture());
+	MaterialLoader::materialLookup.emplace(renderMaterial->GetName(), renderMaterial);
 }
 
 void Renderer::AddModelInstance(ModelInstance* instance)
@@ -372,24 +348,18 @@ void Renderer::OnDraw()
 	PrepareDrawCalls();
 
 	// draw to render texture
-	glBindFramebuffer(GL_FRAMEBUFFER, renderFramebuffer);
+	mainRenderTarget->Use();
 	auto iter = cameraStack.begin();
 	for (iter; iter != cameraStack.end(); iter++)
 	{
 		(*iter).Draw();
 	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	// draw to default surface
-	glDisable(GL_DEPTH_TEST);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, renderTexture);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-	glClear(GL_COLOR_BUFFER_BIT);
-	ShaderLoader::GetShader(POSTPROCESS_SHADER)->Use();
+	RenderTarget::UseDefault();
+	MaterialLoader::GetMaterial("render.mat")->UseMaterial();
 	screenPlane->Draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glEnable(GL_DEPTH_TEST);
 
 	if (drawDebug)
 		RendererDebugMenu::DrawImGui();

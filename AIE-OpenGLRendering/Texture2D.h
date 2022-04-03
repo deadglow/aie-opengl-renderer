@@ -6,7 +6,7 @@
 class Texture2D :
 	public Texture
 {
-private:
+protected:
 	int width = -1;
 	int height = -1;
 	float borderColor[4] = { 1, 1, 1, 1 };

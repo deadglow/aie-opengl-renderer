@@ -178,6 +178,8 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererDebugMenu.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ShaderLoader.cpp" />
@@ -221,6 +223,8 @@
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererDebugMenu.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="RenderTexture.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="ShaderLoader.h" />

@@ -9,6 +9,7 @@
 #include "ModelInstance.h"
 #include "Lights.h"
 #include "MeshDrawData.h"
+#include "RenderTarget.h"
 
 #define RES_X 1280
 #define RES_Y 768
@@ -50,8 +51,7 @@ private:
 	static Model* skybox;
 	static Mesh* screenPlane;
 
-	static unsigned int renderFramebuffer;
-	static unsigned int renderTexture;
+	static RenderTarget* mainRenderTarget;
 
 	Renderer() = delete;
 	~Renderer() = default;

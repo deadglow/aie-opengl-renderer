@@ -209,3 +209,13 @@ void TextureLoader::UnloadTexture(Texture* tex)
 		break;
 	}
 }
+
+void TextureLoader::AddTexture(Texture* tex)
+{
+	textureLookup.emplace(tex->GetFilename(), tex);
+}
+
+void TextureLoader::RemoveTexture(const std::string filename)
+{
+	textureLookup.erase(filename);
+}

@@ -44,12 +44,12 @@ const std::string Texture::GetFilename() const
 	return filename;
 }
 
-void Texture::SetMipMapFilter(TEX_MipMapFiltering filter)
+void Texture::SetMinFilter(TEX_Filtering filter)
 {
 	minFilter = filter;
 }
 
-void Texture::SetFilter(TEX_Filtering filter)
+void Texture::SetMagFilter(TEX_Filtering filter)
 {
 	magFilter = filter;
 }

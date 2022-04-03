@@ -27,5 +27,8 @@ public:
 	static Cubemap* GetCubemap(const std::string filename);
 	static void LoadTexture(Texture* tex);
 	static void UnloadTexture(Texture* tex);
+
+	static void AddTexture(Texture* tex);
+	static void RemoveTexture(const std::string filename);
 };
 

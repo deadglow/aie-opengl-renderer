@@ -5,11 +5,7 @@
 enum class TEX_Filtering : GLenum
 {
 	Nearest = GL_NEAREST,
-	Linear = GL_LINEAR
-};
-
-enum class TEX_MipMapFiltering : GLenum
-{
+	Linear = GL_LINEAR,
 	NearestMipMapNearest = GL_NEAREST_MIPMAP_NEAREST,
 	NearestMipMapLinear = GL_NEAREST_MIPMAP_LINEAR,
 	LinearMipMapNearest = GL_LINEAR_MIPMAP_NEAREST,
@@ -50,8 +46,9 @@ class Texture
 protected:
 	GLuint id = -1;
 	std::string filename = "";
+	bool renderTexture = false;
 
-	TEX_MipMapFiltering minFilter = TEX_MipMapFiltering::LinearMipMapLinear;
+	TEX_Filtering minFilter = TEX_Filtering::LinearMipMapLinear;
 	TEX_Filtering magFilter = TEX_Filtering::Linear;
 
 public:
@@ -68,8 +65,8 @@ public:
 
 	const std::string GetFilename() const;
 
-	void SetMipMapFilter(TEX_MipMapFiltering filter);
-	void SetFilter(TEX_Filtering filter);
+	void SetMinFilter(TEX_Filtering filter);
+	void SetMagFilter(TEX_Filtering filter);
 	virtual void UpdateTextureProperties();
 	virtual TEX_Type GetTexType();
 
