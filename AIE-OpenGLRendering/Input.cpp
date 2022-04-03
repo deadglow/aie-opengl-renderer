@@ -57,7 +57,7 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		{
 			ShaderLoader::InitialiseShaders();
 		}
-		if (key == GLFW_KEY_M)
+		if (key == GLFW_KEY_SLASH)
 		{
 			mouseLocked = !mouseLocked;
 			if (mouseLocked)
@@ -65,6 +65,8 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 			else
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
+		if (key == GLFW_KEY_GRAVE_ACCENT)
+			Renderer::drawDebug = !Renderer::drawDebug;
 
 		if (key == GLFW_KEY_LEFT_SHIFT)
 			shift = true;

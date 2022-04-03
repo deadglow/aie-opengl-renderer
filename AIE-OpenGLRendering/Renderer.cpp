@@ -41,6 +41,8 @@ std::vector<Light*> Renderer::lights;
 std::list<ModelInstance*> Renderer::modelInstances;
 std::unordered_map<Material*, std::vector<MeshDrawData>> Renderer::drawCalls;
 
+bool Renderer::drawDebug = true;
+
 
 int Renderer::Initialise()
 {
@@ -116,7 +118,7 @@ int Renderer::Initialise()
 	skybox->SetAllMaterials(skyboxMaterial);
 
 	// set up screen plane
-	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, 1 }, { -1, 0, 0 });
+	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, -1 }, { 1, 0, 0 });
 	screenPlane->LoadMesh();
 
 	CreateRenderTexture();
@@ -376,20 +378,21 @@ void Renderer::OnDraw()
 	{
 		(*iter).Draw();
 	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	// draw to default surface
 	glDisable(GL_DEPTH_TEST);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, renderTexture);
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	ShaderLoader::GetShader(POSTPROCESS_SHADER)->Use();
 	screenPlane->Draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glEnable(GL_DEPTH_TEST);
 
-	RendererDebugMenu::DrawImGui();
+	if (drawDebug)
+		RendererDebugMenu::DrawImGui();
 }
 
 GLFWwindow* Renderer::GetWindow()

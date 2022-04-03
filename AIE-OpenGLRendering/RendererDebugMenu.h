@@ -10,7 +10,6 @@ private:
 	static Texture* selectedTexture;
 	static int dropDownSelected;
 
-
 	static void DrawRenderData();
 	static void DrawModelCreation();
 	static void DrawInstanceEditing();

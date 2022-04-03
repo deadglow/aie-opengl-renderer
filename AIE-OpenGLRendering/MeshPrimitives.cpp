@@ -3,8 +3,8 @@
 Mesh* MeshPrimitives::CreatePlane(float width, float height, glm::vec3 normal, glm::vec3 tangent)
 {
 	glm::mat3 transform;
-	transform[0] = -tangent;
-	transform[1] = glm::cross(normal, tangent);
+	transform[0] = tangent;
+	transform[1] = -glm::cross(normal, tangent);
 	transform[2] = normal;
 	Vertex vertices[4]
 	{

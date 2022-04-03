@@ -10,8 +10,8 @@
 #include "Lights.h"
 #include "MeshDrawData.h"
 
-#define RES_X 1920
-#define RES_Y 1080
+#define RES_X 1280
+#define RES_Y 768
 #define WINDOW_NAME "Creamy Triangle Maker"
 #define MAX_LIGHTS 5
 #define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
@@ -79,6 +79,8 @@ public:
 	// lists
 	static std::list<ModelInstance*> modelInstances;
 	static std::unordered_map<Material*, std::vector<MeshDrawData>> drawCalls;
+
+	static bool drawDebug;
 
 	static int Initialise();
 	static void Shutdown();
