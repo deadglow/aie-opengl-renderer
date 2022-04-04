@@ -3,7 +3,7 @@
 #include "TextureLoader.h"
 #include <iostream>
 
-RenderTarget::RenderTarget(const int width_init, const int height_init, const std::string name_init, const bool useDepth)
+RenderTarget::RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth)
 {
 	width = width_init;
 	height = height_init;
@@ -17,7 +17,7 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 	GLuint colorTexID;
 	glGenTextures(1, &colorTexID);
 	glBindTexture(GL_TEXTURE_2D, colorTexID);
-	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)TEX_Format::RGB, width, height, 0, (GLint)TEX_Format::RGB, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)TEX_Format::RGB, width, height, 0, (GLint)TEX_Format::RGB, precisionType, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexID, 0);
@@ -43,7 +43,7 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
-		std::cout << "Render texture not complete." << std::endl;
+		std::cout << "Render texture not complete: " << glCheckFramebufferStatus(GL_FRAMEBUFFER) << std::endl;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

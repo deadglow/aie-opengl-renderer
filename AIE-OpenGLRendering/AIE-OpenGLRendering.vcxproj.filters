@@ -172,6 +172,12 @@
       <Filter>_Source Files\Texture</Filter>
     </ClCompile>
     <ClCompile Include="RenderTexture.cpp">
+      <Filter>_Source Files\Texture</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessing.cpp">
+      <Filter>_Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcessingStack.cpp">
       <Filter>_Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -306,6 +312,12 @@
       <Filter>_Header Files\Texture</Filter>
     </ClInclude>
     <ClInclude Include="RenderTexture.h">
+      <Filter>_Header Files\Texture</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessing.h">
+      <Filter>_Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcessingStack.h">
       <Filter>_Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,15 +2,17 @@
 #include "FileReader.h"
 #include "glad.h"
 #include "GLFW/glfw3.h"
+#include "rapidjson/document.h"
 #include <filesystem>
 #include <vector>
 #include <iostream>
 #include <fstream>
 
 namespace fs = std::filesystem;
+namespace rj = rapidjson;
 
 std::string ShaderLoader::dir = fs::current_path().string() + "\\shaders";
-std::string ShaderLoader::shaderListFilename = "shaders.list";
+std::string ShaderLoader::shaderListFilename = "shaders.json";
 std::unordered_map<std::string, unsigned int> ShaderLoader::vertexShaders;
 std::unordered_map<std::string, unsigned int> ShaderLoader::fragmentShaders;
 std::unordered_map<std::string, Shader*> ShaderLoader::shaderPrograms;
@@ -134,53 +136,72 @@ bool ShaderLoader::LoadInShaders()
 	std::vector<ShaderProgramStrings> programStrings;
 
 	// go through shader program list and generate program pairs
-	std::ifstream file(shaderListFile.string());
-	if (file.is_open())
+	std::string contents = FileReader::LoadFileAsString(shaderListFile.string());
+	rj::Document doc;
+	doc.Parse(contents.c_str());
+	
+	assert(doc.IsObject());
+
+	const rj::Value& shaderArray = doc["shaders"];
+	assert(shaderArray.IsArray());
+
+	programStrings.resize(shaderArray.Size());
+	for (int i = 0; i < shaderArray.Size(); ++i)
 	{
-		while (!file.eof())
-		{
-			std::string thisLine;
-			std::getline(file, thisLine);
-
-			ShaderProgramStrings strings;
-			int word = 0;
-			// construct name, vertex and fragment strings. go to the next word when a comma is found.
-			for (char c : thisLine)
-			{
-				// newline, gettouta there
-				if (c == '\n') break;
-				if (c == ',')
-				{
-					word++;
-					continue;
-				}
-
-				switch (word)
-				{
-				case 0:
-					strings.name.push_back(c);
-					break;
-				case 1:
-					strings.vertex.push_back(c);
-					break;
-				case 2:
-					strings.fragment.push_back(c);
-					break;
-				default:
-					break;
-				}
-			}
-
-			// get rid of trailing spaces??
-			programStrings.push_back(strings);
-		}
+		programStrings[i].name = shaderArray[i]["name"].GetString();
+		if (shaderArray[i].HasMember("vert"))
+			programStrings[i].vertex = shaderArray[i]["vert"].GetString();
+		if (shaderArray[i].HasMember("frag"))
+			programStrings[i].fragment = shaderArray[i]["frag"].GetString();
 	}
-	else
-	{
-		std::cout << "Error loading shader list. Path: " << shaderListFile.string() << std::endl;
-		shaderStateOkay = false;
-	}
-	file.close();
+
+	//std::ifstream file(shaderListFile.string());
+	//if (file.is_open())
+	//{
+	//	while (!file.eof())
+	//	{
+	//		std::string thisLine;
+	//		std::getline(file, thisLine);
+
+	//		ShaderProgramStrings strings;
+	//		int word = 0;
+	//		// construct name, vertex and fragment strings. go to the next word when a comma is found.
+	//		for (char c : thisLine)
+	//		{
+	//			// newline, gettouta there
+	//			if (c == '\n') break;
+	//			if (c == ',')
+	//			{
+	//				word++;
+	//				continue;
+	//			}
+
+	//			switch (word)
+	//			{
+	//			case 0:
+	//				strings.name.push_back(c);
+	//				break;
+	//			case 1:
+	//				strings.vertex.push_back(c);
+	//				break;
+	//			case 2:
+	//				strings.fragment.push_back(c);
+	//				break;
+	//			default:
+	//				break;
+	//			}
+	//		}
+
+	//		// get rid of trailing spaces??
+	//		programStrings.push_back(strings);
+	//	}
+	//}
+	//else
+	//{
+	//	std::cout << "Error loading shader list. Path: " << shaderListFile.string() << std::endl;
+	//	shaderStateOkay = false;
+	//}
+	//file.close();
 
 	if (shaderStateOkay)
 	{

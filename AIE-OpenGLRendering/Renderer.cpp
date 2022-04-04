@@ -10,39 +10,228 @@
 #include "imgui_impl_opengl3.h"
 
 #include "MeshPrimitives.h"
+#include "PostProcessing.h"
 #include <iostream>
 
 
+// window
 GLFWwindow* Renderer::window = nullptr;
 float Renderer::aspect = 1.0f;
+
+// time
 double Renderer::lastTime = 0.0;
 double Renderer::deltaTime = 1.0;
 
+// ubos
 GLuint Renderer::uboCamera = -1;
 GLuint Renderer::uboLighting = -1;
 GLuint Renderer::uboGlobals = -1;
 GLuint Renderer::uboFog = -1;
 
-
+// skybox
 Material* Renderer::skyboxMaterial = nullptr;
 Model* Renderer::skybox = nullptr;
+
+// render targets
 Mesh* Renderer::screenPlane = nullptr;
-
 RenderTarget* Renderer::mainRenderTarget = nullptr;
+RenderTarget* Renderer::postprocessingBuffers[2] = { nullptr, nullptr };
+bool Renderer::currentBuffer = 0;
 
+// fog
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
 float Renderer::fogDensity = 0.000f;
 
+// stacks
 std::list<Camera> Renderer::cameraStack;
+
+// lights
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
 std::vector<Light*> Renderer::lights;
 
+// drawing and instances
 std::list<ModelInstance*> Renderer::modelInstances;
 std::unordered_map<Material*, std::vector<MeshDrawData>> Renderer::drawCalls;
 
+// debug
 bool Renderer::drawDebug = true;
 
 
+//==============================================================================
+//				FUNCTIONS
+//____________________________________________________________________________/
+
+void Renderer::AddModelInstance(ModelInstance* instance)
+{
+	modelInstances.push_back(instance);
+}
+
+void Renderer::RemoveModelInstance(ModelInstance* instance)
+{
+	modelInstances.remove(instance);
+	delete instance;
+}
+
+void Renderer::SetSkybox(Cubemap* cubemap)
+{
+	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetID());
+}
+
+void Renderer::PrepareDrawCalls()
+{
+	drawCalls.clear();
+	for (const auto value : modelInstances)
+	{
+		value->AddToDrawCalls();
+	}
+}
+
+GLFWwindow* Renderer::GetWindow()
+{
+	return Renderer::window;
+}
+
+double Renderer::GetDeltaTime()
+{
+	return deltaTime;
+}
+
+float Renderer::GetAspect()
+{
+	return aspect;
+}
+
+// UBOS
+void Renderer::InitUBOs()
+{
+	// camera buffer
+	glGenBuffers(1, &uboCamera);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraShaderData), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboCamera);
+
+	// globals buffer
+	glGenBuffers(1, &uboGlobals);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 2, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboGlobals);
+
+	// lighting buffer
+	glGenBuffers(1, &uboLighting);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) + sizeof(LightShaderData) * MAX_LIGHTS + sizeof(int), NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLighting);
+
+	// fog buffer
+	glGenBuffers(1, &uboFog);
+	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
+	glBufferData(GL_UNIFORM_BUFFER, 20, NULL, GL_STATIC_DRAW);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
+}
+
+void Renderer::SetGlobalsUBO()
+{
+	float floats[2];
+	floats[0] = (float)glfwGetTime();
+	floats[1] = (float)deltaTime;
+	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetCameraUBO(CameraShaderData csd)
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CameraShaderData), &csd);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetLightingUBO()
+{
+	// generate light array
+	int size = (int)lights.size();
+	LightShaderData shaderDataArray[MAX_LIGHTS];
+
+	for (int i = 0; i < size; ++i)
+	{
+		shaderDataArray[i] = lights[i]->ConstructShaderData();
+	}
+
+	// put the data in
+	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &ambientLight);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(LightShaderData) * MAX_LIGHTS, shaderDataArray);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightShaderData) * MAX_LIGHTS + sizeof(glm::vec4), sizeof(int), &size);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void Renderer::SetFogUBO()
+{
+	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
+	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &fogColor);
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(float), &fogDensity);
+	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+// Render textures
+void Renderer::CreateRenderTextures()
+{
+	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true);
+	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_UNSIGNED_BYTE, false);
+	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_UNSIGNED_BYTE, false);
+}
+
+void Renderer::RenderPostProcess(Shader* postProcessShader)
+{
+	// swap to the other buffer
+	currentBuffer = !currentBuffer;
+
+	int currentIndex = (int)currentBuffer;
+	int otherIndex = (int)!currentBuffer;
+
+	// activate da buffer
+	postprocessingBuffers[currentIndex]->Use();
+
+	postProcessShader->Use();
+	// bind previous buffer
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[otherIndex]->GetTexture()->GetID());
+
+	// draw the plane
+	screenPlane->Draw();
+
+}
+
+// Drawing and draw calls
+void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
+{
+	if (!drawCalls.count(mat))
+	{
+		drawCalls.emplace(mat, std::vector<MeshDrawData>());
+	}
+	drawCalls[mat].push_back(data);
+}
+
+void Renderer::DrawSkybox()
+{
+	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
+	skyboxMaterial->UseMaterial();
+	skybox->meshes[0]->Draw();
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+}
+
+// Initialisation
 int Renderer::Initialise()
 {
 	// init GLFW, and check if it has successfully inited
@@ -109,10 +298,10 @@ int Renderer::Initialise()
 
 	// model setup
 	ModelLoader::Initialise();
-		// default cube
+	// default cube
 	Model* model = ModelLoader::LoadModel(MODEL_DEFAULT);
 	model->SetAllMaterials(MaterialLoader::GetMaterial(SHADER_DEFAULT_UNLIT));
-		// skybox
+	// skybox
 	skybox = ModelLoader::LoadModel(SKYBOX_DEFAULT_MODEL);
 	skybox->SetAllMaterials(skyboxMaterial);
 
@@ -120,7 +309,10 @@ int Renderer::Initialise()
 	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, -1 }, { 1, 0, 0 });
 	screenPlane->LoadMesh();
 
-	CreateRenderTexture();
+	CreateRenderTextures();
+
+	// initialise post processing
+	PostProcessing::Initialise();
 
 	// set up imgui
 	IMGUI_CHECKVERSION();
@@ -133,42 +325,7 @@ int Renderer::Initialise()
 	return 0;
 }
 
-
-void Renderer::InitUBOs()
-{
-	// camera buffer
-	glGenBuffers(1, &uboCamera);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(CameraShaderData), NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 0, uboCamera);
-
-	// globals buffer
-	glGenBuffers(1, &uboGlobals);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 2, NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboGlobals);
-
-	// lighting buffer
-	glGenBuffers(1, &uboLighting);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::vec4) + sizeof(LightShaderData) * MAX_LIGHTS + sizeof(int), NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 2, uboLighting);
-
-	// fog buffer
-	glGenBuffers(1, &uboFog);
-	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
-	glBufferData(GL_UNIFORM_BUFFER, 20, NULL, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-	glBindBufferBase(GL_UNIFORM_BUFFER, 3, uboFog);
-}
-
+// Shutdown
 void Renderer::Shutdown()
 {
 	// shutdown imgui
@@ -177,15 +334,18 @@ void Renderer::Shutdown()
 	ImGui::DestroyContext();
 
 	delete mainRenderTarget;
+	delete postprocessingBuffers[0];
+	delete postprocessingBuffers[1];
 	delete skyboxMaterial;
 	delete screenPlane;
 
 	// shutdown loaders
+	PostProcessing::Shutdown();
 	ModelLoader::Shutdown();
 	MaterialLoader::Shutdown();
 	TextureLoader::Shutdown();
 	ShaderLoader::Shutdown();
-	
+
 	// clear materials and instances
 	for (ModelInstance* mt : modelInstances)
 	{
@@ -199,123 +359,7 @@ void Renderer::Shutdown()
 	glfwTerminate();
 }
 
-// UBOS
-void Renderer::SetGlobalsUBO()
-{
-	float floats[2];
-	floats[0] = (float)glfwGetTime();
-	floats[1] = (float)deltaTime;
-	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Renderer::SetCameraUBO(CameraShaderData csd)
-{
-	glBindBuffer(GL_UNIFORM_BUFFER, uboCamera);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(CameraShaderData), &csd);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Renderer::SetLightingUBO()
-{
-	// generate light array
-	int size = (int)lights.size();
-	LightShaderData shaderDataArray[MAX_LIGHTS];
-
-	for (int i = 0; i < size; ++i)
-	{
-		shaderDataArray[i] = lights[i]->ConstructShaderData();
-	}
-
-	// put the data in
-	glBindBuffer(GL_UNIFORM_BUFFER, uboLighting);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &ambientLight);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(LightShaderData) * MAX_LIGHTS, shaderDataArray);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(LightShaderData) * MAX_LIGHTS + sizeof(glm::vec4), sizeof(int), &size);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Renderer::SetFogUBO()
-{
-	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
-	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &fogColor);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(float), &fogDensity);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
-}
-
-void Renderer::CreateRenderTexture()
-{
-	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", true);
-	Material* renderMaterial = new Material(ShaderLoader::GetShader(POSTPROCESS_SHADER), "render.mat");
-	renderMaterial->AddTexture(mainRenderTarget->GetTexture());
-	MaterialLoader::materialLookup.emplace(renderMaterial->GetName(), renderMaterial);
-}
-
-void Renderer::AddModelInstance(ModelInstance* instance)
-{
-	modelInstances.push_back(instance);
-}
-
-void Renderer::RemoveModelInstance(ModelInstance* instance)
-{
-	modelInstances.remove(instance);
-	delete instance;
-}
-
-void Renderer::SetSkybox(Cubemap* cubemap)
-{
-	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetID());
-}
-
-void Renderer::DrawSkybox()
-{
-	glDepthMask(GL_FALSE);
-	glDepthFunc(GL_LEQUAL);
-	skyboxMaterial->UseMaterial();
-	skybox->meshes[0]->Draw();
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-}
-
-void Renderer::PrepareDrawCalls()
-{
-	drawCalls.clear();
-	for (const auto value : modelInstances)
-	{
-		value->AddToDrawCalls();
-	}
-}
-
-void Renderer::AddToDrawCall(Material* mat, MeshDrawData data)
-{
-	if (!drawCalls.count(mat))
-	{
-		drawCalls.emplace(mat, std::vector<MeshDrawData>());
-	}
-	drawCalls[mat].push_back(data);
-}
-
-void Renderer::Start()
-{
-	cameraStack.push_back(Camera());
-
-	// create lights
-	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
-	lights.push_back(dirLight);
-
-	PointLight* light = new PointLight();
-	lights.push_back(light);
-
-	light->color = { 0.0f, 0.0f, 1.0f };
-	light->intensity = 1.0f;
-
-	// move da camera
-	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
-}
-
-
+// Render
 void Renderer::Render()
 {
 	// imgui new frame
@@ -338,6 +382,26 @@ void Renderer::Render()
 	glfwSwapBuffers(window);
 }
 
+// Non essential init here
+void Renderer::Start()
+{
+	cameraStack.push_back(Camera());
+
+	// create lights
+	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
+	lights.push_back(dirLight);
+
+	PointLight* light = new PointLight();
+	lights.push_back(light);
+
+	light->color = { 0.0f, 0.0f, 1.0f };
+	light->intensity = 1.0f;
+
+	// move da camera
+	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
+}
+
+// Non engine drawing here
 void Renderer::OnDraw()
 {
 	// set UBOS
@@ -348,34 +412,44 @@ void Renderer::OnDraw()
 	PrepareDrawCalls();
 
 	// draw to render texture
-	mainRenderTarget->Use();
-	auto iter = cameraStack.begin();
-	for (iter; iter != cameraStack.end(); iter++)
 	{
-		(*iter).Draw();
+		mainRenderTarget->Use();
+		auto iter = cameraStack.begin();
+		for (iter; iter != cameraStack.end(); iter++)
+		{
+			(*iter).Draw();
+		}
 	}
 	
+	// do post processing
+	{
+		// bind main buffer to 1
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture()->GetID());
+
+		// use the screenrender shader to draw the main buffer to the post processing buffer
+		ShaderLoader::UseShader(DEFAULT_SCREENRENDER_SHADER);
+		ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", true);
+		RenderPostProcess(ShaderLoader::GetCurrentShader());
+
+		// render other post processing
+		PostProcessingStack* stack = PostProcessing::stacks["post"];
+		for (int i = 0; i < stack->shaderList.size(); ++i)
+		{
+			RenderPostProcess(ShaderLoader::GetShader(stack->shaderList[i]));
+		}
+	}	
+
 	// draw to default surface
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[(int)currentBuffer]->GetTexture()->GetID());
+
 	RenderTarget::UseDefault();
-	MaterialLoader::GetMaterial("render.mat")->UseMaterial();
+	ShaderLoader::UseShader(DEFAULT_SCREENRENDER_SHADER);
+	ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", false);
 	screenPlane->Draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	if (drawDebug)
 		RendererDebugMenu::DrawImGui();
-}
-
-GLFWwindow* Renderer::GetWindow()
-{
-	return Renderer::window;
-}
-
-double Renderer::GetDeltaTime()
-{
-	return deltaTime;
-}
-
-float Renderer::GetAspect()
-{
-	return aspect;
 }

@@ -176,6 +176,8 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelInstance.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="PostProcessing.cpp" />
+    <ClCompile Include="PostProcessingStack.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererDebugMenu.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
@@ -221,6 +223,8 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelInstance.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="PostProcessing.h" />
+    <ClInclude Include="PostProcessingStack.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererDebugMenu.h" />
     <ClInclude Include="RenderTarget.h" />

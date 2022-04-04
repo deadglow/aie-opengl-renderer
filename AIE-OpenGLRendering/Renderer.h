@@ -31,7 +31,7 @@
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
-#define POSTPROCESS_SHADER "postprocess"
+#define DEFAULT_SCREENRENDER_SHADER "screenrender"
 
 class Renderer
 {
@@ -49,9 +49,12 @@ private:
 	
 	static Material* skyboxMaterial;
 	static Model* skybox;
+
 	static Mesh* screenPlane;
 
 	static RenderTarget* mainRenderTarget;
+	static RenderTarget* postprocessingBuffers[2];
+	static bool currentBuffer;
 
 	Renderer() = delete;
 	~Renderer() = default;
@@ -61,7 +64,9 @@ private:
 	static void SetLightingUBO();
 	static void SetFogUBO();
 
-	static void CreateRenderTexture();
+	static void CreateRenderTextures();
+
+	static void RenderPostProcess(Shader* postProcessShader);
 
 	static void OnDraw();
 	static void PrepareDrawCalls();

@@ -16,7 +16,7 @@ private:
 	float width = -1;
 	float height = -1;
 public:
-	RenderTarget(const int width_init, const int height_init, const std::string name_init, const bool useDepth = true);
+	RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth = true);
 	~RenderTarget();
 
 	void Use();

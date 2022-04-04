@@ -1,0 +1,35 @@
+{
+    "shaders":
+    [
+        {
+            "name":"screenrender",
+            "vert":"screenrender.vert",
+            "frag":"screenrender.frag"
+        },
+        {
+            "name":"unlit",
+            "vert":"unlit.vert",
+            "frag":"unlit.frag"
+        },
+        {
+            "name":"lit",
+            "vert":"lit.vert",
+            "frag":"lit.frag"
+        },
+        {
+            "name":"skybox",
+            "vert":"skybox.vert",
+            "frag":"skybox.frag"
+        },
+        {
+            "name":"post_blur",
+            "vert":"screenrender.vert",
+            "frag":"blur.frag"
+        },
+        {
+            "name":"post_colorshift",
+            "vert":"screenrender.vert",
+            "frag":"colorshift.frag"
+        }
+    ]
+}
