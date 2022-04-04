@@ -5,22 +5,36 @@
 
 using namespace rapidjson;
 
-std::string PostProcessing::dir = fs::current_path().string() + "\\shaders\\postprocessing.json";
+std::string PostProcessing::dir = fs::current_path().string() + "\\postprocessing";
 std::unordered_map<std::string, PostProcessingStack*> PostProcessing::stacks;
 
 
 void PostProcessing::Initialise()
 {
-	PostProcessingStack* stack = LoadPostProcessing(dir);
-	stacks.emplace(stack->name, stack);
+	DeleteAll();
+	std::vector<std::string> extensions{ ".json" };
+	std::vector<fs::path> paths;
+	FileReader::GetAllFilesWithExtensions(dir, &extensions, &paths);
+
+	for (int i = 0; i < paths.size(); ++i)
+	{
+		PostProcessingStack* stack = LoadPostProcessing(paths[i].string());
+		stacks.emplace(stack->name, stack);
+	}
 }
 
-void PostProcessing::Shutdown()
+void PostProcessing::DeleteAll()
 {
 	for (const auto [key, value] : stacks)
 	{
 		delete value;
 	}
+	stacks.clear();
+}
+
+void PostProcessing::Shutdown()
+{
+	DeleteAll();
 }
 
 PostProcessingStack* PostProcessing::LoadPostProcessing(std::string path)

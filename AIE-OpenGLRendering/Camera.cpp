@@ -30,6 +30,11 @@ const CameraShaderData Camera::GetShaderData() const
 
 void Camera::Draw()
 {
+	if (renderTarget)
+		renderTarget->Use();
+	else
+		Renderer::GetMainRenderTarget()->Use();
+
 	// clear the depth buffer and start drawing
 	glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -58,3 +63,8 @@ void Camera::Draw()
 	if (clearType == CameraClearType::Skybox)
 		Renderer::DrawSkybox();
 	}
+
+void Camera::SetRenderTarget(RenderTarget* target)
+{
+	renderTarget = target;
+}

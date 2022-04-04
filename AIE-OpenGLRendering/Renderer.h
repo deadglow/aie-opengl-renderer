@@ -101,6 +101,8 @@ public:
 	static double GetDeltaTime();
 	static float GetAspect();
 
+	static RenderTarget* GetMainRenderTarget();
+
 	static void AddModelInstance(ModelInstance* instance);
 	static void RemoveModelInstance(ModelInstance* instance);
 

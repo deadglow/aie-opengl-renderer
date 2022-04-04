@@ -55,6 +55,12 @@
     <Filter Include="_Source Files\IMGUI">
       <UniqueIdentifier>{10cbe6e5-51bb-4fcc-902e-285d2847a0a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="_Header Files\Camera">
+      <UniqueIdentifier>{bc106356-937a-4eed-bec6-171895bff1fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Header Files\NonRenderer">
+      <UniqueIdentifier>{7128347b-12a4-4110-9c15-46e000c6b26d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp">
@@ -188,13 +194,7 @@
     <ClInclude Include="khrplatform.h">
       <Filter>OpenGL\glad</Filter>
     </ClInclude>
-    <ClInclude Include="FileReader.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
       <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
@@ -202,15 +202,6 @@
     </ClInclude>
     <ClInclude Include="Triangle.h">
       <Filter>_Header Files\Primitive</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraShaderData.h">
-      <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DirectionalLight.h">
       <Filter>_Header Files\Lighting</Filter>
@@ -293,9 +284,6 @@
     <ClInclude Include="RendererDebugMenu.h">
       <Filter>_Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>_Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MeshDrawData.h">
       <Filter>_Header Files\Model</Filter>
     </ClInclude>
@@ -318,6 +306,24 @@
       <Filter>_Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PostProcessingStack.h">
+      <Filter>_Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>_Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraShaderData.h">
+      <Filter>_Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>_Header Files\NonRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>_Header Files\NonRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="FileReader.h">
+      <Filter>_Header Files\NonRenderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
       <Filter>_Header Files</Filter>
     </ClInclude>
   </ItemGroup>

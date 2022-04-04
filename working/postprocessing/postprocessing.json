@@ -2,7 +2,6 @@
     "name":"post",
     "stack":
     [
-        "post_blur",
-        "post_colorshift"
+        "post_tonemap"
     ]
 }

@@ -30,6 +30,11 @@
             "name":"post_colorshift",
             "vert":"screenrender.vert",
             "frag":"colorshift.frag"
+        },
+        {
+            "name":"post_tonemap",
+            "vert":"screenrender.vert",
+            "frag":"tonemap.frag"
         }
     ]
 }

@@ -13,6 +13,7 @@ public:
 	static std::unordered_map<std::string, PostProcessingStack*> stacks;
 
 	static void Initialise();
+	static void DeleteAll();
 	static void Shutdown();
 
 	static PostProcessingStack* LoadPostProcessing(std::string path);

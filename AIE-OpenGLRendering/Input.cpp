@@ -1,6 +1,7 @@
 #include "Input.h"
 #include "Renderer.h"
 #include "ShaderLoader.h"
+#include "PostProcessing.h"
 #include "GLFW/glfw3.h"
 
 GLFWwindow* Input::window = nullptr;
@@ -56,6 +57,8 @@ void Input::OnKey(GLFWwindow* window, int key, int scancode, int action, int mod
 		if (key == GLFW_KEY_R)
 		{
 			ShaderLoader::InitialiseShaders();
+			PostProcessing::Initialise();
+			
 		}
 		if (key == GLFW_KEY_SLASH)
 		{

@@ -17,7 +17,14 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 	GLuint colorTexID;
 	glGenTextures(1, &colorTexID);
 	glBindTexture(GL_TEXTURE_2D, colorTexID);
-	glTexImage2D(GL_TEXTURE_2D, 0, (GLint)TEX_Format::RGB, width, height, 0, (GLint)TEX_Format::RGB, precisionType, NULL);
+	
+	GLint format = (GLint)TEX_Format::RGBA;
+
+	// change the format if its a float format
+	if (precisionType == GL_FLOAT)
+		format = GL_RGBA16F;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, (GLint)TEX_Format::RGBA, precisionType, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexID, 0);
@@ -26,6 +33,7 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 	renderTexture->SetID(colorTexID);
 	renderTexture->SetMagFilter(TEX_Filtering::Linear);
 	renderTexture->SetMinFilter(TEX_Filtering::Linear);
+	renderTexture->SetWrapMode(TEX_WrapMode::ClampEdge, TEX_WrapMode::ClampEdge);
 	renderTexture->SetProperties(width, height, TEX_Format::RGB);
 
 	TextureLoader::AddTexture(renderTexture);

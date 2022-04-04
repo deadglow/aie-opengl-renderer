@@ -99,7 +99,7 @@ float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float r
 	return _SpecularStrength * spec;
 }
 
-vec4 CalculateDirectionalLight(int i, vec3 norm, vec3 fragDir)
+vec3 CalculateDirectionalLight(int i, vec3 norm, vec3 fragDir)
 {
 	vec4 dir4 = _Vmat * vec4(_Lights[i].direction, 0.0);
 	vec3 dir = dir4.xyz;
@@ -109,10 +109,10 @@ vec4 CalculateDirectionalLight(int i, vec3 norm, vec3 fragDir)
 	// specular highlight
 	float specular = CalculateSpecularIntensity(norm, dir, fragDir, 0.0);
 
-	return (diffuse + specular) * _Lights[i].color;
+	return (diffuse + specular) * _Lights[i].color.rgb;
 }
 
-vec4 CalculatePointLight(int i, vec3 norm, vec3 fragDir)
+vec3 CalculatePointLight(int i, vec3 norm, vec3 fragDir)
 {
 	// light vec
 	vec3 lightPos = (_Vmat * vec4(_Lights[i].position, 1.0)).xyz;
@@ -130,12 +130,12 @@ vec4 CalculatePointLight(int i, vec3 norm, vec3 fragDir)
 	// attenuation
 	float attenuation = 1.0 / (properties.x + properties.y * dist + properties.z * (dist * dist));
 
-	return (diffuse + specular) * _Lights[i].color * attenuation;
+	return (diffuse + specular) * _Lights[i].color.rgb * attenuation;
 }
 
-vec4 CalculateLights(vec3 norm, vec3 fragDir)
+vec3 CalculateLights(vec3 norm, vec3 fragDir)
 {
-	vec4 lightValue = vec4(0, 0, 0, 1);
+	vec3 lightValue = vec3(0, 0, 0);
 	for (int i = 0; i < _NumLights; i++)
 	{
 		switch(_Lights[i].type)
@@ -152,14 +152,14 @@ vec4 CalculateLights(vec3 norm, vec3 fragDir)
 	return lightValue;
 }
 
-vec4 CalculateCubemapColor(vec3 norm, vec3 fragDir)
+vec3 CalculateCubemapColor(vec3 norm, vec3 fragDir)
 {
 	vec3 eyeDir = fragDir;
 	vec3 reflected = normalize(reflect(eyeDir, norm));
 
 	vec3 transformed = mat3(_iVmat) * reflected;
 	
-	return vec4(texture(_Cubemap, -transformed).rgb * _Reflectivity, 1.0);
+	return texture(_Cubemap, -transformed).rgb * _Reflectivity;
 }
 
 vec4 ProcessFog(vec4 color)
@@ -180,12 +180,12 @@ void main()
 	vec3 viewDir = vec3(0, 0, 1);
 	vec3 fragDir = normalize(fs_in.FragPos);
 
-	vec4 totalLight;
+	vec3 totalLight;
 	totalLight += CalculateLights(norm, fragDir);
-	totalLight += _Ambient;
+	totalLight += _Ambient.rgb;
 
-	vec4 color = texture(_Diffuse, fs_in.TexCoord) * _AlbedoColor * totalLight;
-	color += CalculateCubemapColor(norm, fragDir);
+	vec4 color = texture(_Diffuse, fs_in.TexCoord) * _AlbedoColor * vec4(totalLight, 1.0);
+	color += vec4(CalculateCubemapColor(norm, fragDir), 0);
 	
 	// do fog
 	FragColour = ProcessFog(color);

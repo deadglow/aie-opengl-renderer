@@ -2,6 +2,7 @@
 #include "glm/glm.hpp"
 #include "CameraShaderData.h"
 #include "Transform.h"
+#include "RenderTarget.h"
 
 #define DEFAULT_FOV 70.0f
 #define DEFAULT_NEARPLANE 0.1f
@@ -22,6 +23,7 @@ private:
 	float fieldOfView = glm::radians(DEFAULT_FOV);
 	float orthoSize = 10.0f;
 	int layerMask = INT_MAX;
+	RenderTarget* renderTarget = nullptr;
 
 	CameraShaderData shaderData;
 public:
@@ -30,6 +32,8 @@ public:
 	CameraClearType clearType = CameraClearType::Skybox;
 	Camera() = default;
 	~Camera() = default;
+
+	void SetRenderTarget(RenderTarget* target);
 
 	void UpdateVPMatrix();
 	const CameraShaderData GetShaderData() const;

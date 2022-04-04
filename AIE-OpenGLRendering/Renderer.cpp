@@ -102,6 +102,11 @@ float Renderer::GetAspect()
 	return aspect;
 }
 
+RenderTarget* Renderer::GetMainRenderTarget()
+{
+	return mainRenderTarget;
+}
+
 // UBOS
 void Renderer::InitUBOs()
 {
