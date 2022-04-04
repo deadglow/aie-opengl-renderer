@@ -2,38 +2,19 @@
 
 PointLight::PointLight(glm::vec3 position_init, glm::vec3 color_init, float intensity_init) : Light(color_init, intensity_init)
 {
-    position = position_init;
+    transform.SetPosition(position_init);
 }
 
-PointLight::PointLight(const PointLight& pLight)
+LightType PointLight::GetType()
 {
-    this->color = pLight.color;
-    this->intensity = pLight.intensity;
-    this->position = pLight.position;
-    this->radius = pLight.radius;
-    this->constant = pLight.constant;
-    this->linear = pLight.linear;
-    this->quadratic = pLight.quadratic;
-}
-
-PointLight::PointLight()
-{
-}
-
-PointLight::~PointLight()
-{
-}
-
-int PointLight::GetType()
-{
-    return 1;
+    return LightType::Point;
 }
 
 LightShaderData PointLight::ConstructShaderData()
 {
     LightShaderData shaderData;
-    shaderData.type = GetType();
-    shaderData.position = position;
+    shaderData.type = (int)GetType();
+    shaderData.position = transform.GetPosition();
     shaderData.color = GetFinalColor();
     shaderData.properties = GetProperties();
 

@@ -5,18 +5,17 @@ class PointLight
 	: public Light
 {
 public:
-	glm::vec3 position{ 0, 0, 0 };
 	float constant = 1.0f;
 	float linear = 1.0f;
 	float quadratic = 1.0f;
 	float radius = 0.1f;
 
-	PointLight(glm::vec3 direction_init, glm::vec3 color_init, float intensity_init);
-	PointLight(const PointLight& pLight);
-	PointLight();
-	~PointLight();
+	PointLight(glm::vec3 position_init, glm::vec3 color_init, float intensity_init);
+	PointLight(const PointLight& pLight) = default;
+	PointLight() = default;
+	~PointLight() = default;
 
-	int GetType();
+	LightType GetType();
 
 	LightShaderData ConstructShaderData();
 

@@ -32,10 +32,4 @@ void Game::Update()
 
 	glm::vec3 appliedmove = (glm::vec3(0, 0, -1) * moveinput.z + glm::vec3(1, 0, 0) * moveinput.x + glm::vec3(0, 1, 0) * moveinput.y) * mult * (float)Renderer::GetDeltaTime();
 	Renderer::cameraStack.front().transform.Translate(appliedmove, false);
-
-	PointLight* light = (PointLight*)Renderer::lights[1];
-	light->position.x = glm::cos((float)glfwGetTime()) * 1;
-	light->position.z = glm::sin((float)glfwGetTime()) * 1;
-	//light->intensity = glm::sin((float)glfwGetTime()) * 0.5f + 0.5f;
-
 }

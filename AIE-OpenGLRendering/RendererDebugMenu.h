@@ -1,5 +1,6 @@
 #pragma once
 #include "ModelInstance.h"
+#include "Lights.h"
 
 class RendererDebugMenu
 {
@@ -8,6 +9,7 @@ private:
 	static Model* selectedBaseModel;
 	static Material* selectedMaterial;
 	static Texture* selectedTexture;
+	static Light* selectedLight;
 	static int dropDownSelected;
 
 	static void DrawRenderData();
@@ -16,6 +18,7 @@ private:
 	static void DrawInstanceSelection();
 	static void DrawMaterialList();
 	static void DrawTexturesList();
+	static void DrawLightingList();
 	static void SelectInstance(ModelInstance* instance);
 public:
 	RendererDebugMenu() = delete;

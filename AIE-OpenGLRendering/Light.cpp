@@ -6,17 +6,9 @@ Light::Light(glm::vec3 color_init, float intensity_init)
     intensity = intensity_init;
 }
 
-Light::Light()
+LightType Light::GetType()
 {
-}
-
-Light::~Light()
-{
-}
-
-int Light::GetType()
-{
-    return 0;
+    return LightType();
 }
 
 glm::vec4 Light::GetFinalColor()
@@ -27,4 +19,23 @@ glm::vec4 Light::GetFinalColor()
 LightShaderData Light::ConstructShaderData()
 {
     return LightShaderData();
+}
+
+std::string Light::GetTypeName(LightType type)
+{
+	switch (type)
+	{
+	case LightType::Directional:
+		return "Directional Light";
+		break;
+	case LightType::Point:
+		return "Point Light";
+		break;
+	case LightType::Spot:
+		return "Spot Light";
+		break;
+	default:
+		return "";
+		break;
+	}
 }

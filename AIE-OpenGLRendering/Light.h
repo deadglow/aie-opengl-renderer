@@ -1,5 +1,7 @@
 #pragma once
+#include "Transform.h"
 #include "glm/glm.hpp"
+#include <string>
 
 struct alignas(16) LightShaderData
 {
@@ -10,20 +12,30 @@ struct alignas(16) LightShaderData
 	alignas(4) int type = 0;
 };
 
+enum class LightType : int
+{
+	Directional,
+	Point,
+	Spot
+};
+
 class Light
 {
 public:
+	Transform transform;
 	glm::vec3 color{ 1.0f, 1.0f, 1.0f };
 	float intensity =  1.0f;
 
 	Light(glm::vec3 color_init, float intensity_init);
-	Light();
-	virtual ~Light();
+	Light() = default;
+	virtual ~Light() = default;
 
-	virtual int GetType();
+	virtual LightType GetType();
 
 	glm::vec4 GetFinalColor();
 
 	virtual LightShaderData ConstructShaderData();
+
+	static std::string GetTypeName(LightType type);
 };
 

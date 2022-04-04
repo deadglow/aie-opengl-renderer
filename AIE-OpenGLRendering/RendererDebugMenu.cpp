@@ -10,6 +10,7 @@ ModelInstance* RendererDebugMenu::selectedInstance = nullptr;
 Model* RendererDebugMenu::selectedBaseModel = nullptr;
 Material* RendererDebugMenu::selectedMaterial = nullptr;
 Texture* RendererDebugMenu::selectedTexture = nullptr;
+Light* RendererDebugMenu::selectedLight = nullptr;
 int RendererDebugMenu::dropDownSelected = -1;
 
 
@@ -26,6 +27,8 @@ void RendererDebugMenu::DrawImGui()
 	DrawMaterialList();
 
 	DrawTexturesList();
+
+	DrawLightingList();
 }
 
 void RendererDebugMenu::DrawRenderData()
@@ -107,14 +110,14 @@ void RendererDebugMenu::DrawInstanceEditing()
 			selectedInstance->transform.SetPosition({ 0, 0, 0 });
 
 		// rot
-		glm::vec3 rotation = selectedInstance->transform.GetRotation();
-		float rotArray[3] = { glm::degrees(rotation.x), glm::degrees(rotation.y), glm::degrees(rotation.z) };
-		ImGui::DragFloat3("Rotation", rotArray, 0.5f);
-		rotation = { glm::radians(rotArray[0]), glm::radians(rotArray[1]), glm::radians(rotArray[2]) };
-		selectedInstance->transform.SetRotation(rotation);
+		glm::quat rotation = selectedInstance->transform.GetRotation();
+		glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
+		ImGui::DragFloat3("Rotation", (float*)&euler, 0.5f);
+		euler = glm::radians(euler);
+		selectedInstance->transform.SetRotation(glm::quat(euler));
 		ImGui::SameLine();
 		if (ImGui::Button("ResetRot"))
-			selectedInstance->transform.SetRotation({ 0, 0, 0 });
+			selectedInstance->transform.SetRotation(glm::identity<glm::quat>());
 
 
 		if (ImGui::Button("Delete instance"))
@@ -162,7 +165,7 @@ void RendererDebugMenu::DrawInstanceEditing()
 						charArrays.push_back(materialNames[j].c_str());
 					}
 
-					ImGui::ListBox("Select material", &selected, &(charArrays[0]), charArrays.size());
+					ImGui::ListBox("Select material", &selected, &(charArrays[0]), (int)charArrays.size());
 
 					selectedInstance->SetMaterialOverride(i, matList[selected]);
 				}
@@ -314,6 +317,38 @@ void RendererDebugMenu::DrawTexturesList()
 		ImGui::Selectable(value->GetFilename().c_str(), &isSelected);
 		if (isSelected)
 			selectedTexture = value;
+	}
+
+	ImGui::End();
+}
+
+void RendererDebugMenu::DrawLightingList()
+{
+	ImGui::Begin("Lighting");
+	ImGui::ColorEdit3("Ambient light", (float*)&Renderer::ambientLight);
+	if (selectedLight)
+	{
+		ImGui::Text(Light::GetTypeName(selectedLight->GetType()).c_str());
+
+		glm::vec3 position = selectedLight->transform.GetPosition();
+		ImGui::DragFloat3("Position", (float*)&position, 0.01f);
+		selectedLight->transform.SetPosition(position);
+
+		glm::vec3 rotation = glm::degrees(glm::eulerAngles(selectedLight->transform.GetRotation()));
+		ImGui::DragFloat3("Rotation", (float*)&rotation, 0.01f);
+		selectedLight->transform.SetRotation(glm::quat(glm::radians(rotation)));
+	}
+	else
+	{
+		ImGui::Text("No Light Selected");
+		ImGui::Spacing();
+		ImGui::Spacing();
+	}
+
+	// draw list
+	for (Light* light : Renderer::lights)
+	{
+		ImGui::Text(Light::GetTypeName(light->GetType()).c_str());
 	}
 
 	ImGui::End();
