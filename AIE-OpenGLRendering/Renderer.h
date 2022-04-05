@@ -75,7 +75,7 @@ public:
 	
 	// lighting
 	static glm::vec4 ambientLight;
-	static std::vector<Light*> lights;
+	static std::list<Light*> lights;
 	
 	// fog
 	static glm::vec4 fogColor;

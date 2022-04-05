@@ -7,10 +7,6 @@
 class ModelLoader
 {
 private:
-	static std::string dir;
-
-	static Model* CreateModel(const std::string filepath, const std::string filename);
-
 	ModelLoader() = delete;
 public:
 	static std::unordered_map<std::string, Model*> modelList;
@@ -20,7 +16,8 @@ public:
 	static void PrintAllMeshFiles();
 
 	static Model* GetModel(const std::string filename);
-	static Model* LoadModel(const std::string filename);
+	static Model* LoadModel(Model* model);
+	static Model* LoadModel(const std::string model);
 	static void UnloadModel(const std::string filename);
 };
 

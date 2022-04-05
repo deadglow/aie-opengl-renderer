@@ -7,28 +7,20 @@
 #include <iostream>
 #include <vector>
 
-namespace fs = std::filesystem;
 
-std::string ModelLoader::dir = fs::current_path().string() + "\\models";
 std::unordered_map<std::string, Model*> ModelLoader::modelList;
-
-Model* ModelLoader::CreateModel(const std::string filepath, const std::string filename)
-{
-	return MeshLoadFunctions::CreateModelFromFile(filepath, filename);
-}
 
 void ModelLoader::Initialise()
 {
 	std::vector<fs::path> paths;
-	std::vector<std::string> extensions{ ".obj", ".fbx", ".blend"};
+	std::vector<std::string> extensions{ ".obj", ".fbx", ".blend" };
 
 	// find all mesh files in the meshes folder
-	FileReader::GetAllFilesWithExtensions(dir, &extensions, &paths);
+	FileReader::GetAllFilesWithExtensions(ModelLoadFunctions::dir, &extensions, &paths);
 
 	for (int i = 0; i < paths.size(); ++i)
 	{
-		Model* model = CreateModel(paths[i].string(), paths[i].filename().string());
-		model->SetAllMaterials(MaterialLoader::GetMaterial(MATERIAL_DEFAULT));
+		Model* model = new Model(paths[i].filename().string());
 		modelList.emplace(paths[i].filename().string(), model);
 	}
 }
@@ -61,12 +53,28 @@ Model* ModelLoader::GetModel(const std::string filename)
 		return nullptr;
 }
 
+Model* ModelLoader::LoadModel(Model* model)
+{
+	bool success = ModelLoadFunctions::LoadModelFromFile(model);
+	if (!success)
+	{
+		std::cout << "Failed to load model " << model->GetFilename() << std::endl;
+		return nullptr;
+	}
+
+	std::cout << "Loaded model " << model->GetFilename() << std::endl;
+	model->SetAllMaterials(MaterialLoader::GetMaterial(MATERIAL_DEFAULT));
+	model->ModelLoaded();
+	return model;
+}
+
 Model* ModelLoader::LoadModel(const std::string filename)
 {
 	Model* model = GetModel(filename);
-	model ->Load();
+	if (!model)
+		throw std::out_of_range("Model not found.");
 
-	return model;
+	return LoadModel(model);
 }
 
 void ModelLoader::UnloadModel(const std::string filename)

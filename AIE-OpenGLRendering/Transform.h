@@ -19,6 +19,8 @@ public:
 
 	void SetPosition(const glm::vec3 pos);
 	void SetRotation(const glm::quat rotation);
+	void SetScale(const glm::vec3 scale);
+
 
 	void Translate(const glm::vec3 offset, bool worldSpace = true);
 	void Rotate(const glm::quat rotation, bool worldSpace = true);

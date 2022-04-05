@@ -3,27 +3,33 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
+
+std::string ModelLoadFunctions::dir = fs::current_path().string() + "\\models";
+
 
 // do this do this
-Model* MeshLoadFunctions::CreateModelFromFile(const std::string filepath, const std::string filename)
+bool ModelLoadFunctions::LoadModelFromFile(Model* model)
 {
+	// do unit scale here
+	// model->unitScale;
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filepath, aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+	const aiScene* scene = importer.ReadFile(dir + "\\" + model->GetFilename(), aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cout << "assimp error: " << importer.GetErrorString() << std::endl;
-		return nullptr;
+		return false;
 	}
-
-	Model* model = new Model(filename);
 
 	ProcessNode(model, scene->mRootNode, scene);
 
-	return model;
+	return true;
 }
 
-void MeshLoadFunctions::ProcessNode(Model* model, aiNode* node, const aiScene* scene)
+void ModelLoadFunctions::ProcessNode(Model* model, aiNode* node, const aiScene* scene)
 {
 	// process all node meshes
 	for (unsigned int i = 0; i < node->mNumMeshes; ++i)
@@ -41,7 +47,7 @@ void MeshLoadFunctions::ProcessNode(Model* model, aiNode* node, const aiScene* s
 	}
 }
 
-Mesh* MeshLoadFunctions::ProcessMesh(Model* model, aiMesh* mesh, glm::mat4 transform, const aiScene* scene)
+Mesh* ModelLoadFunctions::ProcessMesh(Model* model, aiMesh* mesh, glm::mat4 transform, const aiScene* scene)
 {
 	std::vector<Vertex> vertices;
 	std::vector<Triangle> triangles;

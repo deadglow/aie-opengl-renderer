@@ -10,18 +10,7 @@ Model::Model(const std::string filename_init)
 
 Model::~Model()
 {
-	if (loaded)
-	{
-		Unload();
-	}
-
-	for (int i = 0; i < meshes.size(); ++i)
-	{
-		Mesh* mesh = meshes[i];
-		if (mesh)
-			delete mesh;
-	}
-	meshes.clear();
+	Unload();
 }
 
 void Model::AddMesh(Mesh* mesh)
@@ -47,12 +36,14 @@ void Model::Load()
 {
 	if (!loaded)
 	{
-		for (int i = 0; i < meshes.size(); ++i)
-		{
-			meshes[i]->LoadMesh();
-		}
-		loaded = true;
+		// load mesh from assimp
+		ModelLoader::LoadModel(this);
 	}
+}
+
+void Model::ModelLoaded()
+{
+	loaded = true;
 }
 
 void Model::Unload()
@@ -61,8 +52,11 @@ void Model::Unload()
 	{
 		for (int i = 0; i < meshes.size(); ++i)
 		{
-			meshes[i]->UnloadMesh();
+			Mesh* mesh = meshes[i];
+			if (mesh)
+				delete mesh;
 		}
+		meshes.clear();
 		loaded = false;
 	}
 }

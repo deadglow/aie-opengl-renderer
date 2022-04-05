@@ -12,7 +12,19 @@ Material* RendererDebugMenu::selectedMaterial = nullptr;
 Texture* RendererDebugMenu::selectedTexture = nullptr;
 Light* RendererDebugMenu::selectedLight = nullptr;
 int RendererDebugMenu::dropDownSelected = -1;
+glm::vec3 RendererDebugMenu::instanceRotation;
+glm::vec3 RendererDebugMenu::lightRotation;
 
+
+glm::quat RotationControl(glm::vec3* rotation)
+{
+	*rotation = glm::degrees(*rotation);
+	ImGui::DragFloat3("Rotation", (float*)rotation, 0.5f);
+	*rotation = glm::radians(*rotation);
+
+	glm::quat quat = glm::identity<glm::quat>();
+	return quat * glm::angleAxis(rotation->y, glm::vec3(0, 1, 0)) * glm::angleAxis(rotation->x, glm::vec3(1, 0, 0)) * glm::angleAxis(rotation->z, glm::vec3(0, 0, 1));
+}
 
 void RendererDebugMenu::DrawImGui()
 {
@@ -82,7 +94,7 @@ void RendererDebugMenu::DrawModelCreation()
 	for (const auto entry : ModelLoader::modelList)
 	{
 		bool isSelected = selectedBaseModel == entry.second;
-		std::string name = entry.second->GetFilename() + " " + std::to_string(entry.second->meshes.size());
+		std::string name = entry.second->GetFilename();
 		ImGui::Selectable(name.c_str(), &isSelected);
 		if (isSelected)
 			selectedBaseModel = entry.second;
@@ -109,15 +121,11 @@ void RendererDebugMenu::DrawInstanceEditing()
 		if (ImGui::Button("ResetPos"))
 			selectedInstance->transform.SetPosition({ 0, 0, 0 });
 
-		// rot
-		glm::quat rotation = selectedInstance->transform.GetRotation();
-		glm::vec3 euler = glm::degrees(glm::eulerAngles(rotation));
-		ImGui::DragFloat3("Rotation", (float*)&euler, 0.5f);
-		euler = glm::radians(euler);
-		selectedInstance->transform.SetRotation(glm::quat(euler));
+		selectedInstance->transform.SetRotation(RotationControl(&instanceRotation));
+		
 		ImGui::SameLine();
 		if (ImGui::Button("ResetRot"))
-			selectedInstance->transform.SetRotation(glm::identity<glm::quat>());
+			instanceRotation = { 0, 0, 0 };
 
 
 		if (ImGui::Button("Delete instance"))
@@ -293,9 +301,9 @@ void RendererDebugMenu::DrawTexturesList()
 			if (ImGui::Button("Unload"))
 				selectedTexture->Unload();
 
-			ImGui::SameLine();
 			if (selectedTexture->GetTexType() == TEX_Type::Cubemap)
 			{
+				ImGui::SameLine();
 				if (ImGui::Button("Set Skybox"))
 				{
 					Renderer::SetSkybox((Cubemap*)selectedTexture);
@@ -326,17 +334,41 @@ void RendererDebugMenu::DrawLightingList()
 {
 	ImGui::Begin("Lighting");
 	ImGui::ColorEdit3("Ambient light", (float*)&Renderer::ambientLight);
+	// draw selected light
 	if (selectedLight)
 	{
+		glm::mat4 lightMat = selectedLight->transform.matrix;
+		lightMat = glm::scale(lightMat, glm::vec3(0.1f, 0.1f, 0.1f));
+		ModelLoader::GetModel(MODEL_DEFAULT)->Draw(Renderer::cameraStack.front().GetShaderData(), lightMat);
 		ImGui::Text(Light::GetTypeName(selectedLight->GetType()).c_str());
+		
+		if (ImGui::Button("Delete"))
+		{
+			Renderer::lights.remove(selectedLight);
+			delete selectedLight;
+			SelectLight(nullptr);
+			ImGui::End();
+			return;
+		}
 
 		glm::vec3 position = selectedLight->transform.GetPosition();
 		ImGui::DragFloat3("Position", (float*)&position, 0.01f);
 		selectedLight->transform.SetPosition(position);
 
-		glm::vec3 rotation = glm::degrees(glm::eulerAngles(selectedLight->transform.GetRotation()));
-		ImGui::DragFloat3("Rotation", (float*)&rotation, 0.01f);
-		selectedLight->transform.SetRotation(glm::quat(glm::radians(rotation)));
+		selectedLight->transform.SetRotation(RotationControl(&lightRotation));
+
+		ImGui::ColorEdit3("Color", (float*)&selectedLight->color);
+		ImGui::DragFloat("Intensity", &selectedLight->intensity, 0.001f, 0, 100);
+
+		if (selectedLight->GetType() == LightType::Point)
+		{
+			PointLight* point = (PointLight*)selectedLight;
+
+			ImGui::DragFloat("Constant", &point->constant, 0.001f);
+			ImGui::DragFloat("Linear", &point->linear, 0.001f);
+			ImGui::DragFloat("Quadratic", &point->quadratic, 0.001f);
+			ImGui::DragFloat("Radius", &point->radius, 0.001f);
+		}
 	}
 	else
 	{
@@ -345,10 +377,29 @@ void RendererDebugMenu::DrawLightingList()
 		ImGui::Spacing();
 	}
 
+	if (ImGui::Button("Create Directional Light"))
+	{
+		DirectionalLight* dirLight = new DirectionalLight();
+		Renderer::lights.push_back(dirLight);
+
+		SelectLight(dirLight);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Create Point Light"))
+	{
+		PointLight* pointLight = new PointLight();
+		Renderer::lights.push_back(pointLight);
+
+		SelectLight(pointLight);
+	}
+
 	// draw list
 	for (Light* light : Renderer::lights)
 	{
-		ImGui::Text(Light::GetTypeName(light->GetType()).c_str());
+		bool isSelected = light == selectedLight;
+		ImGui::Selectable(Light::GetTypeName(light->GetType()).c_str(), &isSelected);
+		if (isSelected)
+			selectedLight = light;
 	}
 
 	ImGui::End();
@@ -358,4 +409,13 @@ void RendererDebugMenu::SelectInstance(ModelInstance* instance)
 {
 	selectedInstance = instance;
 	dropDownSelected = -1;
+	if (selectedInstance)
+		instanceRotation = glm::eulerAngles(selectedInstance->transform.GetRotation());
+}
+
+void RendererDebugMenu::SelectLight(Light* light)
+{
+	selectedLight = light;
+	if (selectedLight)
+		lightRotation = glm::eulerAngles(light->transform.GetRotation());
 }

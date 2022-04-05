@@ -4,9 +4,10 @@ layout(std140, binding = 1) uniform _Globals
 {
 	float _Time;
 	float _DeltaTime;
+	float _Aspect;
 };
 
-uniform float _Exposure = 1.0;
+uniform float _Exposure = 2;
 // sampler
 layout (binding = 0) uniform sampler2D _PostprocessingTexture;
 layout (binding = 1) uniform sampler2D _MainTexture;

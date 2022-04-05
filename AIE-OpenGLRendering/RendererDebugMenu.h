@@ -11,6 +11,8 @@ private:
 	static Texture* selectedTexture;
 	static Light* selectedLight;
 	static int dropDownSelected;
+	static glm::vec3 instanceRotation;
+	static glm::vec3 lightRotation;
 
 	static void DrawRenderData();
 	static void DrawModelCreation();
@@ -20,6 +22,7 @@ private:
 	static void DrawTexturesList();
 	static void DrawLightingList();
 	static void SelectInstance(ModelInstance* instance);
+	static void SelectLight(Light* light);
 public:
 	RendererDebugMenu() = delete;
 	RendererDebugMenu(const RendererDebugMenu&) = delete;

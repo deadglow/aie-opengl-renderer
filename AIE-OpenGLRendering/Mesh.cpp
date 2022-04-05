@@ -9,12 +9,13 @@ Mesh::Mesh(std::string filename_init, glm::mat4 transform_init, std::vector<Vert
 	transform = transform_init;
 	vertices = vertices_init;
 	triangles = triangles_init;
+
+	LoadMesh();
 }
 
 Mesh::~Mesh()
 {
-	if (loaded)
-		UnloadMesh();
+	UnloadMesh();
 }
 
 void Mesh::Draw() const
@@ -26,12 +27,6 @@ void Mesh::Draw() const
 
 void Mesh::LoadMesh()
 {
-	if (loaded)
-	{
-		std::cout << "Mesh " << filename << " already loaded." << std::endl;
-		return;
-	}
-
 	// initialise buffers
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -64,20 +59,11 @@ void Mesh::LoadMesh()
 	glEnableVertexAttribArray(3);
 
 	glBindVertexArray(0);
-
-	loaded = true;
 }
 
 void Mesh::UnloadMesh()
 {
-	if (!loaded)
-	{
-		std::cout << "Mesh not loaded." << std::endl;
-		return;
-	}
 	glDeleteBuffers(1, &EBO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &VAO);
-
-	loaded = false;
 }

@@ -40,6 +40,7 @@ layout(std140, binding = 1) uniform _Globals
 {
 	float _Time;
 	float _DeltaTime;
+	float _Aspect;
 };
 
 layout(std140, binding = 2) uniform _Lighting
@@ -185,7 +186,7 @@ void main()
 	totalLight += _Ambient.rgb;
 
 	vec4 color = texture(_Diffuse, fs_in.TexCoord) * _AlbedoColor * vec4(totalLight, 1.0);
-	color += vec4(CalculateCubemapColor(norm, fragDir), 0);
+	color += vec4(CalculateCubemapColor(norm, fragDir), 0) * texture(_SpecMap, fs_in.TexCoord).r;
 	
 	// do fog
 	FragColour = ProcessFog(color);

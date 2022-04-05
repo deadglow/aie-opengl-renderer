@@ -18,8 +18,7 @@ glm::vec3 Transform::GetPosition() const
 
 glm::quat Transform::GetRotation() const
 {
-	glm::mat3 rotMatrix = matrix;
-	return glm::toQuat(rotMatrix);
+	return glm::toQuat((glm::mat3)matrix);
 }
 
 glm::vec3 Transform::GetRight() const
@@ -48,6 +47,17 @@ void Transform::SetRotation(const glm::quat rotation)
 	rotMat[3] = glm::vec4(GetPosition(), 1.0f);
 	
 	matrix = rotMat;
+}
+
+void Transform::SetScale(const glm::vec3 scale)
+{
+	glm::vec3 right = glm::normalize(GetRight());
+	glm::vec3 up = glm::normalize(GetUp());
+	glm::vec3 forward = glm::normalize(GetForward());
+
+	matrix[0] = glm::vec4(right * scale.x, 0);
+	matrix[1] = glm::vec4(up * scale.y, 0);
+	matrix[2] = glm::vec4(forward * scale.z, 0);
 }
 
 void Transform::Translate(const glm::vec3 offset, bool worldSpace)

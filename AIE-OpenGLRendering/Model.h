@@ -11,6 +11,7 @@ private:
 	bool loaded = false;
 
 public:
+	float unitScale = 1.0f;
 	std::vector<Mesh*> meshes;
 	std::vector<Material*> defaultMaterials;
 	
@@ -25,6 +26,7 @@ public:
 	void SetAllMaterials(Material* material);
 
 	void Load();
+	void ModelLoaded();
 	void Unload();
 	
 	void Draw(CameraShaderData csd, glm::mat4 transform);

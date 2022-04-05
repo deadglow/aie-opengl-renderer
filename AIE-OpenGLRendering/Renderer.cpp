@@ -47,7 +47,7 @@ std::list<Camera> Renderer::cameraStack;
 
 // lights
 glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
-std::vector<Light*> Renderer::lights;
+std::list<Light*> Renderer::lights;
 
 // drawing and instances
 std::list<ModelInstance*> Renderer::modelInstances;
@@ -121,7 +121,7 @@ void Renderer::InitUBOs()
 	// globals buffer
 	glGenBuffers(1, &uboGlobals);
 	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
-	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 2, NULL, GL_STATIC_DRAW);
+	glBufferData(GL_UNIFORM_BUFFER, sizeof(float) * 3, NULL, GL_STATIC_DRAW);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 	glBindBufferBase(GL_UNIFORM_BUFFER, 1, uboGlobals);
@@ -145,9 +145,10 @@ void Renderer::InitUBOs()
 
 void Renderer::SetGlobalsUBO()
 {
-	float floats[2];
+	float floats[3];
 	floats[0] = (float)glfwGetTime();
 	floats[1] = (float)deltaTime;
+	floats[2] = (float)aspect;
 	glBindBuffer(GL_UNIFORM_BUFFER, uboGlobals);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(floats), floats);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -166,9 +167,11 @@ void Renderer::SetLightingUBO()
 	int size = (int)lights.size();
 	LightShaderData shaderDataArray[MAX_LIGHTS];
 
-	for (int i = 0; i < size; ++i)
+	int index = 0;
+	for (Light* light : lights)
 	{
-		shaderDataArray[i] = lights[i]->ConstructShaderData();
+		shaderDataArray[index] = light->ConstructShaderData();
+		index++;
 	}
 
 	// put the data in
@@ -312,7 +315,6 @@ int Renderer::Initialise()
 
 	// set up screen plane
 	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, -1 }, { 1, 0, 0 });
-	screenPlane->LoadMesh();
 
 	CreateRenderTextures();
 

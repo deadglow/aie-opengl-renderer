@@ -18,10 +18,10 @@ void main()
 {
 	vec4 color = texture(_PostprocessingTexture, TexCoord);
 
-	float average = color.x + color.y + color.z;
+	float average = color.r + color.g + color.b;
 	average /= 3;
 
-	color = color.zyxw;
+	color = vec4(average, color.g, average, 1.0);
 
 	FragColour = color;
 }

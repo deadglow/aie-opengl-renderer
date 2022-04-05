@@ -19,6 +19,7 @@ layout(std140, binding = 1) uniform _Globals
 {
 	float _Time;
 	float _DeltaTime;
+	float _Aspect;
 };
 
 // model data
