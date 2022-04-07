@@ -1,0 +1,74 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "CL Build",
+			"command": "cl.exe",
+			"args": [
+				"/Zi",
+				"/EHsc",
+				"/nologo",
+				"/std:c++17",
+
+				"/D",
+				"\"_DEBUG\"",
+				"/D",
+				"\"_CONSOLE\"",
+				"/D",
+				"\"GLFW_INCLUDE_NONE\"",
+				"/D",
+				"\"RAPIDJSON_NOMEMBERITERATORCLASS\"",
+				
+				"/I${workspaceFolder}\\include",
+				"/Fo:",
+				"${workspaceFolder}\\obj\\",
+				"/Fd:",
+				"${workspaceFolder}\\obj\\",
+				"/Fa${workspaceFolder}\\obj\\",
+
+				"/Od",
+				"/MDd",
+				// src files
+				"${workspaceFolder}\\src\\*.cpp",
+				"${workspaceFolder}\\src\\*.c",
+				 
+				"/link",
+				"/OUT:${workspaceFolder}\\bin\\OpenGLRenderer.exe",
+				"/DEBUG",
+				"/INCREMENTAL",
+
+				"glfw3.lib",
+				"zlibstaticd.lib",
+				"assimp-vc143-mtd.lib",
+
+				"kernel32.lib",
+				"user32.lib",
+				"gdi32.lib",
+				"winspool.lib",
+				"comdlg32.lib",
+				"advapi32.lib",
+				"shell32.lib",
+				"ole32.lib",
+				"oleaut32.lib",
+				"uuid.lib",
+				"odbc32.lib",
+				"odbccp32.lib",
+
+				"/LIBPATH:${workspaceFolder}\\lib",
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\working\\"
+			},
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group":
+			{
+				"kind": "build",
+				"isDefault": true	
+			},
+			"detail": "compiler: cl.exe"
+		}
+	]
+}
