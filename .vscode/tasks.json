@@ -2,6 +2,16 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"type": "shell",
+			"label": "Create Directories",
+			"command": "cmd",
+			"args": [
+				"/C",
+				"if not exist ${workspaceFolder}\\bin  mkdir ${workspaceFolder}\\bin",
+				"if not exist ${workspaceFolder}\\obj  mkdir ${workspaceFolder}\\obj"
+			]
+		},
+		{
 			"type": "cppbuild",
 			"label": "CL Build",
 			"command": "cl.exe",

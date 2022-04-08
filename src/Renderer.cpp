@@ -36,7 +36,8 @@ Model* Renderer::skybox = nullptr;
 Mesh* Renderer::screenPlane = nullptr;
 RenderTarget* Renderer::mainRenderTarget = nullptr;
 RenderTarget* Renderer::postprocessingBuffers[2] = { nullptr, nullptr };
-bool Renderer::currentPostProcessBuffer = 0;
+bool Renderer::currentPostProcessBuffer = false;
+int Renderer::bloomBlurSamples = 5;
 
 // fog
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
@@ -194,8 +195,8 @@ void Renderer::SetFogUBO()
 void Renderer::CreateRenderTextures()
 {
 	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 2);
-	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_UNSIGNED_BYTE, false);
-	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_UNSIGNED_BYTE, false);
+	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, true);
+	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, true);
 }
 
 void Renderer::RenderPostProcess(Shader* postProcessShader)
@@ -440,13 +441,19 @@ void Renderer::OnDraw()
 	ShaderLoader::UseShader(SHADER_BLOOM);
 	for (int i = 0; i < amount; ++i)
 	{
-		// here
+		ShaderLoader::GetCurrentShader()->SetUniform("_UseMain", firstIteration);
+		ShaderLoader::GetCurrentShader()->SetUniform("_Horizontal", horizontal);
+
+		RenderPostProcess(ShaderLoader::GetCurrentShader());
+
+		horizontal = !horizontal;
+		if (firstIteration)
+			firstIteration = false;
 	}
 
-	// use the screenrender shader to draw the main buffer to the post processing buffer for ping ponging
-	ShaderLoader::UseShader(SHADER_SCREENRENDER);
-	ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", true);
-	RenderPostProcess(ShaderLoader::GetCurrentShader());
+	// combine bloom here
+	ShaderLoader::UseShader(SHADER_BLOOMPOST);
+	RenderPostProcess(ShaderLoader::GetShader(SHADER_BLOOMPOST));
 
 	// render other post processing
 	PostProcessingStack* stack = PostProcessing::stacks[POSTPROCESS_STACK];

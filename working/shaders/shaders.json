@@ -21,6 +21,16 @@
             "vert":"skybox.vert",
             "frag":"skybox.frag"
         },
+		{
+			"name":"bloom",
+			"vert":"screenrender.vert",
+			"frag":"bloom.frag"
+		},
+		{
+			"name":"bloomPost",
+			"vert":"screenrender.vert",
+			"frag":"bloomPost.frag"
+		},
         {
             "name":"post_blur",
             "vert":"screenrender.vert",
@@ -30,11 +40,6 @@
             "name":"post_colorshift",
             "vert":"screenrender.vert",
             "frag":"colorshift.frag"
-        },
-        {
-            "name":"post_tonemap",
-            "vert":"screenrender.vert",
-            "frag":"tonemap.frag"
         }
     ]
 }

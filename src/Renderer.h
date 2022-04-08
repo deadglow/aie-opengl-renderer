@@ -33,6 +33,7 @@
 
 #define SHADER_SCREENRENDER "screenrender"
 #define SHADER_BLOOM "bloom"
+#define SHADER_BLOOMPOST "bloomPost"
 
 #define POSTPROCESS_STACK "post"
 
@@ -57,7 +58,8 @@ private:
 
 	static RenderTarget* mainRenderTarget;
 	static RenderTarget* postprocessingBuffers[2];
-	static bool currentBuffer;
+	static bool currentPostProcessBuffer;
+	static int bloomBlurSamples;
 
 	Renderer() = delete;
 	~Renderer() = default;
