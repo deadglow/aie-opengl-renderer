@@ -8,7 +8,8 @@ class RenderTarget
 {
 private:
 	GLuint framebufferID = -1;
-	RenderTexture* renderTexture;
+	int colorBuffers = -1;
+	RenderTexture** renderTextures;
 	GLuint depthStencilBufferID = -1;
 
 	std::string name;
@@ -16,14 +17,15 @@ private:
 	float width = -1;
 	float height = -1;
 public:
-	RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth = true);
+	RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth = true, const int colorBufferCount = 1);
 	~RenderTarget();
 
 	void Use();
 	void Clear();
 	const bool UsesDepth() const;
 
-	Texture2D* GetTexture() const;
+	Texture2D* GetTexture(const int index) const;
+	const int GetTextureCount() const;
 
 	static void UseDefault();
 };

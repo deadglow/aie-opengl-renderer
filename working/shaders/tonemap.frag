@@ -9,8 +9,8 @@ layout(std140, binding = 1) uniform _Globals
 
 uniform float _Exposure = 2;
 // sampler
-layout (binding = 0) uniform sampler2D _PostprocessingTexture;
-layout (binding = 1) uniform sampler2D _MainTexture;
+layout (binding = 0) uniform sampler2D _MainTexture;
+layout (binding = 2) uniform sampler2D _PostprocessingTexture;
 
 in vec2 TexCoord;
 out vec4 FragColour;

@@ -3,7 +3,7 @@
 #include "TextureLoader.h"
 #include <iostream>
 
-RenderTarget::RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth)
+RenderTarget::RenderTarget(const int width_init, const int height_init, const std::string name_init, const GLenum precisionType, const bool useDepth, const int colorBufferCount)
 {
 	width = width_init;
 	height = height_init;
@@ -13,30 +13,39 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 	glGenFramebuffers(1, &framebufferID);
 	glBindFramebuffer(GL_FRAMEBUFFER, framebufferID);
 
-	// color buffer
-	GLuint colorTexID;
-	glGenTextures(1, &colorTexID);
-	glBindTexture(GL_TEXTURE_2D, colorTexID);
-	
-	GLint format = (GLint)TEX_Format::RGBA;
+	colorBuffers = colorBufferCount;
 
-	// change the format if its a float format
-	if (precisionType == GL_FLOAT)
-		format = GL_RGBA16F;
+	renderTextures = new RenderTexture*[colorBuffers];
 
-	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, (GLint)TEX_Format::RGBA, precisionType, NULL);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	for (int i = 0; i < colorBuffers; ++i)
+	{
+		// color buffer
+		GLuint colorTexID;
+		glGenTextures(1, &colorTexID);
+		glBindTexture(GL_TEXTURE_2D, colorTexID);
+		
+		GLint format = (GLint)TEX_Format::RGBA;
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexID, 0);
+		// change the format if its a float format
+		if (precisionType == GL_FLOAT)
+			format = GL_RGBA16F;
 
-	renderTexture = new RenderTexture(name, width, height);
-	renderTexture->SetID(colorTexID);
-	renderTexture->SetMagFilter(TEX_Filtering::Linear);
-	renderTexture->SetMinFilter(TEX_Filtering::Linear);
-	renderTexture->SetWrapMode(TEX_WrapMode::ClampEdge, TEX_WrapMode::ClampEdge);
-	renderTexture->SetProperties(width, height, TEX_Format::RGB);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, (GLint)TEX_Format::RGBA, precisionType, NULL);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-	TextureLoader::AddTexture(renderTexture);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorTexID, 0);
+
+		RenderTexture* rentex = new RenderTexture(name, width, height);
+		rentex->SetID(colorTexID);
+		rentex->SetMagFilter(TEX_Filtering::Linear);
+		rentex->SetMinFilter(TEX_Filtering::Linear);
+		rentex->SetWrapMode(TEX_WrapMode::ClampEdge, TEX_WrapMode::ClampEdge);
+		rentex->SetProperties(width, height, TEX_Format::RGB);
+
+		TextureLoader::AddTexture(rentex);
+
+		renderTextures[i] = rentex;
+	}
 
 	// depth and stencil buffer
 	if (useDepth)
@@ -58,7 +67,7 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 
 RenderTarget::~RenderTarget()
 {
-	delete renderTexture;
+	delete[] renderTextures;
 	TextureLoader::RemoveTexture(name);
 
 	if (depthStencilBufferID != -1)
@@ -88,13 +97,18 @@ const bool RenderTarget::UsesDepth() const
 	return depthStencilBufferID != -1;
 }
 
-Texture2D* RenderTarget::GetTexture() const
+Texture2D* RenderTarget::GetTexture(const int index) const
 {
-	return (Texture2D*)renderTexture;
+	return (Texture2D*)renderTextures[index];
 }
 
 void RenderTarget::UseDefault()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
+}
+
+const int RenderTarget::GetTextureCount() const
+{
+    return colorBuffers;
 }

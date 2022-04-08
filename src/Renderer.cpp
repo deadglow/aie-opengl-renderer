@@ -36,7 +36,7 @@ Model* Renderer::skybox = nullptr;
 Mesh* Renderer::screenPlane = nullptr;
 RenderTarget* Renderer::mainRenderTarget = nullptr;
 RenderTarget* Renderer::postprocessingBuffers[2] = { nullptr, nullptr };
-bool Renderer::currentBuffer = 0;
+bool Renderer::currentPostProcessBuffer = 0;
 
 // fog
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
@@ -193,7 +193,7 @@ void Renderer::SetFogUBO()
 // Render textures
 void Renderer::CreateRenderTextures()
 {
-	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true);
+	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 2);
 	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_UNSIGNED_BYTE, false);
 	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_UNSIGNED_BYTE, false);
 }
@@ -201,22 +201,21 @@ void Renderer::CreateRenderTextures()
 void Renderer::RenderPostProcess(Shader* postProcessShader)
 {
 	// swap to the other buffer
-	currentBuffer = !currentBuffer;
+	currentPostProcessBuffer = !currentPostProcessBuffer;
 
-	int currentIndex = (int)currentBuffer;
-	int otherIndex = (int)!currentBuffer;
+	int currentIndex = (int)currentPostProcessBuffer;
+	int otherIndex = (int)!currentPostProcessBuffer;
 
 	// activate da buffer
 	postprocessingBuffers[currentIndex]->Use();
 
 	postProcessShader->Use();
-	// bind previous buffer
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[otherIndex]->GetTexture()->GetID());
+	// bind previous buffer or the main buffer
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[otherIndex]->GetTexture(0)->GetID());
 
 	// draw the plane
 	screenPlane->Draw();
-
 }
 
 // Drawing and draw calls
@@ -287,8 +286,8 @@ int Renderer::Initialise()
 		return -1;
 	}
 
-	// textures setup
 	TextureLoader::Initialise();
+	// default textures setup
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_WHITE)->Load();
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR)->Load();
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_NORMAL)->Load();
@@ -300,11 +299,11 @@ int Renderer::Initialise()
 	}
 
 	MaterialLoader::Initialise();
-
+	
+	// create skybox
 	skyboxMaterial = new Material(ShaderLoader::GetShader(SKYBOX_DEFAULT_SHADER), SKYBOX_DEFAULT_SHADER);
 	SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
 
-	// model setup
 	ModelLoader::Initialise();
 	// default cube
 	Model* model = ModelLoader::LoadModel(MODEL_DEFAULT);
@@ -318,7 +317,6 @@ int Renderer::Initialise()
 
 	CreateRenderTextures();
 
-	// initialise post processing
 	PostProcessing::Initialise();
 
 	// set up imgui
@@ -419,40 +417,50 @@ void Renderer::OnDraw()
 	PrepareDrawCalls();
 
 	// draw to render texture
+	mainRenderTarget->Use();
+	auto iter = cameraStack.begin();
+	for (iter; iter != cameraStack.end(); iter++)
 	{
-		mainRenderTarget->Use();
-		auto iter = cameraStack.begin();
-		for (iter; iter != cameraStack.end(); iter++)
-		{
-			(*iter).Draw();
-		}
+		(*iter).Draw();
 	}
 	
 	// do post processing
+	// bind main buffer to 1 and bright colours buffer to the other
+	for (int i = 0; i < mainRenderTarget->GetTextureCount(); ++i)
 	{
-		// bind main buffer to 1
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture()->GetID());
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture(i)->GetID());
+	}
 
-		// use the screenrender shader to draw the main buffer to the post processing buffer
-		ShaderLoader::UseShader(DEFAULT_SCREENRENDER_SHADER);
-		ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", true);
-		RenderPostProcess(ShaderLoader::GetCurrentShader());
+	// bloom. Ping pong between postprocessbuffers and continue to blur based on number of samples
+	bool horizontal = true;
+	bool firstIteration = true;
 
-		// render other post processing
-		PostProcessingStack* stack = PostProcessing::stacks["post"];
-		for (int i = 0; i < stack->shaderList.size(); ++i)
-		{
-			RenderPostProcess(ShaderLoader::GetShader(stack->shaderList[i]));
-		}
-	}	
+	int amount = 10;
+	ShaderLoader::UseShader(SHADER_BLOOM);
+	for (int i = 0; i < amount; ++i)
+	{
+		// here
+	}
+
+	// use the screenrender shader to draw the main buffer to the post processing buffer for ping ponging
+	ShaderLoader::UseShader(SHADER_SCREENRENDER);
+	ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", true);
+	RenderPostProcess(ShaderLoader::GetCurrentShader());
+
+	// render other post processing
+	PostProcessingStack* stack = PostProcessing::stacks[POSTPROCESS_STACK];
+	for (int i = 0; i < stack->shaderList.size(); ++i)
+	{
+		RenderPostProcess(ShaderLoader::GetShader(stack->shaderList[i]));
+	}
 
 	// draw to default surface
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[(int)currentBuffer]->GetTexture()->GetID());
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, postprocessingBuffers[(int)currentPostProcessBuffer]->GetTexture(0)->GetID());
 
 	RenderTarget::UseDefault();
-	ShaderLoader::UseShader(DEFAULT_SCREENRENDER_SHADER);
+	ShaderLoader::UseShader(SHADER_SCREENRENDER);
 	ShaderLoader::GetCurrentShader()->SetUniform("_UseMainBuffer", false);
 	screenPlane->Draw();
 	glBindTexture(GL_TEXTURE_2D, 0);

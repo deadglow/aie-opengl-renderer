@@ -1,8 +1,8 @@
 #version 460
 
 // sampler
-layout (binding = 0) uniform sampler2D _PostprocessingTexture;
-layout (binding = 1) uniform sampler2D _MainTexture;
+layout (binding = 0) uniform sampler2D _MainTexture;
+layout (binding = 2) uniform sampler2D _PostprocessingTexture;
 
 uniform bool _UseMainBuffer = false;
 

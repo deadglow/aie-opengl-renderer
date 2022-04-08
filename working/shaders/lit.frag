@@ -86,7 +86,8 @@ in VS_OUT
 	in vec2 TexCoord;
 } fs_in;
 
-out vec4 FragColour;
+layout (location = 0) out vec4 FragColour;
+layout (location = 1) out vec4 BrightColour;
 
 // functions
 float CalculateSpecularIntensity(vec3 norm, vec3 lightDir, vec3 fragDir, float radius)
@@ -190,4 +191,11 @@ void main()
 	
 	// do fog
 	FragColour = ProcessFog(color);
+
+	float brightness = dot(FragColour.xyz, vec3(0.2126, 0.7152, 0.0722));
+
+	if (brightness > 1.0)
+		BrightColour = vec4(FragColour.xyz, 1.0);
+	else
+		BrightColour = vec4(0, 0, 0, 1);
 }

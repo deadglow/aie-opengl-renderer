@@ -31,7 +31,10 @@
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
-#define DEFAULT_SCREENRENDER_SHADER "screenrender"
+#define SHADER_SCREENRENDER "screenrender"
+#define SHADER_BLOOM "bloom"
+
+#define POSTPROCESS_STACK "post"
 
 class Renderer
 {
