@@ -9,7 +9,7 @@ layout(std140, binding = 1) uniform _Globals
 // sampler
 layout (binding = 0) uniform sampler2D _MainTexture;
 layout (binding = 1) uniform sampler2D _BrightTexture;
-layout (binding = 1) uniform sampler2D _PostprocessTexture;
+layout (binding = 2) uniform sampler2D _PostprocessTexture;
 
 uniform float _Exposure = 1.0;
 
@@ -29,4 +29,7 @@ void main()
 	result = pow(result, vec3(1.0 / gamma));
 
 	FragColour = vec4(result, 1.0);
+	// FragColour = vec4(bloomColor, 1.0);
+	// FragColour = texture(_BrightTexture, TexCoord);
+	// FragColour = vec4(hdrColor, 1.0);
 }

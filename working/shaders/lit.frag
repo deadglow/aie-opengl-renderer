@@ -192,10 +192,10 @@ void main()
 	// do fog
 	FragColour = ProcessFog(color);
 
-	float brightness = dot(FragColour.xyz, vec3(0.2126, 0.7152, 0.0722));
+	float brightness = dot(FragColour.rgb, vec3(0.2126, 0.7152, 0.0722));
 
-	if (brightness > 1.0)
-		BrightColour = vec4(FragColour.xyz, 1.0);
+	if (brightness > 100)
+		BrightColour = vec4(FragColour.rgb, 1.0);
 	else
 		BrightColour = vec4(0, 0, 0, 1);
 }

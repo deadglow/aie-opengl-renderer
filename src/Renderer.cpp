@@ -187,7 +187,8 @@ void Renderer::SetFogUBO()
 {
 	glBindBuffer(GL_UNIFORM_BUFFER, uboFog);
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::vec4), &fogColor);
-	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(float), &fogDensity);
+	glm::vec4 fogDensityv4 = {fogDensity, 0, 0, 0};
+	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::vec4), sizeof(glm::vec4), &fogDensityv4);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
@@ -195,8 +196,8 @@ void Renderer::SetFogUBO()
 void Renderer::CreateRenderTextures()
 {
 	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 2);
-	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, true);
-	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, true);
+	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, false, 1);
+	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, false, 1);
 }
 
 void Renderer::RenderPostProcess(Shader* postProcessShader)
@@ -437,7 +438,7 @@ void Renderer::OnDraw()
 	bool horizontal = true;
 	bool firstIteration = true;
 
-	int amount = 10;
+	int amount = bloomBlurSamples * 2;
 	ShaderLoader::UseShader(SHADER_BLOOM);
 	for (int i = 0; i < amount; ++i)
 	{

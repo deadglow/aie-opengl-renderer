@@ -40,7 +40,7 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 		rentex->SetMagFilter(TEX_Filtering::Linear);
 		rentex->SetMinFilter(TEX_Filtering::Linear);
 		rentex->SetWrapMode(TEX_WrapMode::ClampEdge, TEX_WrapMode::ClampEdge);
-		rentex->SetProperties(width, height, TEX_Format::RGB);
+		rentex->SetProperties(width, height, TEX_Format::RGBA);
 
 		TextureLoader::AddTexture(rentex);
 
@@ -67,6 +67,10 @@ RenderTarget::RenderTarget(const int width_init, const int height_init, const st
 
 RenderTarget::~RenderTarget()
 {
+	for (int i = 0; i < colorBuffers; ++i)
+	{
+		delete renderTextures[i];
+	}
 	delete[] renderTextures;
 	TextureLoader::RemoveTexture(name);
 
@@ -83,6 +87,16 @@ void RenderTarget::Use()
 		glEnable(GL_DEPTH_TEST);
 	else
 		glDisable(GL_DEPTH_TEST);
+
+	// pass array of color attachments
+	unsigned int* attachments = new unsigned int [colorBuffers];
+	for (int i = 0; i < colorBuffers; ++i)
+	{
+		attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+	}
+	glDrawBuffers(2, attachments);
+
+	delete[] attachments;
 }
 
 void RenderTarget::Clear()
@@ -106,6 +120,7 @@ void RenderTarget::UseDefault()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDisable(GL_DEPTH_TEST);
+	glDrawBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 const int RenderTarget::GetTextureCount() const

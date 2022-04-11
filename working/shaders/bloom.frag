@@ -9,7 +9,7 @@ layout(std140, binding = 1) uniform _Globals
 // sampler
 layout (binding = 0) uniform sampler2D _MainTexture;
 layout (binding = 1) uniform sampler2D _BrightTexture;
-layout (binding = 1) uniform sampler2D _PostprocessTexture;
+layout (binding = 2) uniform sampler2D _PostprocessTexture;
 
 uniform bool _UseMain = false;
 uniform bool _Horizontal = false;
@@ -39,8 +39,8 @@ void main()
 		{
 			for (int i = 1; i < 5; ++i)
 			{
-				result += texture(_BrightTexture, TexCoord + vec2(0.0, texOffset.x * i)).rgb * _Weights[i];
-				result += texture(_BrightTexture, TexCoord - vec2(0.0, texOffset.x * i)).rgb * _Weights[i];	
+				result += texture(_BrightTexture, TexCoord + vec2(0.0, texOffset.y * i)).rgb * _Weights[i];
+				result += texture(_BrightTexture, TexCoord - vec2(0.0, texOffset.y * i)).rgb * _Weights[i];	
 			}
 		}
 	}
@@ -59,8 +59,8 @@ void main()
 		{
 			for (int i = 1; i < 5; ++i)
 			{
-				result += texture(_PostprocessTexture, TexCoord + vec2(0.0, texOffset.x * i)).rgb * _Weights[i];
-				result += texture(_PostprocessTexture, TexCoord - vec2(0.0, texOffset.x * i)).rgb * _Weights[i];	
+				result += texture(_PostprocessTexture, TexCoord + vec2(0.0, texOffset.y * i)).rgb * _Weights[i];
+				result += texture(_PostprocessTexture, TexCoord - vec2(0.0, texOffset.y * i)).rgb * _Weights[i];	
 			}
 		}
 
