@@ -2,6 +2,5 @@
     "name":"post",
     "stack":
     [
-        "post_tonemap"
     ]
 }

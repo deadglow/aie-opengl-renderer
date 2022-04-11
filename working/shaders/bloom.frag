@@ -22,24 +22,48 @@ out vec4 FragColour;
 void main()
 {
 	vec2 texOffset = 1.0 / textureSize(_BrightTexture, 0);
-	vec3 result = texture(image, TexCoord).rgb * _Weights[0];
-	sampler2D image = (_UseMain)? _BrightTexture : _PostprocessTexture;
+	vec3 result = vec3(0, 0, 0);
 
-	if (_Horizontal)
+	if (_UseMain)
 	{
-		for (int i = 1; i < 5; ++i)
+		result = texture(_BrightTexture, TexCoord).rgb * _Weights[0];
+		if (_Horizontal)
 		{
-			result += texture(image, TexCoord + vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
-			result += texture(image, TexCoord - vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
+			for (int i = 1; i < 5; ++i)
+			{
+				result += texture(_BrightTexture, TexCoord + vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
+				result += texture(_BrightTexture, TexCoord - vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
+			}
+		}
+		else
+		{
+			for (int i = 1; i < 5; ++i)
+			{
+				result += texture(_BrightTexture, TexCoord + vec2(0.0, texOffset.x * i)).rgb * _Weights[i];
+				result += texture(_BrightTexture, TexCoord - vec2(0.0, texOffset.x * i)).rgb * _Weights[i];	
+			}
 		}
 	}
 	else
 	{
-		for (int i = 1; i < 5; ++i)
+		result = texture(_PostprocessTexture, TexCoord).rgb * _Weights[0];
+		if (_Horizontal)
 		{
-			result += texture(image, TexCoord + vec2(0.0, texOffset.x * i)).rgb * _Weights[i];
-			result += texture(image, TexCoord - vec2(0.0, texOffset.x * i)).rgb * _Weights[i];	
+			for (int i = 1; i < 5; ++i)
+			{
+				result += texture(_PostprocessTexture, TexCoord + vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
+				result += texture(_PostprocessTexture, TexCoord - vec2(texOffset.x * i, 0.0)).rgb * _Weights[i];
+			}
 		}
+		else
+		{
+			for (int i = 1; i < 5; ++i)
+			{
+				result += texture(_PostprocessTexture, TexCoord + vec2(0.0, texOffset.x * i)).rgb * _Weights[i];
+				result += texture(_PostprocessTexture, TexCoord - vec2(0.0, texOffset.x * i)).rgb * _Weights[i];	
+			}
+		}
+
 	}
 
 	FragColour = vec4(result, 1.0);

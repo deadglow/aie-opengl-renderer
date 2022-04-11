@@ -21,11 +21,11 @@ void main()
 {
 	const float gamma = 2.2;
 	vec3 hdrColor = texture(_MainTexture, TexCoord).rgb;
-	vec3 bloomColor = texOffset(_PostprocessTexture, TexCoord).rgb;
+	vec3 bloomColor = texture(_PostprocessTexture, TexCoord).rgb;
 	hdrColor += bloomColor;
 
 	// tone mapping
-	vec3 result = vec3(1.0) - exp(-hdrColor * exposure);
+	vec3 result = vec3(1.0) - exp(-hdrColor * _Exposure);
 	result = pow(result, vec3(1.0 / gamma));
 
 	FragColour = vec4(result, 1.0);
