@@ -334,6 +334,17 @@ void RendererDebugMenu::DrawLightingList()
 {
 	ImGui::Begin("Lighting");
 	ImGui::ColorEdit3("Ambient light", (float*)&Renderer::ambientLight);
+	
+	ImGui::Text("Bloom");
+	float bloomThreshold = Renderer::GetBloomThreshold();
+	ImGui::DragFloat("Threshold", &bloomThreshold, 0.01, 0, 1000);
+	Renderer::SetBloomThreshold(bloomThreshold);
+
+	float exposure = Renderer::GetExposure();
+	ImGui::DragFloat("Exposure", &exposure, 0.01);
+	Renderer::SetExposure(exposure);
+
+	ImGui::Spacing();
 	// draw selected light
 	if (selectedLight)
 	{

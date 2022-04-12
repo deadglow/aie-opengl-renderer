@@ -13,7 +13,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}\\working",
             "environment": [],
-            "console": "externalTerminal",
+            "console": "internalConsole",
         },
         {
             "name": "(Windows) Build and Launch",

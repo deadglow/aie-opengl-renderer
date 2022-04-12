@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "ShaderLoader.h"
 #include "glm/gtc/type_ptr.hpp"
+#include <iostream>
 
 Shader::Shader(unsigned int ID_init, std::string name_init)
 {
@@ -44,6 +45,7 @@ const int Shader::GetUniformLocation(const std::string variable) const
 {
 	const char* cstring = variable.c_str();
 	int val = glGetUniformLocation(ID, cstring);
+
 	return val;
 }
 

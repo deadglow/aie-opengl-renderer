@@ -43,8 +43,6 @@ void Material::ApplyConfiguration()
 	// set texture bindings
 	for (int i = 0; i < usedTextures.size(); ++i)
 	{
-			
-
 		TEX_Type type = usedTextures[i]->GetTexType();
 
 		glActiveTexture(GL_TEXTURE0 + i);

@@ -29,7 +29,4 @@ void main()
 	result = pow(result, vec3(1.0 / gamma));
 
 	FragColour = vec4(result, 1.0);
-	// FragColour = vec4(bloomColor, 1.0);
-	// FragColour = texture(_BrightTexture, TexCoord);
-	// FragColour = vec4(hdrColor, 1.0);
 }

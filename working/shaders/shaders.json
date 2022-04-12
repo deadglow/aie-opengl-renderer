@@ -2,9 +2,9 @@
     "shaders":
     [
         {
-            "name":"screenrender",
-            "vert":"screenrender.vert",
-            "frag":"screenrender.frag"
+            "name":"post_screenrender",
+            "vert":"post_screenrender.vert",
+            "frag":"post_screenrender.frag"
         },
         {
             "name":"unlit",
@@ -22,24 +22,29 @@
             "frag":"skybox.frag"
         },
 		{
-			"name":"bloom",
-			"vert":"screenrender.vert",
-			"frag":"bloom.frag"
+			"name":"post_drawtobright",
+			"vert":"post_screenrender.vert",
+			"frag":"post_drawtobright.frag"
 		},
 		{
-			"name":"bloomPost",
-			"vert":"screenrender.vert",
-			"frag":"bloomPost.frag"
+			"name":"post_bloom",
+			"vert":"post_screenrender.vert",
+			"frag":"post_bloom.frag"
+		},
+		{
+			"name":"post_bloomPost",
+			"vert":"post_screenrender.vert",
+			"frag":"post_bloomPost.frag"
 		},
         {
             "name":"post_blur",
-            "vert":"screenrender.vert",
-            "frag":"blur.frag"
+            "vert":"post_screenrender.vert",
+            "frag":"post_blur.frag"
         },
         {
             "name":"post_colorshift",
-            "vert":"screenrender.vert",
-            "frag":"colorshift.frag"
+            "vert":"post_screenrender.vert",
+            "frag":"post_colorshift.frag"
         }
     ]
 }

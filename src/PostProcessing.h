@@ -7,6 +7,7 @@ class PostProcessing
 {
 private:
 	static std::string dir;
+	
 
 	PostProcessing() = delete;
 public:

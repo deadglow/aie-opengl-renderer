@@ -58,5 +58,5 @@ vec4 ProcessFog(vec4 color)
 void main()
 {
 	// do fog
-	FragColour = ProcessFog(texture(_Texture0, fs_in.TexCoord) * 50);
+	FragColour = ProcessFog(texture(_Texture0, fs_in.TexCoord));
 }

@@ -35,9 +35,12 @@ Model* Renderer::skybox = nullptr;
 // render targets
 Mesh* Renderer::screenPlane = nullptr;
 RenderTarget* Renderer::mainRenderTarget = nullptr;
+RenderTarget *Renderer::brightColorTarget = nullptr;
 RenderTarget* Renderer::postprocessingBuffers[2] = { nullptr, nullptr };
 bool Renderer::currentPostProcessBuffer = false;
 int Renderer::bloomBlurSamples = 5;
+float Renderer::bloomThreshold = 1;
+float Renderer::exposure = 1.0f;
 
 // fog
 glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
@@ -77,6 +80,30 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 {
 	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetID());
+}
+
+float Renderer::GetBloomThreshold()
+{
+	return bloomThreshold;
+}
+
+void Renderer::SetBloomThreshold(const float threshold)
+{
+	ShaderLoader::UseShader(SHADER_DRAWTOBRIGHT);
+	ShaderLoader::GetCurrentShader()->SetUniform("_Threshold", threshold);
+	bloomThreshold = threshold;
+}
+
+float Renderer::GetExposure()
+{
+	return exposure;
+}
+
+void Renderer::SetExposure(const float value)
+{
+	ShaderLoader::UseShader(SHADER_BLOOMPOST);
+	ShaderLoader::GetCurrentShader()->SetUniform("_Exposure", value);
+	exposure = value;
 }
 
 void Renderer::PrepareDrawCalls()
@@ -195,7 +222,8 @@ void Renderer::SetFogUBO()
 // Render textures
 void Renderer::CreateRenderTextures()
 {
-	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 2);
+	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 1);
+	brightColorTarget = new RenderTarget(RES_X, RES_Y, "bright.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, false, 1);
 }
@@ -341,6 +369,7 @@ void Renderer::Shutdown()
 	ImGui::DestroyContext();
 
 	delete mainRenderTarget;
+	delete brightColorTarget;
 	delete postprocessingBuffers[0];
 	delete postprocessingBuffers[1];
 	delete skyboxMaterial;
@@ -419,20 +448,26 @@ void Renderer::OnDraw()
 	PrepareDrawCalls();
 
 	// draw to render texture
-	mainRenderTarget->Use();
 	auto iter = cameraStack.begin();
 	for (iter; iter != cameraStack.end(); iter++)
 	{
 		(*iter).Draw();
 	}
-	
+
 	// do post processing
-	// bind main buffer to 1 and bright colours buffer to the other
-	for (int i = 0; i < mainRenderTarget->GetTextureCount(); ++i)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture(i)->GetID());
-	}
+	// bind main buffer to 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture(0)->GetID());
+
+	// bind bright texture to 1
+
+	// add all bright colours to the bright texture
+	brightColorTarget->Use();
+	ShaderLoader::UseShader(SHADER_DRAWTOBRIGHT);
+	screenPlane->Draw();
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, brightColorTarget->GetTexture(0)->GetID());
 
 	// bloom. Ping pong between postprocessbuffers and continue to blur based on number of samples
 	bool horizontal = true;

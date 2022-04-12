@@ -35,9 +35,6 @@ void Camera::Draw()
 	else
 		Renderer::GetMainRenderTarget()->Use();
 
-	if (renderTarget)
-		renderTarget->Clear();
-
 	// clear the depth buffer and start drawing
 	glClear(GL_DEPTH_BUFFER_BIT);
 

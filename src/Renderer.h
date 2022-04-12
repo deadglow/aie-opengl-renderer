@@ -31,9 +31,10 @@
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
-#define SHADER_SCREENRENDER "screenrender"
-#define SHADER_BLOOM "bloom"
-#define SHADER_BLOOMPOST "bloomPost"
+#define SHADER_SCREENRENDER "post_screenrender"
+#define SHADER_BLOOM "post_bloom"
+#define SHADER_BLOOMPOST "post_bloomPost"
+#define SHADER_DRAWTOBRIGHT "post_drawtobright"
 
 #define POSTPROCESS_STACK "post"
 
@@ -57,9 +58,12 @@ private:
 	static Mesh* screenPlane;
 
 	static RenderTarget* mainRenderTarget;
+	static RenderTarget* brightColorTarget;
 	static RenderTarget* postprocessingBuffers[2];
 	static bool currentPostProcessBuffer;
 	static int bloomBlurSamples;
+	static float bloomThreshold;
+	static float exposure;
 
 	Renderer() = delete;
 	~Renderer() = default;
@@ -112,4 +116,10 @@ public:
 	static void RemoveModelInstance(ModelInstance* instance);
 
 	static void SetSkybox(Cubemap* cubemap);
+
+	static float GetBloomThreshold();
+	static void SetBloomThreshold(const float threshold);
+
+	static float GetExposure();
+	static void SetExposure(const float value);
 };
