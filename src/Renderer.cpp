@@ -223,7 +223,7 @@ void Renderer::SetFogUBO()
 void Renderer::CreateRenderTextures()
 {
 	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 1);
-	brightColorTarget = new RenderTarget(RES_X, RES_Y, "bright.render", GL_FLOAT, false, 1);
+	brightColorTarget = new RenderTarget(RES_X / 2, RES_Y / 2, "bright.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, false, 1);
 }

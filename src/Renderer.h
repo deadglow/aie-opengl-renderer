@@ -61,7 +61,6 @@ private:
 	static RenderTarget* brightColorTarget;
 	static RenderTarget* postprocessingBuffers[2];
 	static bool currentPostProcessBuffer;
-	static int bloomBlurSamples;
 	static float bloomThreshold;
 	static float exposure;
 
@@ -85,6 +84,7 @@ public:
 	// lighting
 	static glm::vec4 ambientLight;
 	static std::list<Light*> lights;
+	static int bloomBlurSamples;
 	
 	// fog
 	static glm::vec4 fogColor;

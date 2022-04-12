@@ -340,6 +340,8 @@ void RendererDebugMenu::DrawLightingList()
 	ImGui::DragFloat("Threshold", &bloomThreshold, 0.01, 0, 1000);
 	Renderer::SetBloomThreshold(bloomThreshold);
 
+	ImGui::InputInt("Samples", &Renderer::bloomBlurSamples, 1, 3);
+
 	float exposure = Renderer::GetExposure();
 	ImGui::DragFloat("Exposure", &exposure, 0.01);
 	Renderer::SetExposure(exposure);
