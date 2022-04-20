@@ -223,7 +223,7 @@ void Renderer::SetFogUBO()
 void Renderer::CreateRenderTextures()
 {
 	mainRenderTarget = new RenderTarget(RES_X, RES_Y, "main.render", GL_FLOAT, true, 1);
-	brightColorTarget = new RenderTarget(RES_X / 2, RES_Y / 2, "bright.render", GL_FLOAT, false, 1);
+	brightColorTarget = new RenderTarget(RES_X, RES_Y, "bright.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[0] = new RenderTarget(RES_X, RES_Y, "postprocess0.render", GL_FLOAT, false, 1);
 	postprocessingBuffers[1] = new RenderTarget(RES_X, RES_Y, "postprocess1.render", GL_FLOAT, false, 1);
 }
@@ -459,13 +459,13 @@ void Renderer::OnDraw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture(0)->GetID());
 
-	// bind bright texture to 1
 
 	// add all bright colours to the bright texture
 	brightColorTarget->Use();
 	ShaderLoader::UseShader(SHADER_DRAWTOBRIGHT);
 	screenPlane->Draw();
 
+	// bind bright texture to 1
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, brightColorTarget->GetTexture(0)->GetID());
 
@@ -508,6 +508,7 @@ void Renderer::OnDraw()
 	screenPlane->Draw();
 	glBindTexture(GL_TEXTURE_2D, 0);
 
+	// imgui
 	if (drawDebug)
 		RendererDebugMenu::DrawImGui();
 }
