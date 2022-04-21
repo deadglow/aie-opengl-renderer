@@ -1,6 +1,7 @@
 #version 460
 
 #define LIGHTS_MAX 5
+#define M_PI 3.1415926535897932384626433832795
 
 // structs
 struct Light
@@ -60,8 +61,7 @@ in VS_OUT
 	in vec2 TexCoord;
 } fs_in;
 
-layout (location = 0) out vec4 FragColour;
-
+layout (location = 0) out vec4 FragColor;
 
 
 void main()
@@ -70,9 +70,12 @@ void main()
 	norm = norm * 2.0 - 1.0;
 	norm = normalize(fs_in.TBN * norm);
 
-   	vec3 camDir = vec3(0, 0, 1);
+   	vec3 camForward = vec3(0, 0, 1);
 	// direction TO fragment
 	vec3 camToFrag = normalize(fs_in.Position);
+
+	vec4 albedo = texture(_Albedo, fs_in.TexCoord);
+	vec3 ao = texture(_AOMap, fs_in.TexCoord).xyz;
 
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
@@ -85,11 +88,82 @@ void main()
 		vec3 L = normalize(fs_in.Position - viewSpaceLightPos);
 		vec3 H = normalize(camToFrag + L);
 
-		vec3 radiance = 
+		// attenuation	//
 
-		float distance 
+		vec3 radiance = _Lights[i].color;
+
+		// base metallic F0 is 0.04, mix with albedo based on metallic
+		vec3 F0 = vec3(0.04);
+		F0 = mix(F0, albedo, metallic);
+		vec3 F = FresnelSchlick(max(dot(H, camToFrag), 0.0), F0);
+		
+		float D = DistributionGGX(norm, H, roughness);
+		float G = GeometrySmith(norm, camToFrag, L, roughness);
+
+		vec3 numerator = F * D * G;
+		float denom = 4.0 * max(dot(norm, camToFrag), 0.0) * max(dot(norm, L), 0.0) + 0.0001;
+		vec3 specular = numerator / denom;
+
+		vec3 kS = F;
+		vec3 kD = vec3(1.0) - kS;
+
+		kD *= 1.0 - metallic;
+
+		float NdotL = max(dot(N, L), 0.0);
+		Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
 	}
+
+	vec3 ambient = _Ambient * albedo * ao;
+	vec3 color = ambient + Lo;
+
+	FragColor = vec4(color, 1.0);
 }
+
+
+// fresnel function
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+// normal distribution function
+// using Trowbridge-Reitz GGX
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+	float a = roughness * roughness;
+	float a2 = a * a;
+	float NdotH = max(dot(N, H), 0.0);
+	float NdotH2 = NdotH * NdotH;
+
+	float denom = NdotH2 * (a2 - 1.0) + 1.0;
+	denom = M_PI * denom * denom;
+
+	return a2 / denom;
+}
+
+// geometry function
+// Schlick-GGX
+float GeometrySGGX(float NdotV, float roughness)
+{
+	float r = roughness + 1.0;
+	float k = (r * r) / 8.0;
+
+	float denom = NdotV * (1.0 - k) + k;
+
+	return NdotV / denom;
+}
+
+// smith geometry function
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+	float NdotV = max(dot(N, v), 0.0);
+	float NdotL = max(dot(N, L), 0.0);
+	float ggx1 = GeometrySGGX(NdotL, roughness);
+	float ggx2 = GeometrySGGX(NdotV, roughness);
+
+	return ggx1 * ggx2;
+}
+
 
 vec3 GetRadianceFromLight(vec3 norm, vec3 fragDir, int index)
 {
