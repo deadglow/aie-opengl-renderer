@@ -11,11 +11,11 @@
             "vert":"unlit.vert",
             "frag":"unlit.frag"
         },
-        {
-            "name":"lit",
-            "vert":"lit.vert",
-            "frag":"lit.frag"
-        },
+		{
+			"name":"pbr",
+			"vert":"pbr.vert",
+			"frag":"pbr.frag"
+		},
         {
             "name":"skybox",
             "vert":"skybox.vert",

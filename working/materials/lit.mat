@@ -1,11 +1,11 @@
 {
 	"name":"lit",
-	"shader":"lit",
-	"textures":["_default_white.png", "_default_normal.png", "_default_white.png"],
+	"shader":"pbr",
+	"textures":["_default_white.png", "_default_normal.png", "_default_white.png", "_default_white.png"],
 	"properties":
 	[
-		{"name":"_Smoothness", "value":0.5},
-		{"name":"_Reflectivity", "value":0.0},
-		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0, 1.0]}
+		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0, 1.0]},
+		{"name":"_MetallicMultiplier", "value":0.0},
+		{"name":"_RoughnessMultiplier", "value":0.2}
 	]
 }

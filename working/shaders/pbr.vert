@@ -1,3 +1,5 @@
+#version 460
+
 //Attributes that we expect from the vertex buffer
 layout (location = 0) in vec3 _Position;
 layout (location = 1) in vec3 _Normal;
@@ -36,9 +38,9 @@ out VS_OUT
 void main()
 {
 	// local to view
-	vs_out.FragPos = vec3(_Vmat * _M2W * vec4(_Position, 1));
+	vs_out.Position = vec3(_Vmat * _M2W * vec4(_Position, 1));
 	// world to perspective
-	gl_Position = _Pmat * vec4(vs_out.FragPos, 1.0);
+	gl_Position = _Pmat * vec4(vs_out.Position, 1.0);
 	
 	vec3 normal = normalize(_Normal);
 	vec3 tangent = normalize(_Tangent);

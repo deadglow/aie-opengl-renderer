@@ -18,10 +18,11 @@
 #define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
 
 #define SHADER_DEFAULT_UNLIT "unlit"
-#define SHADER_DEFAULT_LIT "lit"
+#define SHADER_DEFAULT_LIT "pbr"
 #define MATERIAL_DEFAULT SHADER_DEFAULT_LIT
 
 #define TEXTURE_DEFAULT_WHITE "_default_white.png"
+#define TEXTURE_DEFAULT_BLACK "_default_black.png"
 #define TEXTURE_DEFAULT_ERROR "_default_error.png"
 #define TEXTURE_DEFAULT_NORMAL "_default_normal.png"
 

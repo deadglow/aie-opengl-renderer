@@ -319,6 +319,7 @@ int Renderer::Initialise()
 	TextureLoader::Initialise();
 	// default textures setup
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_WHITE)->Load();
+	TextureLoader::GetTexture(TEXTURE_DEFAULT_BLACK)->Load();
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR)->Load();
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_NORMAL)->Load();
 	TextureLoader::GetTexture(SKYBOX_DEFAULT_CUBEMAP)->Load();
