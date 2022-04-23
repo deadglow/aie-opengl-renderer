@@ -18,9 +18,9 @@ glm::vec3 RendererDebugMenu::lightRotation;
 
 glm::quat RotationControl(glm::vec3* rotation)
 {
-	*rotation = glm::degrees(*rotation);
-	ImGui::DragFloat3("Rotation", (float*)rotation, 0.5f);
-	*rotation = glm::radians(*rotation);
+	glm::vec3 degrees = glm::degrees(*rotation);
+	ImGui::DragFloat3("Rotation", (float*)&degrees, 0.5f);
+	*rotation = glm::radians(degrees);
 
 	glm::quat quat = glm::identity<glm::quat>();
 	return quat * glm::angleAxis(rotation->y, glm::vec3(0, 1, 0)) * glm::angleAxis(rotation->x, glm::vec3(1, 0, 0)) * glm::angleAxis(rotation->z, glm::vec3(0, 0, 1));

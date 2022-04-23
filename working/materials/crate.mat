@@ -1,6 +1,6 @@
 {
 	"name":"crate",
-	"shader":"lit",
+	"shader":"pbr",
 	"textures":["crate_albedo.png", "crate_normal.png", "_default_white.png"],
 	"properties":
 	[

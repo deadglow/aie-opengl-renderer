@@ -58,7 +58,6 @@ uniform mat4 _iM2W;
 layout (binding = 0) uniform sampler2D _Albedo;
 layout (binding = 1) uniform sampler2D _NormalMap;
 layout (binding = 2) uniform sampler2D _Metallic;
-layout (binding = 3) uniform sampler2D _AOMap;
 
 uniform vec3 _AlbedoColor = vec3(1.0);
 uniform float _RoughnessMultiplier = 1.0;
@@ -85,7 +84,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
 	float a = roughness * roughness;
 	float a2 = a * a;
-	float NdotH = max(dot(N, H), 0.0);
+	float NdotH = max(dot(N, -H), 0.0);
 	float NdotH2 = NdotH * NdotH;
 
 	float denom = NdotH2 * (a2 - 1.0) + 1.0;
@@ -109,8 +108,8 @@ float GeometrySGGX(float NdotV, float roughness)
 // smith geometry function
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
-	float NdotV = max(dot(N, V), 0.0);
-	float NdotL = max(dot(N, L), 0.0);
+	float NdotV = max(dot(N, -V), 0.0);
+	float NdotL = max(dot(N, -L), 0.0);
 	float ggx1 = GeometrySGGX(NdotL, roughness);
 	float ggx2 = GeometrySGGX(NdotV, roughness);
 
@@ -119,12 +118,11 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 
 PBRLightData CalculateDirectionalLight(int i)
 {
-	vec4 dir4 = _Vmat * vec4(_Lights[i].direction, 0.0);
-	vec3 dir = dir4.xyz;
+	vec4 dir = _Vmat * vec4(_Lights[i].direction, 0.0);
 
 	PBRLightData data;
 	data.color = _Lights[i].color.rgb;
-	data.lightVector = dir;
+	data.lightVector = dir.xyz;
 	
 	return data;
 }
@@ -169,20 +167,19 @@ void main()
 	norm = norm * 2.0 - 1.0;
 	norm = normalize(fs_in.TBN * norm);
 
-   	vec3 camForward = vec3(0, 0, 1);
 	// direction TO fragment
 	vec3 camToFrag = normalize(fs_in.Position);
 
-	vec3 albedo = texture(_Albedo, fs_in.TexCoord).xyz * ;
+	vec3 albedo = texture(_Albedo, fs_in.TexCoord).xyz * _AlbedoColor;
 	vec4 metallicSample = texture(_Metallic, fs_in.TexCoord);
 
-	float metallic = metallicSample.r * _MetallicMultiplier;
-	float roughness = metallicSample.w * _RoughnessMultiplier;
+	float ao = metallicSample.r;
+	float roughness = metallicSample.g * _RoughnessMultiplier;
+	float metallic = metallicSample.b * _MetallicMultiplier;
 	
-	vec3 ao = texture(_AOMap, fs_in.TexCoord).xyz;
 
 	vec3 F0 = vec3(0.04);
-	F0 = mix(F0, albedo.xyz, metallic);
+	F0 = mix(F0, albedo, metallic);
 
 	// reflectance
 	vec3 Lo = vec3(0.0);
@@ -193,18 +190,19 @@ void main()
 		vec3 radiance = data.color;
 		vec3 L = data.lightVector;
 
+		// halfway vector (still don't know why it's called that)
 		vec3 H = normalize(camToFrag + L);
 
 		// base metallic F0 is 0.04, mix with albedo based on metallic
 		vec3 F0 = vec3(0.04);
-		F0 = mix(F0, albedo.xyz, metallic);
+		F0 = mix(F0, albedo, metallic);
 		vec3 F = FresnelSchlick(max(dot(H, camToFrag), 0.0), F0);
 		
 		float D = DistributionGGX(norm, H, roughness);
 		float G = GeometrySmith(norm, camToFrag, L, roughness);
 
 		vec3 numerator = F * D * G;
-		float denom = 4.0 * max(dot(norm, camToFrag), 0.0) * max(dot(norm, L), 0.0) + 0.0001;
+		float denom = 4.0 * max(dot(norm, -camToFrag), 0.0) * max(dot(norm, -L), 0.0) + 0.0001;
 		vec3 specular = numerator / denom;
 
 		vec3 kS = F;
@@ -212,7 +210,7 @@ void main()
 
 		kD *= 1.0 - metallic;
 
-		float NdotL = max(dot(norm, L), 0.0);
+		float NdotL = max(dot(norm, -L), 0.0);
 		Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
 	}
 

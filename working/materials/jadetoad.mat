@@ -1,0 +1,11 @@
+{
+	"name":"toad",
+	"shader":"pbr",
+	"textures":["toad_albedo.png", "toad_normal.png", "toad_metallic.png"],
+	"properties":
+	[
+		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0, 1.0]},
+		{"name":"_MetallicMultiplier", "value":1.0},
+		{"name":"_RoughnessMultiplier", "value":1.0}
+	]
+}
