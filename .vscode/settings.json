@@ -1,0 +1,6 @@
+{
+	"files.associations": {
+		"*.mat": "json",
+		"filesystem": "cpp"
+	}
+}

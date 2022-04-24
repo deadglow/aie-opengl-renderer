@@ -58,6 +58,9 @@ uniform mat4 _iM2W;
 layout (binding = 0) uniform sampler2D _Albedo;
 layout (binding = 1) uniform sampler2D _NormalMap;
 layout (binding = 2) uniform sampler2D _Metallic;
+layout (binding = 15) uniform samplerCube _Skybox;
+layout (binding = 14) uniform samplerCube _IrradianceMap;
+
 
 uniform vec3 _AlbedoColor = vec3(1.0);
 uniform float _RoughnessMultiplier = 1.0;
@@ -78,6 +81,11 @@ vec3 FresnelSchlick(float cosTheta, vec3 F0)
 	return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+	return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 // normal distribution function
 // using Trowbridge-Reitz GGX
 float DistributionGGX(vec3 N, vec3 H, float roughness)
@@ -88,7 +96,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 	float NdotH2 = NdotH * NdotH;
 
 	float denom = NdotH2 * (a2 - 1.0) + 1.0;
-	denom = M_PI * denom * denom;
+	denom = M_PI * denom * denom + 0.00001;
 
 	return a2 / denom;
 }
@@ -177,7 +185,6 @@ void main()
 	float roughness = metallicSample.g * _RoughnessMultiplier;
 	float metallic = metallicSample.b * _MetallicMultiplier;
 	
-
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
 
@@ -194,27 +201,31 @@ void main()
 		vec3 H = normalize(camToFrag + L);
 
 		// base metallic F0 is 0.04, mix with albedo based on metallic
-		vec3 F0 = vec3(0.04);
-		F0 = mix(F0, albedo, metallic);
 		vec3 F = FresnelSchlick(max(dot(H, camToFrag), 0.0), F0);
 		
 		float D = DistributionGGX(norm, H, roughness);
 		float G = GeometrySmith(norm, camToFrag, L, roughness);
+		
+		vec3 kD = vec3(1.0) - F;
+		kD *= 1.0 - metallic;
 
 		vec3 numerator = F * D * G;
 		float denom = 4.0 * max(dot(norm, -camToFrag), 0.0) * max(dot(norm, -L), 0.0) + 0.0001;
 		vec3 specular = numerator / denom;
 
-		vec3 kS = F;
-		vec3 kD = vec3(1.0) - kS;
-
-		kD *= 1.0 - metallic;
-
 		float NdotL = max(dot(norm, -L), 0.0);
 		Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
 	}
 
-	vec3 ambient = _Ambient.xyz * albedo * ao;
+	vec4 worldNormal = _iVmat * vec4(norm, 0.0);
+
+	// compute diffuse irradiance color
+	vec3 kS = FresnelSchlickRoughness(max(dot(norm, -camToFrag), 0.0), F0, roughness);
+	vec3 kD = 1.0 - kS;
+	vec3 irradiance = texture(_IrradianceMap, -worldNormal.xyz).rgb;
+	vec3 diffuse = irradiance * _Ambient.xyz * albedo;
+	vec3 ambient = kD * diffuse * ao;
+
 	vec3 color = ambient + Lo;
 
 	FragColor = vec4(color, 1.0);

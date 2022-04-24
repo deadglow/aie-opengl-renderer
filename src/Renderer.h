@@ -28,7 +28,8 @@
 
 #define MODEL_DEFAULT "default.obj"
 
-#define SKYBOX_DEFAULT_CUBEMAP "skybox_grass.cubemap"
+#define SKYBOX_DEFAULT_CUBEMAP "skybox_island.cubemap"
+#define SKYBOX_DEFAULT_IRRADIANCE "irradiance_island.cubemap"
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 
@@ -116,7 +117,7 @@ public:
 	static void AddModelInstance(ModelInstance* instance);
 	static void RemoveModelInstance(ModelInstance* instance);
 
-	static void SetSkybox(Cubemap* cubemap);
+	static void SetCubemap(Cubemap* cubemap, int offset);
 
 	static float GetBloomThreshold();
 	static void SetBloomThreshold(const float threshold);

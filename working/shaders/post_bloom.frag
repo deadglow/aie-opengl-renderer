@@ -13,7 +13,7 @@ layout (binding = 2) uniform sampler2D _PostprocessTexture;
 
 uniform bool _UseMain = false;
 uniform bool _Horizontal = false;
-uniform float _Weights[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);	
+uniform float _Weights[5] = float[] (0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
 
 in vec2 TexCoord;
 out vec4 FragColour;

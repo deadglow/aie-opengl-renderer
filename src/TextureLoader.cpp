@@ -18,7 +18,7 @@ std::unordered_map<std::string, Texture*> TextureLoader::textureLookup;
 void TextureLoader::Initialise()
 {
 	std::vector<fs::path> paths;
-	std::vector<std::string> extensions{ ".png", ".jpg", ".jpeg", ".tga", ".cubemap" };
+	std::vector<std::string> extensions{ ".png", ".jpg", ".jpeg", ".tga", ".cubemap", ".hdr" };
 
 	// find all texture files in the textures folder
 	FileReader::GetAllFilesWithExtensions(dir, &extensions, &paths);
@@ -136,18 +136,23 @@ void TextureLoader::LoadCubemap(Cubemap* tex)
 	// cancel if not enough lines are read
 	if (FileReader::LoadFileAsStringVector(&lines, pathString) < 1) return;
 
+	// check if cubemap is hdr or not
+	bool isHDR = lines[0] == "true";
+	GLenum format = isHDR ? GL_RGB16F : GL_RGB;
+	GLenum dataType = isHDR ? GL_FLOAT : GL_UNSIGNED_BYTE;
+
 	std::string faceTextures[6];
-	int lastValidLine = 0;
-	for (int i = 0; i < 6; ++i)
+	int lastValidLine = 1;
+	for (int i = 1; i < 7; ++i)
 	{
-		if (i >= lines.size() || lines[i].size() <= 1)
+		if (i >= lines.size() || lines[i].size() <= 2)
 		{
 			std::cout << "Not enough textures for cubemap, filling with last texture." << std::endl;
-			faceTextures[i] = faceTextures[lastValidLine];
+			faceTextures[i - 1] = faceTextures[lastValidLine];
 		}
 		else
 		{
-			faceTextures[i] = lines[i];
+			faceTextures[i - 1] = lines[i];
 			lastValidLine = i;
 		}
 	}
@@ -164,12 +169,18 @@ void TextureLoader::LoadCubemap(Cubemap* tex)
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		stbi_set_flip_vertically_on_load(true);
+		
+		fs::path texPath = path.string() + "\\" + faceTextures[i];
+		void* data;
+		if (isHDR)
+			data = stbi_loadf(texPath.string().c_str(), &width, &height, &nrChannels, 0);
+		else
+			data = stbi_load(texPath.string().c_str(), &width, &height, &nrChannels, 0);
 
-		unsigned char* data = stbi_load((path.string() + "/" + faceTextures[i]).c_str(), &width, &height, &nrChannels, 0);
 		if (data)
 		{
-			GLenum format = (GLenum)Texture2D::CalculateFormat(nrChannels);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width, height, 0, GL_RGB, dataType, data);
+
 			stbi_image_free(data);
 		}
 		else

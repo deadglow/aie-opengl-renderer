@@ -76,9 +76,9 @@ void Renderer::RemoveModelInstance(ModelInstance* instance)
 	delete instance;
 }
 
-void Renderer::SetSkybox(Cubemap* cubemap)
+void Renderer::SetCubemap(Cubemap* cubemap, int offset)
 {
-	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START);
+	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - offset);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetID());
 }
 
@@ -323,6 +323,7 @@ int Renderer::Initialise()
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_ERROR)->Load();
 	TextureLoader::GetTexture(TEXTURE_DEFAULT_NORMAL)->Load();
 	TextureLoader::GetTexture(SKYBOX_DEFAULT_CUBEMAP)->Load();
+	TextureLoader::GetTexture(SKYBOX_DEFAULT_IRRADIANCE)->Load();
 	for (int i = 0; i < 11; ++i)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
@@ -333,7 +334,9 @@ int Renderer::Initialise()
 	
 	// create skybox
 	skyboxMaterial = new Material(ShaderLoader::GetShader(SKYBOX_DEFAULT_SHADER), SKYBOX_DEFAULT_SHADER);
-	SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
+	// set skybox and irradiance binding
+	SetCubemap(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP), 0);
+	SetCubemap(TextureLoader::GetCubemap(SKYBOX_DEFAULT_IRRADIANCE), 1);
 
 	ModelLoader::Initialise();
 	// default cube
