@@ -43,7 +43,7 @@ float Renderer::bloomThreshold = 1;
 float Renderer::exposure = 1.0f;
 
 // fog
-glm::vec4 Renderer::fogColor = { 0.0f, 0.05f, 0.1f, 1.0f };
+glm::vec4 Renderer::fogColor = { 1.0f, 1.0f, 1.0f, 1.0f};
 float Renderer::fogDensity = 0.000f;
 
 // stacks
@@ -431,11 +431,27 @@ void Renderer::Start()
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
 	lights.push_back(dirLight);
 
-	PointLight* light = new PointLight();
-	lights.push_back(light);
+	Model* sphere = ModelLoader::GetModel("uvsphere.obj");
+	sphere->Load();
 
-	light->color = { 0.0f, 0.0f, 1.0f };
-	light->intensity = 1.0f;
+	// generate sphere thing
+	for (int y = 0; y < 6; ++y)
+	{
+		for (int x = 0; x < 6; ++x)
+		{
+			ModelInstance* instance = new ModelInstance(sphere);
+			glm::vec3 pos = {0, 0, 0};
+			pos.x = x * 2.5f;
+			pos.y = y * 2.5f;
+			instance->transform.SetPosition(pos);
+			AddModelInstance(instance);
+			Material* mat = MaterialLoader::CloneMaterial(MaterialLoader::GetMaterial(SHADER_DEFAULT_LIT), "sphere " + std::to_string(y * 6 + x));
+			mat->AddProperty("_AlbedoColor", glm::vec3{0.0f, 0.0f, 1.0f});
+			mat->AddProperty("_MetallicScale", y / 5.0f);
+			mat->AddProperty("_RoughnessScale", x / 5.0f);
+			instance->SetMaterialOverride(0, mat);
+		}
+	}
 
 	// move da camera
 	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));

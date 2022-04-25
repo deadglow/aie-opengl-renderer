@@ -16,7 +16,8 @@ public:
 	static void Initialise();
 	static void Shutdown();
 	static void PrintAllMaterials();
-	static Material* BuildMaterial(std::string filepath);
+	static Material* CloneMaterial(Material* material, std::string name);
+	static Material* BuildMaterialFromFile(std::string filepath);
 	
 	static Material* GetMaterial(const std::string filename);
 };

@@ -63,8 +63,8 @@ layout (binding = 14) uniform samplerCube _IrradianceMap;
 
 
 uniform vec3 _AlbedoColor = vec3(1.0);
-uniform float _RoughnessMultiplier = 1.0;
-uniform float _MetallicMultiplier = 1.0;
+uniform float _RoughnessScale = 1.0;
+uniform float _MetallicScale = 1.0;
 
 in VS_OUT
 {
@@ -169,6 +169,15 @@ PBRLightData GetRadianceFromLight(int index)
 	}
 }
 
+vec4 ProcessFog(vec4 color)
+{
+	vec3 delta = fs_in.Position;
+	float depth = dot(delta, delta) * _FogDensity;
+	float t = clamp(depth, 0, 1);
+
+	return mix(color, _FogColor, t);
+}
+
 void main()
 {
    	vec3 norm = texture(_NormalMap, fs_in.TexCoord).rgb;
@@ -178,12 +187,12 @@ void main()
 	// direction TO fragment
 	vec3 camToFrag = normalize(fs_in.Position);
 
-	vec3 albedo = texture(_Albedo, fs_in.TexCoord).xyz * _AlbedoColor;
+	vec3 albedo = texture(_Albedo, fs_in.TexCoord).rgb * _AlbedoColor;
 	vec4 metallicSample = texture(_Metallic, fs_in.TexCoord);
 
 	float ao = metallicSample.r;
-	float roughness = metallicSample.g * _RoughnessMultiplier;
-	float metallic = metallicSample.b * _MetallicMultiplier;
+	float roughness = metallicSample.g * _RoughnessScale;
+	float metallic = metallicSample.b * _MetallicScale;
 	
 	vec3 F0 = vec3(0.04);
 	F0 = mix(F0, albedo, metallic);
@@ -228,5 +237,7 @@ void main()
 
 	vec3 color = ambient + Lo;
 
-	FragColor = vec4(color, 1.0);
+	
+
+	FragColor = ProcessFog(vec4(color, 1.0));
 }

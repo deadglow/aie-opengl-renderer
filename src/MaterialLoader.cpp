@@ -21,7 +21,7 @@ void MaterialLoader::Initialise()
 	for (int i = 0; i < paths.size(); ++i)
 	{
 		// read material file and parse it here
-		Material* material = BuildMaterial(paths[i].string());
+		Material* material = BuildMaterialFromFile(paths[i].string());
 		materialLookup.emplace(material->GetName(), material);
 	}
 }
@@ -42,7 +42,20 @@ void MaterialLoader::PrintAllMaterials()
 	}
 }
 
-Material* MaterialLoader::BuildMaterial(std::string filepath)
+Material* MaterialLoader::CloneMaterial(Material* material, std::string name)
+{
+	Material* mat = new Material(material->GetShader(), name);
+	for (int i = 0; i < material->usedTextures.size(); ++i)
+	{
+		mat->AddTexture(material->usedTextures[i]);
+	}
+
+	materialLookup.emplace(mat->GetName(), mat);
+
+	return mat;
+}
+
+Material* MaterialLoader::BuildMaterialFromFile(std::string filepath)
 {
 	std::string contents = FileReader::LoadFileAsString(filepath);
 	Document doc;

@@ -5,7 +5,7 @@
 	"properties":
 	[
 		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0, 1.0]},
-		{"name":"_MetallicMultiplier", "value":1.0},
-		{"name":"_RoughnessMultiplier", "value":1.0}
+		{"name":"_MetallicScale", "value":1.0},
+		{"name":"_RoughnessScale", "value":1.0}
 	]
 }
