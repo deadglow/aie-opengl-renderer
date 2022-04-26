@@ -306,11 +306,7 @@ void RendererDebugMenu::DrawTexturesList()
 				ImGui::SameLine();
 				if (ImGui::Button("Set Skybox"))
 				{
-					Renderer::SetCubemap((Cubemap*)selectedTexture, 0);
-				}
-				if (ImGui::Button("Set Irradiance"))
-				{
-					Renderer::SetCubemap((Cubemap *)selectedTexture, 1);
+					Renderer::SetSkybox((Cubemap*)selectedTexture);
 				}
 			}
 		}

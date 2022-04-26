@@ -4,7 +4,7 @@
 	"textures":["toad_albedo.png", "toad_normal.png", "toad_metallic.png"],
 	"properties":
 	[
-		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0, 1.0]},
+		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0]},
 		{"name":"_MetallicScale", "value":1.0},
 		{"name":"_RoughnessScale", "value":1.0}
 	]

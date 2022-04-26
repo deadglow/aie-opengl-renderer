@@ -30,7 +30,9 @@ GLuint Renderer::uboFog = -1;
 
 // skybox
 Material* Renderer::skyboxMaterial = nullptr;
-Model* Renderer::skybox = nullptr;
+Model* Renderer::skyboxModel = nullptr;
+unsigned int Renderer::diffuseIrradianceMap = -1;
+unsigned int Renderer::specularIrradianceMap = -1;
 
 // render targets
 Mesh* Renderer::screenPlane = nullptr;
@@ -50,7 +52,7 @@ float Renderer::fogDensity = 0.000f;
 std::list<Camera> Renderer::cameraStack;
 
 // lights
-glm::vec4 Renderer::ambientLight = { 0.1f, 0.1f, 0.1f, 0.0f };
+glm::vec4 Renderer::ambientLight = { 1.0f, 1.0f, 1.0f, 1.0f };
 std::list<Light*> Renderer::lights;
 
 // drawing and instances
@@ -80,6 +82,88 @@ void Renderer::SetCubemap(Cubemap* cubemap, int offset)
 {
 	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - offset);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap->GetID());
+}
+
+void Renderer::SetSkybox(Cubemap* cubemap)
+{
+	SetCubemap(cubemap, 0);
+
+	if (diffuseIrradianceMap != -1)
+		glDeleteTextures(1, &diffuseIrradianceMap);
+	
+	if (specularIrradianceMap != -1)
+		glDeleteTextures(1, &specularIrradianceMap);
+
+	unsigned int captureFBO, captureRBO;
+	glGenFramebuffers(1, &captureFBO);
+	glGenRenderbuffers(1, &captureRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+	
+	// generate irradiance
+
+	//create camera
+	CameraShaderData csd;
+	csd.pMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 captureViews[] = 
+	{
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+	};
+	// generate cubemap
+	glGenTextures(1, &diffuseIrradianceMap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, diffuseIrradianceMap);
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// use diffuse irradiance shader
+	ShaderLoader::GetShader(SHADER_GEN_DIFFUSE_IRR)->Use();
+
+	// resize viewport
+	glViewport(0, 0, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE);
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+
+	// render da sides
+	for (unsigned int i = 0; i < 6; ++i)
+	{
+		csd.vMatrix = captureViews[i];
+		SetCameraUBO(csd);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, diffuseIrradianceMap, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		skyboxModel->meshes[0]->Draw();
+	}
+
+	// bind textures
+	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, diffuseIrradianceMap);
+
+	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 2);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, specularIrradianceMap);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// delete the framebuffer
+	glDeleteFramebuffers(1, &captureFBO);
+	glDeleteRenderbuffers(1, &captureRBO);
+
+	// reset viewport
+	glViewport(0,0, RES_X, RES_Y);
 }
 
 float Renderer::GetBloomThreshold()
@@ -263,7 +347,7 @@ void Renderer::DrawSkybox()
 	glDepthMask(GL_FALSE);
 	glDepthFunc(GL_LEQUAL);
 	skyboxMaterial->UseMaterial();
-	skybox->meshes[0]->Draw();
+	skyboxModel->meshes[0]->Draw();
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 }
@@ -334,22 +418,22 @@ int Renderer::Initialise()
 	
 	// create skybox
 	skyboxMaterial = new Material(ShaderLoader::GetShader(SKYBOX_DEFAULT_SHADER), SKYBOX_DEFAULT_SHADER);
-	// set skybox and irradiance binding
-	SetCubemap(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP), 0);
-	SetCubemap(TextureLoader::GetCubemap(SKYBOX_DEFAULT_IRRADIANCE), 1);
 
 	ModelLoader::Initialise();
 	// default cube
 	Model* model = ModelLoader::LoadModel(MODEL_DEFAULT);
 	model->SetAllMaterials(MaterialLoader::GetMaterial(SHADER_DEFAULT_UNLIT));
 	// skybox
-	skybox = ModelLoader::LoadModel(SKYBOX_DEFAULT_MODEL);
-	skybox->SetAllMaterials(skyboxMaterial);
+	skyboxModel = ModelLoader::LoadModel(SKYBOX_DEFAULT_MODEL);
+	skyboxModel->SetAllMaterials(skyboxMaterial);
 
 	// set up screen plane
 	screenPlane = MeshPrimitives::CreatePlane(1, 1, { 0, 0, -1 }, { 1, 0, 0 });
 
 	CreateRenderTextures();
+
+	// set skybox and irradiance binding
+	SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
 
 	PostProcessing::Initialise();
 

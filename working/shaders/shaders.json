@@ -2,6 +2,11 @@
     "shaders":
     [
         {
+            "name":"irradianceDiff",
+            "vert":"irradiance.vert",
+            "frag":"irradianceDiff.frag"
+        },
+        {
             "name":"post_screenrender",
             "vert":"post_screenrender.vert",
             "frag":"post_screenrender.frag"

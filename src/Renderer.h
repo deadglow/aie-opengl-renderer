@@ -17,6 +17,8 @@
 #define MAX_LIGHTS 5
 #define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
 
+#define SHADER_GEN_DIFFUSE_IRR "irradianceDiff"
+#define SHADER_GEN_DIFFUSE_SPEC "irradianceSpec"
 #define SHADER_DEFAULT_UNLIT "unlit"
 #define SHADER_DEFAULT_LIT "pbr"
 #define MATERIAL_DEFAULT SHADER_DEFAULT_LIT
@@ -32,6 +34,7 @@
 #define SKYBOX_DEFAULT_IRRADIANCE "irradiance_island.cubemap"
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
+#define SKYBOX_IRRADIANCE_SIZE 32
 
 #define SHADER_SCREENRENDER "post_screenrender"
 #define SHADER_BLOOM "post_bloom"
@@ -55,7 +58,9 @@ private:
 	static GLuint uboFog;
 	
 	static Material* skyboxMaterial;
-	static Model* skybox;
+	static Model* skyboxModel;
+	static unsigned int diffuseIrradianceMap;
+	static unsigned int specularIrradianceMap;
 
 	static Mesh* screenPlane;
 
@@ -118,6 +123,7 @@ public:
 	static void RemoveModelInstance(ModelInstance* instance);
 
 	static void SetCubemap(Cubemap* cubemap, int offset);
+	static void SetSkybox(Cubemap* cubemap);
 
 	static float GetBloomThreshold();
 	static void SetBloomThreshold(const float threshold);
