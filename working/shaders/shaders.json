@@ -7,6 +7,11 @@
             "frag":"irradianceDiff.frag"
         },
         {
+            "name":"irradianceSpec",
+            "vert":"irradiance.vert",
+            "frag":"irradianceSpec.frag"
+        },
+        {
             "name":"post_screenrender",
             "vert":"post_screenrender.vert",
             "frag":"post_screenrender.frag"

@@ -17,8 +17,8 @@
 #define MAX_LIGHTS 5
 #define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
 
-#define SHADER_GEN_DIFFUSE_IRR "irradianceDiff"
-#define SHADER_GEN_DIFFUSE_SPEC "irradianceSpec"
+#define SHADER_GEN_IRR_DIFFUSE "irradianceDiff"
+#define SHADER_GEN_IRR_SPEC "irradianceSpec"
 #define SHADER_DEFAULT_UNLIT "unlit"
 #define SHADER_DEFAULT_LIT "pbr"
 #define MATERIAL_DEFAULT SHADER_DEFAULT_LIT
@@ -31,7 +31,6 @@
 #define MODEL_DEFAULT "default.obj"
 
 #define SKYBOX_DEFAULT_CUBEMAP "skybox_island.cubemap"
-#define SKYBOX_DEFAULT_IRRADIANCE "irradiance_island.cubemap"
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
 #define SKYBOX_IRRADIANCE_SIZE 32

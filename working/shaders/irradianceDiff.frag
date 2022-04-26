@@ -1,14 +1,12 @@
 #version 460
 
-#define SAMPLE_DELTA 0.025;
+#define SAMPLE_DELTA 0.025
 
-#define PI = 3.14159265359;
+in vec3 localPos;
+out vec4 FragColor;
 
 layout (binding = 15) uniform samplerCube _Skybox;
 
-in vec3 localPos;
-
-out vec4 FragColor;
 
 void main()
 {
@@ -19,6 +17,7 @@ void main()
 
 	vec3 irradiance = vec3(0.0);
 	int numSamples = 0;
+	const float PI = 3.14159265359;
 
 	for (float phi = 0.0; phi < 2.0 * PI; phi += SAMPLE_DELTA)
 	{
@@ -31,10 +30,10 @@ void main()
 			vec3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
 			irradiance += texture(_Skybox, sampleVec).rgb * cos(theta) * sin(theta);
-			nrSamples++;
+			numSamples++;
 		}
 	}
 	
-	irradiance = PI * irradiance * (1.0 / float(nrSamples));
+	irradiance = PI * irradiance * (1.0 / float(numSamples));
 	FragColor = vec4(irradiance, 1.0);
 }
