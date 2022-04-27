@@ -3,7 +3,7 @@ layout (location = 0) in vec3 _Position;
 
 layout (std140, binding = 0) uniform _Camera
 {
-	mat4 _Pmat;
+	mat4 _Pmat;	
 	mat4 _iPmat;
 	mat4 _Vmat;
 	mat4 _iVmat;

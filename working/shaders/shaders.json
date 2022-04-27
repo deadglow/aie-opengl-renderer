@@ -18,8 +18,8 @@
 		},
 		{
 			"name":"brdfLUTgen",
-			"vert":"brdfLUTGen.vert",
-			"frag":"post_screenrender.frag"
+			"vert":"post_screenrender.vert",
+			"frag":"brdfLUTgen.frag"
 		},
 		{
 			"name":"skybox",

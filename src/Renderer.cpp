@@ -108,10 +108,6 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	unsigned int captureFBO, captureRBO;
 	glGenFramebuffers(1, &captureFBO);
 	glGenRenderbuffers(1, &captureRBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SKYBOX_IRR_DIFF_SIZE, SKYBOX_IRR_DIFF_SIZE);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
 	//create matrix data
 	CameraShaderData csd;
@@ -129,6 +125,11 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	//------------------------------------------------------------------------
 	//		Diffuse Irradiance Map
 	//---------------------------------------------------------------------/
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SKYBOX_IRR_DIFF_SIZE, SKYBOX_IRR_DIFF_SIZE);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
 	// generate cubemap
 	glActiveTexture(GL_TEXTURE0);
@@ -209,10 +210,11 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	//------------------------------------------------------------------------
 	//		BDRF LUT
 	//---------------------------------------------------------------------/
-	
+
 	glGenTextures(1, &brdfLUTMap);
 
 	// preallocate memory
+	glActiveTexture(0);
 	glBindTexture(GL_TEXTURE_2D, brdfLUTMap);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -223,10 +225,10 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTMap, 0);
 
 	glViewport(0, 0, 512, 512);
 	ShaderLoader::GetShader(SHADER_GEN_IRR_BRDF)->Use();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTMap, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	screenPlane->Draw();
 
@@ -244,7 +246,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, specularIrradianceMap);
 
 	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 3);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, brdfLUTMap);
+	glBindTexture(GL_TEXTURE_2D, brdfLUTMap);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -474,7 +476,7 @@ int Renderer::Initialise()
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 	// turn off vsync
-	glfwSwapInterval(0);
+	glfwSwapInterval(1);
 
 	// create and initialise UBOs
 	InitUBOs();

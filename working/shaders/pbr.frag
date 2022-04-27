@@ -189,7 +189,6 @@ void main()
 	vec3 camToFrag = normalize(fs_in.Position);
 
 	vec3 worldNormal = (_iVmat * vec4(norm, 0.0)).xyz;
-	vec3 camToFragWorld = (_iVmat * vec4(camToFrag, 0.0)).xyz;
 
 	vec3 albedo = texture(_Albedo, fs_in.TexCoord).rgb * _AlbedoColor;
 	vec4 metallicSample = texture(_Metallic, fs_in.TexCoord);
@@ -248,7 +247,6 @@ void main()
 	vec3 prefilteredColor = textureLod(_SpecIrradianceMap, R, roughness * MAX_REFLECT_LOD).rgb;
 	vec2 envBRDF = texture(_BRDFLUTMap, vec2(NdotV, roughness)).rg;
 	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
-	specular = prefilteredColor * kS;
 
 	vec3 ambient = (kD * diffuse + specular) * ao;
 
