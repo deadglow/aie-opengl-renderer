@@ -255,11 +255,18 @@ void RendererDebugMenu::DrawMaterialList()
 		{
 			ShaderPropertyBase* prop = selectedMaterial->properties[i];
 
-			ShaderProperty<glm::vec4>* col = dynamic_cast<ShaderProperty<glm::vec4>*>(prop);
-			if (col)
+			ShaderProperty<glm::vec4>* col4 = dynamic_cast<ShaderProperty<glm::vec4>*>(prop);
+			if (col4)
 			{
-				float* floats = (float*)&col->value;
-				ImGui::ColorEdit4(col->name.c_str(), floats);
+				float* floats = (float*)&col4->value;
+				ImGui::ColorEdit4(col4->name.c_str(), floats);
+				continue;
+			}
+			ShaderProperty<glm::vec3>* col3 = dynamic_cast<ShaderProperty<glm::vec3>*>(prop);
+			if (col3)
+			{
+				float* floats = (float*)&col3->value;
+				ImGui::ColorEdit3(col3->name.c_str(), floats);
 				continue;
 			}
 			ShaderProperty<float>* flt = dynamic_cast<ShaderProperty<float>*>(prop);

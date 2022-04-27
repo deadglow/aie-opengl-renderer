@@ -59,8 +59,9 @@ layout (binding = 0) uniform sampler2D _Albedo;
 layout (binding = 1) uniform sampler2D _NormalMap;
 layout (binding = 2) uniform sampler2D _Metallic;
 layout (binding = 15) uniform samplerCube _Skybox;
-layout (binding = 14) uniform samplerCube _IrradianceMap;
-
+layout (binding = 14) uniform samplerCube _DiffIrradianceMap;
+layout (binding = 13) uniform samplerCube _SpecIrradianceMap;
+layout (binding = 12) uniform sampler2D _BRDFLUTMap;
 
 uniform vec3 _AlbedoColor = vec3(1.0);
 uniform float _RoughnessScale = 1.0;
@@ -182,10 +183,13 @@ void main()
 {
    	vec3 norm = texture(_NormalMap, fs_in.TexCoord).rgb;
 	norm = norm * 2.0 - 1.0;
-	norm = normalize(fs_in.TBN * norm);
+	norm = normalize(fs_in.TBN * norm);	// in view space
 
 	// direction TO fragment
 	vec3 camToFrag = normalize(fs_in.Position);
+
+	vec3 worldNormal = (_iVmat * vec4(norm, 0.0)).xyz;
+	vec3 camToFragWorld = (_iVmat * vec4(camToFrag, 0.0)).xyz;
 
 	vec3 albedo = texture(_Albedo, fs_in.TexCoord).rgb * _AlbedoColor;
 	vec4 metallicSample = texture(_Metallic, fs_in.TexCoord);
@@ -226,18 +230,29 @@ void main()
 		Lo += (kD * albedo / M_PI + specular) * radiance * NdotL;
 	}
 
-	vec4 worldNormal = _iVmat * vec4(norm, 0.0);
 
 	// compute diffuse irradiance color
-	vec3 kS = FresnelSchlickRoughness(max(dot(norm, -camToFrag), 0.0), F0, roughness);
+	float NdotV = max(dot(-camToFrag, norm), 0.0);
+	vec3 kS = FresnelSchlickRoughness(NdotV, F0, roughness);
 	vec3 kD = 1.0 - kS;
-	vec3 irradiance = texture(_IrradianceMap, -worldNormal.xyz).rgb;
+	kD *= 1.0 - metallic;
+	vec3 irradiance = texture(_DiffIrradianceMap, -worldNormal).rgb;
 	vec3 diffuse = irradiance * _Ambient.xyz * albedo;
-	vec3 ambient = kD * diffuse * ao;
+
+	// specular
+	vec3 R = reflect(-camToFrag, norm);
+	// put in world space for the cubemap
+	R = (_iVmat * vec4(R, 0.0)).xyz;
+
+	const float MAX_REFLECT_LOD = 4.0;
+	vec3 prefilteredColor = textureLod(_SpecIrradianceMap, R, roughness * MAX_REFLECT_LOD).rgb;
+	vec2 envBRDF = texture(_BRDFLUTMap, vec2(NdotV, roughness)).rg;
+	vec3 specular = prefilteredColor * (kS * envBRDF.x + envBRDF.y);
+	specular = prefilteredColor * kS;
+
+	vec3 ambient = (kD * diffuse + specular) * ao;
 
 	vec3 color = ambient + Lo;
-
-	
 
 	FragColor = ProcessFog(vec4(color, 1.0));
 }

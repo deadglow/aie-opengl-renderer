@@ -31,8 +31,8 @@ vec3 ImportanceSamplingGGX(vec2 Xi, vec3 N, float roughness)
     // use square roughness as per Disney's paper. Makes it look better(?)
     float r = roughness * roughness;
 
-    float phi = 2.0 * Pi * Xi.x;
-    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a * a - 1.0) * Xi.y));
+    float phi = 2.0 * PI * Xi.x;
+    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (r * r - 1.0) * Xi.y));
     float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
     // convert from spherical to cartesian
@@ -64,7 +64,7 @@ void main()
         vec3 H = ImportanceSamplingGGX(Xi, normal, _Roughness);
         vec3 L = normalize(2.0 * dot(normal, H) * H - normal);
 
-        float NdotL = max(dot(N, L), 0.0);
+        float NdotL = max(dot(normal, L), 0.0);
         if (NdotL > 0.0)
         {
             prefilteredColor += texture(_Skybox, L).rgb * NdotL;

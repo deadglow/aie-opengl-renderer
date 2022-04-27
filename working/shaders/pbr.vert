@@ -25,13 +25,14 @@ layout(std140, binding = 1) uniform _Globals
 // model data
 uniform mat4 _M2W;
 uniform mat4 _iM2W;
+// this converts it to view space
 uniform mat4 _NormalMat;
 
 // out
 out VS_OUT
 {
 	out vec3 Position;	// is in view space
-	out mat3 TBN;
+	out mat3 TBN; // converts normal to view space
 	out vec2 TexCoord;
 } vs_out;
 

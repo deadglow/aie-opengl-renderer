@@ -46,7 +46,6 @@
 				"/link",
 				"/OUT:${workspaceFolder}\\bin\\OpenGLRenderer.exe",
 				"/DEBUG",
-				"/INCREMENTAL",
 
 				"glfw3.lib",
 				"zlibstaticd.lib",

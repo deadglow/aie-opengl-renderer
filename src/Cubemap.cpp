@@ -15,7 +15,7 @@ void Cubemap::UpdateTextureProperties()
 	glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 
 	// set texture parameters
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, (GLenum)magFilter);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, (GLenum)minFilter);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, (GLenum)magFilter);
 
 	// unbind

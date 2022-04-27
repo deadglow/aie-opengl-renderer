@@ -1,36 +1,41 @@
 {
-    "shaders":
-    [
-        {
-            "name":"irradianceDiff",
-            "vert":"irradiance.vert",
-            "frag":"irradianceDiff.frag"
-        },
-        {
-            "name":"irradianceSpec",
-            "vert":"irradiance.vert",
-            "frag":"irradianceSpec.frag"
-        },
-        {
-            "name":"post_screenrender",
-            "vert":"post_screenrender.vert",
-            "frag":"post_screenrender.frag"
-        },
-        {
-            "name":"unlit",
-            "vert":"unlit.vert",
-            "frag":"unlit.frag"
-        },
+	"shaders":
+	[
+		{
+			"name":"post_screenrender",
+			"vert":"post_screenrender.vert",
+			"frag":"post_screenrender.frag"
+		},
+		{
+			"name":"irradianceDiff",
+			"vert":"irradiance.vert",
+			"frag":"irradianceDiff.frag"
+		},
+		{
+			"name":"irradianceSpec",
+			"vert":"irradiance.vert",
+			"frag":"irradianceSpec.frag"
+		},
+		{
+			"name":"brdfLUTgen",
+			"vert":"brdfLUTGen.vert",
+			"frag":"post_screenrender.frag"
+		},
+		{
+			"name":"skybox",
+			"vert":"skybox.vert",
+			"frag":"skybox.frag"
+		},
+		{
+			"name":"unlit",
+			"vert":"unlit.vert",
+			"frag":"unlit.frag"
+		},
 		{
 			"name":"pbr",
 			"vert":"pbr.vert",
 			"frag":"pbr.frag"
 		},
-        {
-            "name":"skybox",
-            "vert":"skybox.vert",
-            "frag":"skybox.frag"
-        },
 		{
 			"name":"post_drawtobright",
 			"vert":"post_screenrender.vert",
@@ -46,15 +51,15 @@
 			"vert":"post_screenrender.vert",
 			"frag":"post_bloomPost.frag"
 		},
-        {
-            "name":"post_blur",
-            "vert":"post_screenrender.vert",
-            "frag":"post_blur.frag"
-        },
-        {
-            "name":"post_colorshift",
-            "vert":"post_screenrender.vert",
-            "frag":"post_colorshift.frag"
-        }
-    ]
+		{
+			"name":"post_blur",
+			"vert":"post_screenrender.vert",
+			"frag":"post_blur.frag"
+		},
+		{
+			"name":"post_colorshift",
+			"vert":"post_screenrender.vert",
+			"frag":"post_colorshift.frag"
+		}
+	]
 }

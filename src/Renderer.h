@@ -17,8 +17,6 @@
 #define MAX_LIGHTS 5
 #define CUBEMAP_TEXTURE_BINDING_START GL_TEXTURE15
 
-#define SHADER_GEN_IRR_DIFFUSE "irradianceDiff"
-#define SHADER_GEN_IRR_SPEC "irradianceSpec"
 #define SHADER_DEFAULT_UNLIT "unlit"
 #define SHADER_DEFAULT_LIT "pbr"
 #define MATERIAL_DEFAULT SHADER_DEFAULT_LIT
@@ -33,7 +31,12 @@
 #define SKYBOX_DEFAULT_CUBEMAP "skybox_island.cubemap"
 #define SKYBOX_DEFAULT_SHADER "skybox"
 #define SKYBOX_DEFAULT_MODEL "skybox.obj"
-#define SKYBOX_IRRADIANCE_SIZE 32
+#define SKYBOX_IRR_DIFF_SIZE 32
+#define SKYBOX_IRR_SPEC_SIZE 1024
+
+#define SHADER_GEN_IRR_DIFFUSE "irradianceDiff"
+#define SHADER_GEN_IRR_SPEC "irradianceSpec"
+#define SHADER_GEN_IRR_BRDF "brdfLUTgen"
 
 #define SHADER_SCREENRENDER "post_screenrender"
 #define SHADER_BLOOM "post_bloom"
@@ -60,6 +63,7 @@ private:
 	static Model* skyboxModel;
 	static unsigned int diffuseIrradianceMap;
 	static unsigned int specularIrradianceMap;
+	static unsigned int brdfLUTMap;
 
 	static Mesh* screenPlane;
 

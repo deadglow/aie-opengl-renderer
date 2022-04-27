@@ -33,6 +33,7 @@ Material* Renderer::skyboxMaterial = nullptr;
 Model* Renderer::skyboxModel = nullptr;
 unsigned int Renderer::diffuseIrradianceMap = -1;
 unsigned int Renderer::specularIrradianceMap = -1;
+unsigned int Renderer::brdfLUTMap = -1;
 
 // render targets
 Mesh* Renderer::screenPlane = nullptr;
@@ -87,6 +88,9 @@ void Renderer::SetCubemap(Cubemap* cubemap, int offset)
 void Renderer::SetSkybox(Cubemap* cubemap)
 {
 	SetCubemap(cubemap, 0);
+	cubemap->SetMagFilter(TEX_Filtering::Linear);
+	cubemap->SetMinFilter(TEX_Filtering::LinearMipMapLinear);
+	//cubemap->UpdateTextureProperties();
 
 	// clear previous irradiance maps
 	if (diffuseIrradianceMap != -1)
@@ -95,11 +99,10 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	if (specularIrradianceMap != -1)
 		glDeleteTextures(1, &specularIrradianceMap);
 
+	if (brdfLUTMap != -1)
+		glDeleteTextures(1, &brdfLUTMap);
 
 	glDepthMask(GL_FALSE);
-
-	// generate cubemaps
-	// diffuse
 
 	// create framebuffers
 	unsigned int captureFBO, captureRBO;
@@ -107,7 +110,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glGenRenderbuffers(1, &captureRBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, SKYBOX_IRR_DIFF_SIZE, SKYBOX_IRR_DIFF_SIZE);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
 
 	//create matrix data
@@ -133,7 +136,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, diffuseIrradianceMap);
 	for (unsigned int i = 0; i < 6; ++i)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, SKYBOX_IRR_DIFF_SIZE, SKYBOX_IRR_DIFF_SIZE, 0, GL_RGB, GL_FLOAT, nullptr);
 	}
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -142,9 +145,8 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// render to the cubemap
-
 	ShaderLoader::GetShader(SHADER_GEN_IRR_DIFFUSE)->Use();
-	glViewport(0, 0, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE);
+	glViewport(0, 0, SKYBOX_IRR_DIFF_SIZE, SKYBOX_IRR_DIFF_SIZE);
 	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
 
 	for (unsigned int i = 0; i < 6; ++i)
@@ -158,8 +160,6 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 		skyboxModel->meshes[0]->Draw();
 	}
 
-	
-
 	//------------------------------------------------------------------------
 	//		Specular Irradiance Map
 	//---------------------------------------------------------------------/
@@ -169,7 +169,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	glBindTexture(GL_TEXTURE_CUBE_MAP, specularIrradianceMap);
 	for (unsigned int i = 0; i < 6; ++i)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, SKYBOX_IRRADIANCE_SIZE, SKYBOX_IRRADIANCE_SIZE, 0, GL_RGB, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, SKYBOX_IRR_SPEC_SIZE, SKYBOX_IRR_SPEC_SIZE, 0, GL_RGB, GL_FLOAT, nullptr);
 	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -187,7 +187,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
 	{
 		// resize framebuffer to the desired mip level
-		unsigned int mipSize = 128 * std::pow(0.5, mip);
+		unsigned int mipSize = SKYBOX_IRR_SPEC_SIZE * std::pow(0.5, mip);
 		glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipSize, mipSize);
 		glViewport(0, 0, mipSize, mipSize);
@@ -206,6 +206,34 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 		}
 	}
 
+	//------------------------------------------------------------------------
+	//		BDRF LUT
+	//---------------------------------------------------------------------/
+	
+	glGenTextures(1, &brdfLUTMap);
+
+	// preallocate memory
+	glBindTexture(GL_TEXTURE_2D, brdfLUTMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTMap, 0);
+
+	glViewport(0, 0, 512, 512);
+	ShaderLoader::GetShader(SHADER_GEN_IRR_BRDF)->Use();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	screenPlane->Draw();
+
+	//------------------------------------------------------------------------
+	//		BINDING TEXTURES
+	//---------------------------------------------------------------------/
+
 	glDepthMask(GL_TRUE);
 
 	// bind textures
@@ -214,6 +242,9 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 
 	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 2);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, specularIrradianceMap);
+
+	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 3);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, brdfLUTMap);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
