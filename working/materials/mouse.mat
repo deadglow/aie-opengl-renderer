@@ -1,0 +1,11 @@
+{
+	"name":"mouse",
+	"shader":"pbr",
+	"textures":["woody albedo.png", "woody normal.png", "_default_white.png"],
+	"properties":
+	[
+		{"name":"_AlbedoColor", "value":[1.0, 1.0, 1.0]},
+		{"name":"_MetallicScale", "value":0.0},
+		{"name":"_RoughnessScale", "value":0.7}
+	]
+}
