@@ -4,7 +4,6 @@
 #include <sstream>
 #include "imgui.h"
 #include <unordered_map>
-#include <typeinfo>
 
 ModelInstance* RendererDebugMenu::selectedInstance = nullptr;
 Model* RendererDebugMenu::selectedBaseModel = nullptr;
@@ -22,8 +21,7 @@ glm::quat RotationControl(glm::vec3* rotation)
 	ImGui::DragFloat3("Rotation", (float*)&degrees, 0.5f);
 	*rotation = glm::radians(degrees);
 
-	glm::quat quat = glm::identity<glm::quat>();
-	return quat * glm::angleAxis(rotation->y, glm::vec3(0, 1, 0)) * glm::angleAxis(rotation->x, glm::vec3(1, 0, 0)) * glm::angleAxis(rotation->z, glm::vec3(0, 0, 1));
+	return glm::angleAxis(rotation->y, glm::vec3(0, 1, 0)) * glm::angleAxis(rotation->x, glm::vec3(1, 0, 0)) * glm::angleAxis(rotation->z, glm::vec3(0, 0, 1));
 }
 
 void RendererDebugMenu::DrawImGui()
@@ -357,6 +355,8 @@ void RendererDebugMenu::DrawLightingList()
 	// draw selected light
 	if (selectedLight)
 	{
+		
+
 		glm::mat4 lightMat = selectedLight->transform.matrix;
 		lightMat = glm::scale(lightMat, glm::vec3(0.1f, 0.1f, 0.1f));
 		ModelLoader::GetModel(MODEL_DEFAULT)->Draw(Renderer::cameraStack.front().GetShaderData(), lightMat);
@@ -418,8 +418,8 @@ void RendererDebugMenu::DrawLightingList()
 	{
 		bool isSelected = light == selectedLight;
 		ImGui::Selectable(Light::GetTypeName(light->GetType()).c_str(), &isSelected);
-		if (isSelected)
-			selectedLight = light;
+		if (isSelected && selectedLight != light)
+			SelectLight(light);
 	}
 
 	ImGui::End();

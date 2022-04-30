@@ -88,9 +88,10 @@ void Renderer::SetCubemap(Cubemap* cubemap, int offset)
 void Renderer::SetSkybox(Cubemap* cubemap)
 {
 	SetCubemap(cubemap, 0);
-	cubemap->SetMagFilter(TEX_Filtering::Linear);
-	cubemap->SetMinFilter(TEX_Filtering::LinearMipMapLinear);
-	//cubemap->UpdateTextureProperties();
+
+	// failed attempt at fixing artifacts
+	//cubemap->SetMagFilter(TEX_Filtering::Linear);
+	//cubemap->SetMinFilter(TEX_Filtering::LinearMipMapLinear);
 
 	// clear previous irradiance maps
 	if (diffuseIrradianceMap != -1)
@@ -102,7 +103,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	if (brdfLUTMap != -1)
 		glDeleteTextures(1, &brdfLUTMap);
 
-	glDepthMask(GL_FALSE);
+	glDisable(GL_DEPTH_TEST);
 
 	// create framebuffers
 	unsigned int captureFBO, captureRBO;
@@ -112,6 +113,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	//create matrix data
 	CameraShaderData csd;
 	csd.pMatrix = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 100.0f);
+	csd.ipMatrix = glm::inverse(csd.pMatrix);
 	glm::mat4 captureViews[] = 
 	{
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
@@ -153,6 +155,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	for (unsigned int i = 0; i < 6; ++i)
 	{
 		csd.vMatrix = captureViews[i];
+		csd.ipMatrix = glm::inverse(captureViews[i]);
 		SetCameraUBO(csd);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, diffuseIrradianceMap, 0);
@@ -198,6 +201,7 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 		for (unsigned int i = 0; i < 6; ++i)
 		{
 			csd.vMatrix = captureViews[i];
+			csd.ipMatrix = glm::inverse(captureViews[i]);
 			SetCameraUBO(csd);
 
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, specularIrradianceMap, mip);
@@ -236,8 +240,6 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	//		BINDING TEXTURES
 	//---------------------------------------------------------------------/
 
-	glDepthMask(GL_TRUE);
-
 	// bind textures
 	glActiveTexture(CUBEMAP_TEXTURE_BINDING_START - 1);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, diffuseIrradianceMap);
@@ -253,6 +255,8 @@ void Renderer::SetSkybox(Cubemap* cubemap)
 	// delete the framebuffer
 	glDeleteFramebuffers(1, &captureFBO);
 	glDeleteRenderbuffers(1, &captureRBO);
+
+	glEnable(GL_DEPTH_TEST);
 
 	// reset viewport
 	glViewport(0,0, RES_X, RES_Y);
@@ -587,6 +591,7 @@ void Renderer::Render()
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+
 	// swapping buffers
 	glfwSwapBuffers(window);
 }
@@ -594,13 +599,18 @@ void Renderer::Render()
 // Non essential init here
 void Renderer::Start()
 {
-	// set skybox and irradiance binding
+	#define GENERATE_GRID true
 
 	cameraStack.push_back(Camera());
+	// move da camera
+	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, -5));
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
+	dirLight->transform.SetRotation(glm::vec3(glm::radians(66.0f), glm::radians(-42.5f), 0));
 	lights.push_back(dirLight);
+	
+	#if GENERATE_GRID == true
 
 	Model* sphere = ModelLoader::GetModel("uvsphere.obj");
 	sphere->Load();
@@ -622,12 +632,12 @@ void Renderer::Start()
 			mat->AddProperty("_RoughnessScale", x / 5.0f);
 			instance->SetMaterialOverride(0, mat);
 		}
-
 	}
+	#endif
 
-	SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
-	// move da camera
-	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 5));
+	// set skybox and irradiance binding
+	Renderer::SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));
+
 }
 
 // Non engine drawing here
@@ -652,9 +662,11 @@ void Renderer::OnDraw()
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, mainRenderTarget->GetTexture(0)->GetID());
 
+
 	// add all bright colours to the bright texture
 	brightColorTarget->Use();
 	ShaderLoader::UseShader(SHADER_DRAWTOBRIGHT);
+	
 	screenPlane->Draw();
 
 	// bind bright texture to 1

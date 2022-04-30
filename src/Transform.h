@@ -19,6 +19,7 @@ public:
 
 	void SetPosition(const glm::vec3 pos);
 	void SetRotation(const glm::quat rotation);
+	void SetRotation(const glm::vec3 euler);
 	void SetScale(const glm::vec3 scale);
 
 

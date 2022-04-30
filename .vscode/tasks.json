@@ -13,14 +13,13 @@
 		},
 		{
 			"type": "cppbuild",
-			"label": "CL Build",
+			"label": "CL Debug Build",
 			"command": "cl.exe",
 			"args": [
 				"/Zi",
 				"/EHsc",
 				"/nologo",
 				"/std:c++17",
-
 				"/D",
 				"\"_DEBUG\"",
 				"/D",
@@ -29,28 +28,22 @@
 				"\"GLFW_INCLUDE_NONE\"",
 				"/D",
 				"\"RAPIDJSON_NOMEMBERITERATORCLASS\"",
-				
 				"/I${workspaceFolder}\\include",
 				"/Fo:",
 				"${workspaceFolder}\\obj\\",
 				"/Fd:",
 				"${workspaceFolder}\\obj\\",
 				"/Fa${workspaceFolder}\\obj\\",
-
 				"/Od",
 				"/MDd",
-				// src files
 				"${workspaceFolder}\\src\\*.cpp",
 				"${workspaceFolder}\\src\\*.c",
-				 
 				"/link",
 				"/OUT:${workspaceFolder}\\bin\\OpenGLRenderer.exe",
 				"/DEBUG",
-
 				"glfw3.lib",
 				"zlibstaticd.lib",
 				"assimp-vc143-mtd.lib",
-
 				"kernel32.lib",
 				"user32.lib",
 				"gdi32.lib",
@@ -63,8 +56,7 @@
 				"uuid.lib",
 				"odbc32.lib",
 				"odbccp32.lib",
-
-				"/LIBPATH:${workspaceFolder}\\lib",
+				"/LIBPATH:${workspaceFolder}\\lib"
 			],
 			"options": {
 				"cwd": "${workspaceFolder}\\working\\"
@@ -72,10 +64,65 @@
 			"problemMatcher": [
 				"$msCompile"
 			],
-			"group":
-			{
+			"group": {
 				"kind": "build",
-				"isDefault": true	
+				"isDefault": true
+			},
+			"detail": "compiler: cl.exe"
+		},
+		{
+			"type": "cppbuild",
+			"label": "CL Release Build",
+			"command": "cl.exe",
+			"args": [
+				"/Zi",
+				"/EHsc",
+				"/nologo",
+				"/std:c++17",
+				"/D",
+				"\"_CONSOLE\"",
+				"/D",
+				"\"GLFW_INCLUDE_NONE\"",
+				"/D",
+				"\"RAPIDJSON_NOMEMBERITERATORCLASS\"",
+				"/I${workspaceFolder}\\include",
+				"/Fo:",
+				"${workspaceFolder}\\obj\\release\\",
+				"/Fd:",
+				"${workspaceFolder}\\obj\\release\\",
+				"/Fa${workspaceFolder}\\obj\\release\\",
+				"/O2",
+				"/MD",
+				"${workspaceFolder}\\src\\*.cpp",
+				"${workspaceFolder}\\src\\*.c",
+				"/link",
+				"/OUT:${workspaceFolder}\\bin\\release\\OpenGLRenderer.exe",
+				"glfw3.lib",
+				"zlibstatic.lib",
+				"assimp-vc143-mt.lib",
+				"kernel32.lib",
+				"user32.lib",
+				"gdi32.lib",
+				"winspool.lib",
+				"comdlg32.lib",
+				"advapi32.lib",
+				"shell32.lib",
+				"ole32.lib",
+				"oleaut32.lib",
+				"uuid.lib",
+				"odbc32.lib",
+				"odbccp32.lib",
+				"/LIBPATH:${workspaceFolder}\\lib"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}\\working\\"
+			},
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
 			},
 			"detail": "compiler: cl.exe"
 		}

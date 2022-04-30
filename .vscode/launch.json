@@ -25,7 +25,7 @@
             "cwd": "${workspaceFolder}\\working",
             "environment": [],
             "console": "externalTerminal",
-            "preLaunchTask": "CL Build"
-        },
+            "preLaunchTask": "CL Build Debug"
+        }
     ]
 }

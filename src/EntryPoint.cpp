@@ -26,6 +26,7 @@ int main()
 		Input::UpdateInput();
 		game.Update();
 		Renderer::Render();
+
 	}
 
 	// window has closed, clean up GLFW and exit

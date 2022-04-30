@@ -194,7 +194,7 @@ void main()
 	vec4 metallicSample = texture(_Metallic, fs_in.TexCoord);
 
 	float ao = metallicSample.r;
-	float roughness = metallicSample.g * _RoughnessScale;
+	float roughness = clamp(metallicSample.g * _RoughnessScale, 0.0, 1.0);
 	float metallic = metallicSample.b * _MetallicScale;
 	
 	vec3 F0 = vec3(0.04);

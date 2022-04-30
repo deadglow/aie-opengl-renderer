@@ -49,6 +49,12 @@ void Transform::SetRotation(const glm::quat rotation)
 	matrix = rotMat;
 }
 
+void Transform::SetRotation(const glm::vec3 euler)
+{
+	
+	SetRotation(glm::angleAxis(euler.y, glm::vec3(0, 1, 0)) * glm::angleAxis(euler.x, glm::vec3(1, 0, 0)) * glm::angleAxis(euler.z, glm::vec3(0, 0, 1)));
+}
+
 void Transform::SetScale(const glm::vec3 scale)
 {
 	glm::vec3 right = glm::normalize(GetRight());
