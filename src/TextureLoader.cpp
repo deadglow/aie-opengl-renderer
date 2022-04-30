@@ -95,6 +95,11 @@ void TextureLoader::LoadTexture(Texture* tex)
 	}
 }
 
+void TextureLoader::LoadTexture(const std::string name)
+{
+	LoadTexture(textureLookup.at(name));
+}
+
 void TextureLoader::LoadTexture2D(Texture2D* tex)
 {
 	stbi_set_flip_vertically_on_load(true);

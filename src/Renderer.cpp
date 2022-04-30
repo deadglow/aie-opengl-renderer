@@ -599,11 +599,11 @@ void Renderer::Render()
 // Non essential init here
 void Renderer::Start()
 {
-	#define GENERATE_GRID true
+	#define GENERATE_GRID false
 
 	cameraStack.push_back(Camera());
 	// move da camera
-	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, -5));
+	cameraStack.front().transform.SetPosition(glm::vec3(0, 0, 25));
 
 	// create lights
 	DirectionalLight* dirLight = new DirectionalLight(glm::normalize(glm::vec3(1, -1, -1)), glm::vec3(1), 1.0f);
@@ -634,6 +634,16 @@ void Renderer::Start()
 		}
 	}
 	#endif
+
+	TextureLoader::LoadTexture("toad_albedo.png");
+	TextureLoader::LoadTexture("toad_normal.png");
+	TextureLoader::LoadTexture("toad_metallic.png");
+
+	Model* toad = ModelLoader::LoadModel("JadeToad.obj");
+
+	toad->SetAllMaterials(MaterialLoader::GetMaterial("toad"));
+
+	AddModelInstance(new ModelInstance(toad));
 
 	// set skybox and irradiance binding
 	Renderer::SetSkybox(TextureLoader::GetCubemap(SKYBOX_DEFAULT_CUBEMAP));

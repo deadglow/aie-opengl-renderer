@@ -26,6 +26,7 @@ public:
 	static Texture2D* GetTexture(const std::string filename);
 	static Cubemap* GetCubemap(const std::string filename);
 	static void LoadTexture(Texture* tex);
+	static void LoadTexture(const std::string name);
 	static void UnloadTexture(Texture* tex);
 
 	static void AddTexture(Texture* tex);
