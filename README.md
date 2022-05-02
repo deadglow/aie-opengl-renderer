@@ -16,3 +16,4 @@ This renderer has support for:
 
 The renderer has a rudimentary Camera system, including a camera stack.
 Dear ImGui is used as a debugging tool to place lights, load and unload models/textures, edit materials, override materials of objects, create instances of meshes, etc.
+The repository was mostly used as a glorified portable hard drive, so it is very messy and working files are still in the folder.
