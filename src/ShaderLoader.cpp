@@ -155,54 +155,6 @@ bool ShaderLoader::LoadInShaders()
 			programStrings[i].fragment = shaderArray[i]["frag"].GetString();
 	}
 
-	//std::ifstream file(shaderListFile.string());
-	//if (file.is_open())
-	//{
-	//	while (!file.eof())
-	//	{
-	//		std::string thisLine;
-	//		std::getline(file, thisLine);
-
-	//		ShaderProgramStrings strings;
-	//		int word = 0;
-	//		// construct name, vertex and fragment strings. go to the next word when a comma is found.
-	//		for (char c : thisLine)
-	//		{
-	//			// newline, gettouta there
-	//			if (c == '\n') break;
-	//			if (c == ',')
-	//			{
-	//				word++;
-	//				continue;
-	//			}
-
-	//			switch (word)
-	//			{
-	//			case 0:
-	//				strings.name.push_back(c);
-	//				break;
-	//			case 1:
-	//				strings.vertex.push_back(c);
-	//				break;
-	//			case 2:
-	//				strings.fragment.push_back(c);
-	//				break;
-	//			default:
-	//				break;
-	//			}
-	//		}
-
-	//		// get rid of trailing spaces??
-	//		programStrings.push_back(strings);
-	//	}
-	//}
-	//else
-	//{
-	//	std::cout << "Error loading shader list. Path: " << shaderListFile.string() << std::endl;
-	//	shaderStateOkay = false;
-	//}
-	//file.close();
-
 	if (shaderStateOkay)
 	{
 		for (int i = 0; i < programStrings.size(); ++i)
@@ -228,16 +180,10 @@ bool ShaderLoader::LoadInShaders()
 				shaderPrograms.emplace(newShader->GetName(), newShader);
 				std::cout << "Successfully linked shader program " << programStrings[i].name << std::endl;
 			}
-
 		}
 	}
 
 	return shaderStateOkay;
-}
-
-void ShaderLoader::InitialiseShaderUniforms()
-{
-	
 }
 
 void ShaderLoader::DeleteVertexAndFragmentShaders()

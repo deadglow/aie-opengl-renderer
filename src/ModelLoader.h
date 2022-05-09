@@ -20,4 +20,3 @@ public:
 	static Model* LoadModel(const std::string model);
 	static void UnloadModel(const std::string filename);
 };
-

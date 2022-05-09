@@ -479,7 +479,7 @@ int Renderer::Initialise()
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	// turn off vsync
+	// turn on vsync
 	glfwSwapInterval(1);
 
 	// create and initialise UBOs
@@ -559,7 +559,6 @@ void Renderer::Shutdown()
 	TextureLoader::Shutdown();
 	ShaderLoader::Shutdown();
 
-	// clear materials and instances
 	for (ModelInstance* mt : modelInstances)
 	{
 		delete mt;
