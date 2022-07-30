@@ -6,7 +6,7 @@ This renderer has support for:
 - PBR shading/lighting
   - Diffuse irradiance mapping
   - Specular IBL
-  - Works with any HDRi skybox (that has been separated into cubemaps
+  - Works with any HDRi skybox (that has been separated into cubemaps)
 - Skybox rendering
 - Bloom
 - Post Processing Stack
