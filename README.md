@@ -1,4 +1,4 @@
-# aie-opengl-renderer
+# OpenGL PBR Renderer
 
 An OpenGL renderer written for the AIE Graphics Unit, using GLFW.
 
