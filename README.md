@@ -1,6 +1,7 @@
 # aie-opengl-renderer
 
 An OpenGL renderer written for the AIE Graphics Unit, using GLFW.
+NOTE: Requires ASSIMP to work, but it is not included with this repo.
 
 This renderer has support for:
 - PBR shading/lighting
